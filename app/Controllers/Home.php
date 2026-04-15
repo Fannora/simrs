@@ -9,7 +9,7 @@ class Home extends BaseController
         if(session()->get('isLoggedIn') == true){
             return redirect()->to(base_url('jurusan'));
         }else {
-            return redirect()->to(base_url('/login'));
+            return redirect()->to(base_url('login'));
         }
     }
 
@@ -28,7 +28,7 @@ class Home extends BaseController
                 'isLoggedIn' => true,
                 'username' => $username
             ]);
-            return redirect()->to(base_url());
+            return redirect()->to(base_url('jurusan'));
         } else {
             return redirect()->to(base_url('login'))->with('error', 'Username atau password salah');
         }        
