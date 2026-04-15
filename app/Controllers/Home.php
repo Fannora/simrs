@@ -8,7 +8,7 @@ class Home extends BaseController
     public function index()
     {
         if(session()->get('isLoggedIn') == true){
-            return redirect()->to(base_url('jurusan'));
+            return view('template/konten');
         }else {
             return redirect()->to(base_url('login'));
         }
@@ -35,7 +35,8 @@ class Home extends BaseController
         if ($username === $user['username'] && $password == $user['password']) {
             session()->set([
                 'isLoggedIn' => true,
-                'username' => $username
+                'nama' => $user['nama'],
+                'username' => $user['username']
             ]);
             return redirect()->to(base_url());
         } else {

@@ -81,4 +81,11 @@
 <!-- AdminLTE App -->
 <script src="../../dist/js/adminlte.min.js"></script>
 </body>
+<script>
+  window.setTimeout(function() {
+    $('.alert').fadeTo(500, 0).slideUp(500, function() {
+      $(this).remove();
+    });
+  }, 1500);
+</script>
 </html>
