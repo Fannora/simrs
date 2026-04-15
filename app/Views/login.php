@@ -23,6 +23,9 @@
     </div>
     <div class="card-body">
       <p class="login-box-msg">Sign in to start your session</p>
+      <?php if (session()->getFlashdata('pesan')){
+                echo session()->getFlashdata('pesan');
+            }?>
 
       <form action="<?= base_url('ceklogin') ?>" method="post">
         <div class="input-group mb-3">
