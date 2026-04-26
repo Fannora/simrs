@@ -22,7 +22,7 @@ class Home extends BaseController
     public function ceklogin()
     {
         $username = $this->request->getVar('username');
-        $password = md5($this->request->getVar('password'));
+        $password = $this->request->getVar('password');
 
         $userModel= New ModelUser();
         $user= $userModel->where('username', $username)->first();
@@ -32,11 +32,12 @@ class Home extends BaseController
             return redirect()->to(base_url('login'));
         }
 
-        if ($username === $user['username'] && $password == $user['password']) {
+        if (password_verify($password, $user['password'])) {
             session()->set([
                 'isLoggedIn' => true,
-                'nama' => $user['nama'],
-                'username' => $user['username']
+                'nama' => $user['nama_lengkap'],
+                'username' => $user['username'],
+                'level_id' => $user['level_id']
             ]);
             return redirect()->to(base_url());
         } else {

@@ -7,12 +7,12 @@ use CodeIgniter\Model;
 class ModelUser extends Model
 {
     protected $table            = 'tbl_user';
-    protected $primaryKey       = 'id';
+    protected $primaryKey       = 'id_user';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['username', 'nama','password','level_id'];
+    protected $allowedFields    = ['username', 'nama_lengkap','password','level_id'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

@@ -5,25 +5,35 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('/', 'Home::index');
+$routes->get('/', 'DashboardController::index');
+$routes->get('/dashboard', 'DashboardController::index');
 $routes->get('/login', 'Home::login');
 $routes->post('/ceklogin', 'Home::ceklogin');
 $routes->get('/logout', 'Home::logout');
 
-$routes->get('/jurusan', to: 'JurusanController::index');
-$routes->post('/simpandatajurusan', to: 'JurusanController::simpandata');
-$routes->post('/editdatajurusan', to: 'JurusanController::editdata');
-$routes->get('/hapusdatajurusan/(:any)', 'JurusanController::hapusdata/$1');
+$routes->get('/poli', 'PoliController::index');
+$routes->post('/simpandatapoli', 'PoliController::simpandata');
+$routes->post('/editdatapoli', 'PoliController::editdata');
+$routes->get('/hapusdatapoli/(:any)', 'PoliController::hapusdata/$1');
 
-$routes->get('/prodi', to: 'ProdiController::index');
-$routes->post('/simpandataprodi', to: 'ProdiController::simpandata');
-$routes->post('/editdataprodi', to: 'ProdiController::editdata');
-$routes->get('/hapusdataprodi/(:any)', 'ProdiController::hapusdata/$1');
+$routes->get('/dokter', 'DokterController::index');
+$routes->post('/simpandatadokter', 'DokterController::simpandata');
+$routes->post('/editdatadokter', 'DokterController::editdata');
+$routes->get('/hapusdatadokter/(:any)', 'DokterController::hapusdata/$1');
 
-$routes->get('/mahasiswa', 'MahasiswaController::index');
-$routes->post('/simpandatamahasiswa', 'MahasiswaController::simpandata');
-$routes->post('/editdatamahasiswa', 'MahasiswaController::editdata');
-$routes->get('/hapusdatamahasiswa/(:any)', 'MahasiswaController::hapusdata/$1');
+$routes->get('/pasien', 'PasienController::index');
+$routes->post('/simpandatapasien', 'PasienController::simpandata');
+$routes->post('/editdatapasien', 'PasienController::editdata');
+$routes->get('/hapusdatapasien/(:any)', 'PasienController::hapusdata/$1');
+
+$routes->get('/pendaftaran', 'PendaftaranController::index');
+$routes->post('/simpandatapendaftaran', 'PendaftaranController::simpandata');
+$routes->get('/hapusdatapendaftaran/(:any)', 'PendaftaranController::hapusdata/$1');
+
+$routes->get('/rekammedis', 'RekamMedisController::index');
+$routes->get('/rekammedis/input/(:any)', 'RekamMedisController::input/$1');
+$routes->post('/rekammedis/simpandata', 'RekamMedisController::simpandata');
+$routes->get('/rekammedis/cetak', 'RekamMedisController::cetak');
 
 
 
