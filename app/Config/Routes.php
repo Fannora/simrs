@@ -7,9 +7,9 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'DashboardController::index');
 $routes->get('/dashboard', 'DashboardController::index');
-$routes->get('/login', 'Home::login');
-$routes->post('/ceklogin', 'Home::ceklogin');
-$routes->get('/logout', 'Home::logout');
+$routes->get('/login', 'DashboardController::index');
+$routes->post('/ceklogin', 'DashboardController::index');
+$routes->get('/logout', 'DashboardController::index');
 
 $routes->get('/poli', 'PoliController::index');
 $routes->post('/simpandatapoli', 'PoliController::simpandata');

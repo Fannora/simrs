@@ -7,16 +7,12 @@ class Home extends BaseController
 {
     public function index()
     {
-        if(session()->get('isLoggedIn') == true){
-            return view('template/konten');
-        }else {
-            return redirect()->to(base_url('login'));
-        }
+        return redirect()->to(base_url('dashboard'));
     }
 
     public function login()
     {
-        return view('login');
+        return redirect()->to(base_url('dashboard'));
     }
 
     public function ceklogin()
