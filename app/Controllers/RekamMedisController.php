@@ -76,9 +76,23 @@ class RekamMedisController extends BaseController
 
     public function cetak()
     {
-        $data = [
-            'rekam_medis' => $this->rekamMedisModel->getRekamMedis()
-        ];
+        $no_rawat = $this->request->getGet('no_rawat');
+        if ($no_rawat) {
+            $db = \Config\Database::connect();
+            $data = [
+                'rekam_medis' => $db->table('tbl_rekam_medis')
+                    ->join('tbl_pendaftaran', 'tbl_pendaftaran.no_rawat = tbl_rekam_medis.no_rawat')
+                    ->join('tbl_pasien', 'tbl_pasien.no_rm = tbl_pendaftaran.no_rm')
+                    ->join('tbl_dokter', 'tbl_dokter.id_dokter = tbl_pendaftaran.id_dokter')
+                    ->join('tbl_poli', 'tbl_poli.id_poli = tbl_dokter.id_poli')
+                    ->where('tbl_rekam_medis.no_rawat', $no_rawat)
+                    ->get()->getResultArray()
+            ];
+        } else {
+            $data = [
+                'rekam_medis' => $this->rekamMedisModel->getRekamMedis()
+            ];
+        }
         // Tampilkan view khusus cetak
         echo view('v_rekam_medis_cetak', $data);
     }

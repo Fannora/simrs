@@ -22,24 +22,16 @@ $routes->get('pasien/booking/slot', 'PasienController::getSlotWaktu');         /
 $routes->post('pasien/booking/store', 'PasienController::storeBooking');
 $routes->get('pasien/booking/batal/(:segment)', 'PasienController::batalBooking/$1');
 $routes->get('pasien/riwayat', 'PasienController::riwayat');
-$routes->get('pasien/rekam-medis', 'PasienController::rekamMedis');
+$routes->get('pasien/settings', 'PasienController::settings');
+$routes->post('pasien/settings/update', 'PasienController::updateSettings');
 
-$routes->get('/poli', 'PoliController::index');
-$routes->post('/simpandatapoli', 'PoliController::simpandata');
-$routes->post('/editdatapoli', 'PoliController::editdata');
-$routes->get('/hapusdatapoli/(:any)', 'PoliController::hapusdata/$1');
 
-$routes->get('/dokter', 'DokterController::index');
-$routes->post('/simpandatadokter', 'DokterController::simpandata');
-$routes->post('/editdatadokter', 'DokterController::editdata');
-$routes->get('/hapusdatadokter/(:any)', 'DokterController::hapusdata/$1');
+
 
 // (Legacy Admin Pasien CRUD — digantikan oleh AdminController di bawah)
 
 
-$routes->get('/pendaftaran', 'PendaftaranController::index');
-$routes->post('/simpandatapendaftaran', 'PendaftaranController::simpandata');
-$routes->get('/hapusdatapendaftaran/(:any)', 'PendaftaranController::hapusdata/$1');
+
 
 $routes->get('/rekammedis', 'RekamMedisController::index');
 $routes->get('/rekammedis/input/(:any)', 'RekamMedisController::input/$1');

@@ -1,310 +1,492 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Daftar — RS MedikaCare</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--pink:#ec4899;--rose:#f43f5e;--cyan:#06b6d4;--cyan-dark:#0e7490;--teal:#0d9488;--dark:#0f172a;--gray:#64748b;--white:#fff}
-html{height:100%}
-body{font-family:'DM Sans',sans-serif;color:#1e293b;min-height:100%}
-h1,h2,h3,h4{font-family:'Plus Jakarta Sans',sans-serif}
-a{text-decoration:none;color:inherit}
-
-.reg-wrapper{display:flex;min-height:100vh}
-
-/* LEFT */
-.left{width:38%;background:linear-gradient(135deg,var(--pink),var(--rose));position:relative;display:flex;flex-direction:column;justify-content:center;padding:50px 40px;color:#fff;overflow:hidden}
-.left::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);background-size:22px 22px}
-.left-logo{display:flex;align-items:center;gap:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:40px;position:relative;z-index:2}
-.left-logo svg{width:28px;height:28px;flex-shrink:0}
-.left-illust{position:relative;z-index:2;display:flex;justify-content:center;margin-bottom:36px}
-.left-illust svg{width:200px;opacity:.9}
-.left h2{font-size:1.7rem;font-weight:800;margin-bottom:10px;position:relative;z-index:2;line-height:1.3}
-.left>p{font-size:.92rem;opacity:.78;line-height:1.6;margin-bottom:24px;position:relative;z-index:2}
-.feat{list-style:none;display:flex;flex-direction:column;gap:12px;position:relative;z-index:2}
-.feat li{display:flex;align-items:center;gap:10px;font-size:.9rem;font-weight:500}
-.ck{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ck svg{width:12px;height:12px}
-
-/* RIGHT */
-.right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;background:#fff;overflow-y:auto}
-.form-box{width:100%;max-width:520px;animation:slideIn .6s ease-out}
-@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
-.form-box h1{font-size:1.65rem;font-weight:800;color:var(--dark);margin-bottom:6px}
-.form-sub{color:var(--gray);font-size:.9rem;margin-bottom:28px}
-.form-sub a{color:var(--pink);font-weight:600}
-.form-sub a:hover{color:var(--rose)}
-
-/* ALERT */
-.alert{padding:12px 16px;border-radius:10px;margin-bottom:18px;font-size:.88rem;line-height:1.5;display:flex;align-items:flex-start;gap:10px;animation:fadeA .4s ease}
-.alert-error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
-.alert-success{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
-@keyframes fadeA{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-
-/* GRID */
-.row{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
-.full{grid-column:1/-1}
-
-/* INPUTS */
-.fg{margin-bottom:18px}
-.fg label{display:block;font-size:.8rem;font-weight:600;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
-.fg .opt{font-weight:400;text-transform:none;letter-spacing:0;color:#94a3b8;font-size:.75rem}
-.iw{position:relative}
-.iw svg.ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:#94a3b8;pointer-events:none}
-.iw input,.iw textarea,.iw select{width:100%;padding:12px 12px 12px 40px;border:2px solid #e2e8f0;border-radius:10px;font-size:.92rem;font-family:'DM Sans',sans-serif;color:var(--dark);background:#f8fafc;transition:all .25s;outline:none}
-.iw textarea{padding-left:12px;min-height:70px;resize:vertical}
-.iw input:focus,.iw textarea:focus{border-color:var(--pink);background:#fff;box-shadow:0 0 0 3px rgba(236,72,153,.1)}
-.iw input::placeholder,.iw textarea::placeholder{color:#94a3b8}
-.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:2px}
-.toggle-pw:hover{color:var(--pink)}
-.toggle-pw svg{width:17px;height:17px}
-
-/* GENDER TOGGLE */
-.gender-toggle{display:flex;gap:10px}
-.gender-toggle label{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:.9rem;font-weight:500;color:#64748b;background:#f8fafc;transition:all .25s}
-.gender-toggle input{display:none}
-.gender-toggle input:checked+span{background:transparent}
-.gender-toggle label:has(input:checked){border-color:var(--pink);color:var(--pink);background:#fdf2f8}
-
-/* STRENGTH */
-.pw-strength{margin-top:6px;display:flex;align-items:center;gap:8px}
-.pw-bar{flex:1;height:4px;background:#e2e8f0;border-radius:4px;overflow:hidden}
-.pw-bar-fill{height:100%;width:0;border-radius:4px;transition:all .3s}
-.pw-label{font-size:.75rem;font-weight:600;min-width:50px}
-.str-weak .pw-bar-fill{width:33%;background:#ef4444}
-.str-weak .pw-label{color:#ef4444}
-.str-med .pw-bar-fill{width:66%;background:#f59e0b}
-.str-med .pw-label{color:#f59e0b}
-.str-strong .pw-bar-fill{width:100%;background:#10b981}
-.str-strong .pw-label{color:#10b981}
-
-/* MATCH */
-.match-info{font-size:.78rem;margin-top:5px;font-weight:600;display:none}
-.match-ok{color:#10b981}
-.match-no{color:#ef4444}
-
-/* BUTTON */
-.btn-reg{width:100%;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--rose));color:#fff;font-size:1rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;margin-top:6px}
-.btn-reg:hover{box-shadow:0 8px 24px rgba(236,72,153,.3);transform:translateY(-2px)}
-.btn-reg.loading{pointer-events:none;opacity:.8}
-.btn-reg.loading .bt{visibility:hidden}
-.btn-reg .sp{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:22px;height:22px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
-.btn-reg.loading .sp{display:block}
-@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-
-.divider{display:flex;align-items:center;gap:14px;margin:20px 0;color:#cbd5e1;font-size:.8rem;font-weight:500}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:#e2e8f0}
-.btn-back{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:10px;background:#fff;color:#475569;font-size:.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .25s}
-.btn-back:hover{border-color:var(--pink);color:var(--pink)}
-.btn-back svg{width:16px;height:16px}
-
-@media(max-width:768px){
-.left{display:none}
-.right{padding:28px 18px}
-.row{grid-template-columns:1fr}
-}
-</style>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Daftar Akun Baru - MiraCare Hospital</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700&amp;family=Geist:wght@500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#3f465c",
+                    "primary-fixed-dim": "#bec6e0",
+                    "alert-crimson": "#E11D48",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed": "#271901",
+                    "inverse-on-surface": "#f3f0f2",
+                    "background": "#fcf8fa",
+                    "surface-dim": "#dcd9db",
+                    "slate-surface": "#F8FAFC",
+                    "on-background": "#1b1b1d",
+                    "outline": "#76777d",
+                    "inverse-surface": "#303032",
+                    "on-surface": "#1b1b1d",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "secondary": "#0047AB", // Deep Trust Blue
+                    "surface-container-low": "#f6f3f5",
+                    "outline-variant": "#c6c6cd",
+                    "on-tertiary-container": "#98805d",
+                    "on-secondary-fixed": "#001a42",
+                    "secondary-fixed": "#d8e2ff",
+                    "on-primary-fixed": "#131b2e",
+                    "surface-tint": "#565e74",
+                    "on-primary": "#ffffff",
+                    "on-surface-variant": "#45464d",
+                    "surface-container-high": "#eae7e9",
+                    "on-tertiary-fixed-variant": "#574425",
+                    "primary-fixed": "#dae2fd",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed-dim": "#dec29a",
+                    "surface-variant": "#e4e2e4",
+                    "tertiary": "#000000",
+                    "electric-cyan": "#06B6D4", // Ocean Teal
+                    "on-primary-container": "#7c839b",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#f0edef",
+                    "on-secondary-fixed-variant": "#06B6D4",
+                    "inverse-primary": "#bec6e0",
+                    "primary": "#000000",
+                    "on-tertiary": "#ffffff",
+                    "surface": "#fcf8fa",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#271901",
+                    "tertiary-fixed": "#fcdeb5",
+                    "success-emerald": "#10B981",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#2170e4",
+                    "on-secondary-container": "#fefcff",
+                    "primary-container": "#131b2e",
+                    "surface-container-highest": "#e4e2e4",
+                    "surface-bright": "#fcf8fa"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "max-width": "1280px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "48px",
+                    "unit": "8px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-sm": ["Geist"],
+                    "headline-sm": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "label-md": ["Geist"],
+                    "headline-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"lineHeight": "1", "letterSpacing": "0.08em", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-md": ["30px", {"lineHeight": "1.25", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["13px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .register-card-shadow {
+            box-shadow: 0 16px 32px -4px rgba(0, 71, 171, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.02);
+        }
+        .abstract-medical-pattern {
+            background-color: #fcf8fa;
+            background-image: radial-gradient(#d8e2ff 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+    </style>
 </head>
-<body>
-<div class="reg-wrapper">
+<body class="bg-background font-body-md text-on-surface min-h-screen flex flex-col">
 
-  <!-- LEFT -->
-  <div class="left">
-    <a href="<?= base_url('/') ?>" class="left-logo">
-      <svg viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="18" rx="3" stroke="#fff" stroke-width="2"/><path d="M16 12v8M12 16h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M10 8V6a2 2 0 012-2h8a2 2 0 012 2v2" stroke="#fff" stroke-width="2"/></svg>
-      RS MedikaCare
+<!-- Header Navigation -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 fixed top-0 z-50">
+    <a href="<?= base_url('/') ?>" class="flex items-center gap-2">
+        <img src="<?= base_url('assets/img/MiraCareLogo.png') ?>" alt="MiraCare Logo" class="h-10 w-auto object-contain"/>
     </a>
-    <div class="left-illust">
-      <svg viewBox="0 0 280 240" fill="none">
-        <rect x="70" y="70" width="140" height="130" rx="8" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
-        <rect x="105" y="50" width="70" height="150" rx="6" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
-        <rect x="130" y="65" width="20" height="36" rx="3" fill="rgba(255,255,255,.55)"/>
-        <rect x="122" y="74" width="36" height="18" rx="3" fill="rgba(255,255,255,.55)"/>
-        <rect x="88" y="105" width="20" height="20" rx="4" fill="rgba(255,255,255,.13)" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/>
-        <rect x="88" y="140" width="20" height="20" rx="4" fill="rgba(255,255,255,.13)" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/>
-        <rect x="172" y="105" width="20" height="20" rx="4" fill="rgba(255,255,255,.13)" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/>
-        <rect x="172" y="140" width="20" height="20" rx="4" fill="rgba(255,255,255,.13)" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/>
-        <rect x="122" y="170" width="36" height="30" rx="4" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
-        <!-- Person with clipboard -->
-        <circle cx="240" cy="110" r="12" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
-        <path d="M240 122c-10 0-17 7-17 15v12h34v-12c0-8-7-15-17-15z" fill="rgba(255,255,255,.13)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
-        <rect x="230" y="148" width="20" height="26" rx="3" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
-        <line x1="234" y1="155" x2="246" y2="155" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
-        <line x1="234" y1="160" x2="246" y2="160" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
-        <line x1="234" y1="165" x2="242" y2="165" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
-        <g opacity=".3" stroke="#fff" stroke-width="1.5" stroke-linecap="round">
-          <path d="M40 80v6M37 83h6"/><path d="M30 170v6M27 173h6"/><path d="M250 60v6M247 63h6"/>
-        </g>
-      </svg>
+    <div class="hidden md:flex gap-6 items-center">
+        <a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="<?= base_url('/') ?>">Beranda</a>
+        <a class="font-label-md text-label-md text-secondary border border-secondary px-4 py-1.5 rounded-lg hover:bg-secondary hover:text-white transition-all font-semibold" href="<?= base_url('login') ?>">Login</a>
     </div>
-    <h2>Bergabung Bersama Kami</h2>
-    <p>Daftar sekarang dan nikmati kemudahan layanan kesehatan digital RS MedikaCare.</p>
-    <ul class="feat">
-      <li><span class="ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Booking Online 24/7</li>
-      <li><span class="ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Rekam Medis Digital</li>
-      <li><span class="ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Konsultasi Mudah</li>
-    </ul>
-  </div>
+</header>
 
-  <!-- RIGHT -->
-  <div class="right">
-    <div class="form-box">
-      <h1>Buat Akun Baru</h1>
-      <p class="form-sub">Sudah punya akun? <a href="<?= base_url('login') ?>">Masuk di sini</a></p>
-
-      <?php if (session()->getFlashdata('error')): ?>
-        <div class="alert alert-error"><span><?= session()->getFlashdata('error') ?></span></div>
-      <?php endif; ?>
-      <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success"><span><?= session()->getFlashdata('success') ?></span></div>
-      <?php endif; ?>
-
-      <form action="<?= base_url('register') ?>" method="POST" id="regForm">
-        <?= csrf_field() ?>
-
-        <!-- Nama Lengkap -->
-        <div class="fg full">
-          <label>Nama Lengkap</label>
-          <div class="iw">
-            <svg class="ico" viewBox="0 0 20 20" fill="currentColor"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
-            <input type="text" name="nama_lengkap" placeholder="Masukkan nama lengkap" required>
-          </div>
-        </div>
-
-        <!-- NIK -->
-        <div class="fg full">
-          <label>NIK (Nomor Induk Kependudukan)</label>
-          <div class="iw">
-            <svg class="ico" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v2H7V5zm0 4h6v2H7V9zm0 4h4v2H7v-2z" clip-rule="evenodd"/></svg>
-            <input type="text" name="nik" placeholder="16 digit NIK" maxlength="16" id="nikInput" required>
-          </div>
-        </div>
-
-        <div class="row">
-          <!-- Tanggal Lahir -->
-          <div class="fg">
-            <label>Tanggal Lahir</label>
-            <div class="iw">
-              <svg class="ico" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
-              <input type="date" name="tgl_lahir" required>
+<!-- Main Content Area -->
+<main class="flex-grow flex items-center justify-center pt-24 pb-16 px-margin-mobile abstract-medical-pattern">
+    <div class="w-full max-w-[560px]">
+        
+        <!-- Flash Messages -->
+        <?php if (session()->getFlashdata('error')): ?>
+            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200 flex items-center gap-2" role="alert">
+                <span class="material-symbols-outlined text-[20px] text-alert-crimson" style="font-variation-settings: 'FILL' 1;">error</span>
+                <div>
+                    <?= session()->getFlashdata('error') ?>
+                </div>
             </div>
-          </div>
+        <?php endif; ?>
 
-          <!-- Jenis Kelamin -->
-          <div class="fg">
-            <label>Jenis Kelamin</label>
-            <div class="gender-toggle">
-              <label><input type="radio" name="jk" value="Laki-laki" required>Laki-laki</label>
-              <label><input type="radio" name="jk" value="Perempuan">Perempuan</label>
+        <?php if (session()->getFlashdata('success')): ?>
+            <div class="p-4 mb-4 text-sm text-emerald-800 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2" role="alert">
+                <span class="material-symbols-outlined text-[20px] text-success-emerald" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                <div>
+                    <?= session()->getFlashdata('success') ?>
+                </div>
             </div>
-          </div>
+        <?php endif; ?>
+
+        <!-- Registration Card -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl register-card-shadow overflow-hidden">
+            <div class="p-6 md:p-10 space-y-6">
+                
+                <!-- Brand Identity inside Card -->
+                <div class="text-center space-y-2">
+                    <div class="flex justify-center mb-4">
+                        <img src="<?= base_url('assets/img/MiraCareLogo.png') ?>" alt="MiraCare Logo" class="h-12 w-auto object-contain"/>
+                    </div>
+                    <h1 class="font-headline-sm text-headline-sm text-primary">Daftar Akun Baru</h1>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Bergabunglah dengan MiraCare untuk layanan kesehatan digital yang aman dan terpercaya.</p>
+                </div>
+                
+                <!-- Registration Form -->
+                <form class="space-y-5" action="<?= base_url('register') ?>" method="POST" id="regForm">
+                    <?= csrf_field() ?>
+                    
+                    <!-- Nama Lengkap -->
+                    <div class="space-y-2">
+                        <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="nama_lengkap">Nama Lengkap</label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">person</span>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="nama_lengkap" name="nama_lengkap" placeholder="John Doe" type="text" required value="<?= old('nama_lengkap') ?>"/>
+                        </div>
+                    </div>
+                    
+                    <!-- NIK -->
+                    <div class="space-y-2">
+                        <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="nik">NIK (Nomor Induk Kependudukan)</label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">badge</span>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="nik" name="nik" placeholder="16 digit NIK" type="text" maxlength="16" required value="<?= old('nik') ?>"/>
+                        </div>
+                    </div>
+
+                    <!-- Grid: Tanggal Lahir & Jenis Kelamin -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Tanggal Lahir -->
+                        <div class="space-y-2">
+                            <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="tgl_lahir">Tanggal Lahir</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">calendar_month</span>
+                                <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="tgl_lahir" name="tgl_lahir" type="date" required value="<?= old('tgl_lahir') ?>"/>
+                            </div>
+                        </div>
+
+                        <!-- Jenis Kelamin -->
+                        <div class="space-y-2">
+                            <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider">Jenis Kelamin</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="cursor-pointer block relative">
+                                    <input type="radio" name="jk" value="Laki-laki" class="sr-only peer" required <?= old('jk') === 'Laki-laki' ? 'checked' : '' ?>/>
+                                    <div class="flex items-center justify-center gap-1.5 px-3 py-3 bg-white border border-outline-variant rounded-lg transition-all peer-checked:border-secondary peer-checked:bg-secondary/5 peer-checked:text-secondary hover:bg-surface-container-low">
+                                        <span class="material-symbols-outlined text-[18px]">male</span>
+                                        <span class="font-body-sm">Laki-laki</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer block relative">
+                                    <input type="radio" name="jk" value="Perempuan" class="sr-only peer" <?= old('jk') === 'Perempuan' ? 'checked' : '' ?>/>
+                                    <div class="flex items-center justify-center gap-1.5 px-3 py-3 bg-white border border-outline-variant rounded-lg transition-all peer-checked:border-secondary peer-checked:bg-secondary/5 peer-checked:text-secondary hover:bg-surface-container-low">
+                                        <span class="material-symbols-outlined text-[18px]">female</span>
+                                        <span class="font-body-sm">Perempuan</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alamat -->
+                    <div class="space-y-2">
+                        <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="alamat">Alamat Lengkap</label>
+                        <div class="relative group">
+                            <textarea class="w-full p-4 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all min-h-[80px] resize-y" id="alamat" name="alamat" placeholder="Masukkan alamat lengkap Anda..." required><?= old('alamat') ?></textarea>
+                        </div>
+                    </div>
+
+                    <!-- No BPJS -->
+                    <div class="space-y-2">
+                        <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="no_bpjs">Nomor BPJS <span class="text-outline text-xs lowercase italic">(opsional)</span></label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">medical_services</span>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="no_bpjs" name="no_bpjs" placeholder="Nomor Kartu BPJS Kesehatan" type="text" value="<?= old('no_bpjs') ?>"/>
+                        </div>
+                    </div>
+
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-outline-variant"></div>
+                        <span class="flex-shrink mx-4 text-xs text-outline uppercase tracking-widest font-semibold">Detail Akun</span>
+                        <div class="flex-grow border-t border-outline-variant"></div>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="space-y-2">
+                        <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="username">Username</label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">account_circle</span>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="username" name="username" placeholder="Pilih username unik" type="text" required value="<?= old('username') ?>"/>
+                        </div>
+                    </div>
+
+                    <!-- Grid: Password & Konfirmasi -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Password -->
+                        <div class="space-y-2">
+                            <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="password">Kata Sandi</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">lock</span>
+                                <input class="w-full pl-10 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="password" name="password" placeholder="••••••••" type="password" required/>
+                                <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button" onclick="togglePassword('password', 'eyeIcon1')">
+                                    <span class="material-symbols-outlined text-[20px]" id="eyeIcon1">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Konfirmasi Password -->
+                        <div class="space-y-2">
+                            <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="konfirmasi_password">Konfirmasi</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">verified_user</span>
+                                <input class="w-full pl-10 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="konfirmasi_password" name="konfirmasi_password" placeholder="••••••••" type="password" required/>
+                                <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button" onclick="togglePassword('konfirmasi_password', 'eyeIcon2')">
+                                    <span class="material-symbols-outlined text-[20px]" id="eyeIcon2">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password strength & match info side by side or stacked -->
+                    <div class="space-y-2 bg-surface-container-low p-3.5 rounded-lg border border-outline-variant/60">
+                        <!-- strength -->
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-on-surface-variant font-medium">Kekuatan Kata Sandi:</span>
+                                <span class="font-bold uppercase tracking-wider text-outline" id="pw-label">Belum diisi</span>
+                            </div>
+                            <div class="h-1.5 w-full bg-outline-variant/40 rounded-full overflow-hidden">
+                                <div class="h-full w-0 bg-error transition-all duration-300" id="pw-bar"></div>
+                            </div>
+                        </div>
+                        <!-- match -->
+                        <div class="flex items-center gap-1.5 text-xs font-semibold mt-1.5 hidden" id="matchInfo">
+                            <span class="material-symbols-outlined text-[16px]" id="matchIcon">check_circle</span>
+                            <span id="matchText">Password cocok</span>
+                        </div>
+                    </div>
+
+                    <!-- T&C Checkbox -->
+                    <div class="flex items-start gap-3 py-2">
+                        <input class="mt-1 w-4 h-4 text-secondary border-outline-variant rounded focus:ring-secondary cursor-pointer" id="terms" type="checkbox" required/>
+                        <label class="font-body-sm text-body-sm text-on-surface-variant cursor-pointer select-none" for="terms">
+                            Saya setuju dengan <a class="text-secondary hover:underline font-medium" href="#">Syarat &amp; Ketentuan</a> serta <a class="text-secondary hover:underline font-medium" href="#">Kebijakan Privasi</a> MiraCare.
+                        </label>
+                    </div>
+
+                    <!-- Primary Action Button -->
+                    <button class="w-full py-4 bg-secondary text-white font-label-md text-label-md rounded-lg hover:bg-opacity-95 active:scale-[0.99] transition-all flex items-center justify-center gap-2 font-semibold shadow-sm" type="submit" id="btnReg">
+                        <span class="flex items-center gap-2 justify-center">
+                            Daftar Sekarang
+                            <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                        </span>
+                    </button>
+                </form>
+
+                <!-- Secure HIPAA Compliant Badge -->
+                <div class="flex justify-center items-center gap-2 px-4 py-2 bg-surface-container rounded-full w-fit mx-auto border border-outline-variant/40 shadow-sm">
+                    <span class="material-symbols-outlined text-success-emerald text-[18px]" style="font-variation-settings: 'FILL' 1;">security</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Secure &amp; HIPAA Compliant</span>
+                </div>
+
+                <!-- Footer Link -->
+                <div class="pt-6 border-t border-outline-variant text-center">
+                    <p class="font-body-md text-body-md text-on-surface-variant">
+                        Sudah memiliki akun? 
+                        <a class="text-secondary font-bold hover:underline ml-1" href="<?= base_url('login') ?>">Login</a>
+                    </p>
+                </div>
+            </div>
         </div>
 
-        <!-- Alamat -->
-        <div class="fg full">
-          <label>Alamat</label>
-          <div class="iw">
-            <textarea name="alamat" placeholder="Masukkan alamat lengkap" required></textarea>
-          </div>
+        <!-- Help Widget under card -->
+        <div class="mt-6 text-center">
+            <a href="<?= base_url('/') ?>" class="inline-flex items-center gap-2 text-on-surface-variant hover:text-secondary font-label-md text-label-md transition-colors bg-white border border-outline-variant/60 px-4 py-2.5 rounded-full shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                Kembali ke Beranda
+            </a>
         </div>
-
-        <!-- No BPJS -->
-        <div class="fg full">
-          <label>No. BPJS <span class="opt">(opsional)</span></label>
-          <div class="iw">
-            <svg class="ico" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2L3 7v9a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM9 9h2v5H9V9zm0-3h2v2H9V6z" clip-rule="evenodd"/></svg>
-            <input type="text" name="no_bpjs" placeholder="Nomor BPJS (jika ada)">
-          </div>
-        </div>
-
-        <hr style="border:none;border-top:1px solid #e2e8f0;margin:8px 0 20px">
-
-        <!-- Username -->
-        <div class="fg full">
-          <label>Username</label>
-          <div class="iw">
-            <svg class="ico" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 10.882l7.997-4.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884zM18 8.118l-8 5-8-5V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
-            <input type="text" name="username" placeholder="Pilih username" required>
-          </div>
-        </div>
-
-        <!-- Password -->
-        <div class="fg full">
-          <label>Password</label>
-          <div class="iw">
-            <svg class="ico" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
-            <input type="password" name="password" id="pw" placeholder="Buat password" required>
-            <button type="button" class="toggle-pw" onclick="togPw('pw',this)"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg></button>
-          </div>
-          <div class="pw-strength" id="pwStr">
-            <div class="pw-bar"><div class="pw-bar-fill"></div></div>
-            <span class="pw-label"></span>
-          </div>
-        </div>
-
-        <!-- Konfirmasi Password -->
-        <div class="fg full">
-          <label>Konfirmasi Password</label>
-          <div class="iw">
-            <svg class="ico" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
-            <input type="password" name="konfirmasi_password" id="cpw" placeholder="Ulangi password" required>
-            <button type="button" class="toggle-pw" onclick="togPw('cpw',this)"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg></button>
-          </div>
-          <div class="match-info" id="matchInfo"></div>
-        </div>
-
-        <button type="submit" class="btn-reg" id="btnReg">
-          <span class="bt">Daftar</span><span class="sp"></span>
-        </button>
-      </form>
-
-      <div class="divider">atau</div>
-      <a href="<?= base_url('/') ?>" class="btn-back">
-        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
-        Kembali ke Beranda
-      </a>
     </div>
-  </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant w-full px-margin-mobile md:px-margin-desktop py-6">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-2">
+            <span class="font-label-sm text-label-sm font-semibold text-primary">MiraCare Hospital System</span>
+        </div>
+        <p class="font-label-md text-label-md text-on-surface-variant">© <?= date('Y') ?> MiraCare Hospital System. Seluruh hak cipta dilindungi.</p>
+        <div class="flex gap-6">
+            <a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Kebijakan Privasi</a>
+            <a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Syarat &amp; Ketentuan</a>
+        </div>
+    </div>
+</footer>
+
+<!-- CSS Micro-interaction Help Lightbox -->
+<div class="fixed bottom-8 right-8 hidden xl:block z-40">
+    <div class="relative group cursor-pointer">
+        <div class="absolute -inset-1 bg-gradient-to-r from-secondary to-electric-cyan rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+        <div class="relative px-4 py-3 bg-white border border-outline-variant rounded-full flex items-center gap-3">
+            <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">medical_information</span>
+            <span class="font-label-md text-label-md text-on-background">Butuh bantuan daftar?</span>
+        </div>
+    </div>
 </div>
 
 <script>
-// NIK: digits only
-document.getElementById('nikInput').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'')});
+    // NIK validation: Allow only digits
+    document.getElementById('nik').addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+    });
 
-// Toggle password
-function togPw(id,btn){var i=document.getElementById(id);i.type=i.type==='password'?'text':'password'}
+    // Toggle password visibility
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = 'visibility_off';
+        } else {
+            input.type = 'password';
+            icon.textContent = 'visibility';
+        }
+    }
 
-// Password strength
-document.getElementById('pw').addEventListener('input',function(){
-  var v=this.value,s=document.getElementById('pwStr'),c='';
-  if(!v){s.className='pw-strength';s.querySelector('.pw-label').textContent='';return}
-  var score=0;
-  if(v.length>=6)score++;if(v.length>=10)score++;if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;
-  if(score<=2)c='str-weak';else if(score<=3)c='str-med';else c='str-strong';
-  s.className='pw-strength '+c;
-  s.querySelector('.pw-label').textContent=c==='str-weak'?'Lemah':c==='str-med'?'Sedang':'Kuat';
-  checkMatch();
-});
+    // Password strength meter
+    document.getElementById('password').addEventListener('input', function() {
+        const v = this.value;
+        const bar = document.getElementById('pw-bar');
+        const label = document.getElementById('pw-label');
+        
+        if (!v) {
+            bar.style.width = '0%';
+            bar.className = 'h-full transition-all duration-300 bg-error';
+            label.textContent = 'Belum diisi';
+            label.className = 'font-bold uppercase tracking-wider text-outline';
+            return;
+        }
+        
+        let score = 0;
+        if (v.length >= 6) score++;
+        if (v.length >= 10) score++;
+        if (/[A-Z]/.test(v)) score++;
+        if (/[0-9]/.test(v)) score++;
+        if (/[^A-Za-z0-9]/.test(v)) score++;
+        
+        let width = '0%';
+        let colorClass = '';
+        let text = '';
+        
+        if (score <= 2) {
+            width = '33%';
+            colorClass = 'bg-error';
+            text = 'Lemah';
+            label.className = 'font-bold uppercase tracking-wider text-error';
+        } else if (score <= 4) {
+            width = '66%';
+            colorClass = 'bg-amber-500';
+            text = 'Sedang';
+            label.className = 'font-bold uppercase tracking-wider text-amber-500';
+        } else {
+            width = '100%';
+            colorClass = 'bg-success-emerald';
+            text = 'Kuat';
+            label.className = 'font-bold uppercase tracking-wider text-success-emerald';
+        }
+        
+        bar.style.width = width;
+        bar.className = 'h-full transition-all duration-300 ' + colorClass;
+        label.textContent = text;
+        
+        checkMatch();
+    });
 
-// Confirm password match
-document.getElementById('cpw').addEventListener('input',checkMatch);
-function checkMatch(){
-  var pw=document.getElementById('pw').value,cpw=document.getElementById('cpw').value,el=document.getElementById('matchInfo');
-  if(!cpw){el.style.display='none';return}
-  el.style.display='block';
-  if(pw===cpw){el.className='match-info match-ok';el.textContent='✓ Password cocok'}
-  else{el.className='match-info match-no';el.textContent='✗ Password tidak cocok'}
-}
+    // Confirm password match validation
+    document.getElementById('konfirmasi_password').addEventListener('input', checkMatch);
+    function checkMatch() {
+        const pw = document.getElementById('password').value;
+        const cpw = document.getElementById('konfirmasi_password').value;
+        const info = document.getElementById('matchInfo');
+        const icon = document.getElementById('matchIcon');
+        const text = document.getElementById('matchText');
+        
+        if (!cpw) {
+            info.classList.add('hidden');
+            return;
+        }
+        
+        info.classList.remove('hidden');
+        if (pw === cpw) {
+            info.className = 'flex items-center gap-1.5 text-xs font-semibold mt-1.5 text-success-emerald';
+            icon.textContent = 'check_circle';
+            text.textContent = 'Password cocok';
+        } else {
+            info.className = 'flex items-center gap-1.5 text-xs font-semibold mt-1.5 text-error';
+            icon.textContent = 'cancel';
+            text.textContent = 'Password tidak cocok';
+        }
+    }
 
-// Loading on submit
-document.getElementById('regForm').addEventListener('submit',function(e){
-  var pw=document.getElementById('pw').value,cpw=document.getElementById('cpw').value;
-  if(pw!==cpw){e.preventDefault();alert('Password dan konfirmasi password tidak cocok!');return}
-  document.getElementById('btnReg').classList.add('loading');
-});
+    // Submit button loader validation
+    document.getElementById('regForm').addEventListener('submit', function(e) {
+        const pw = document.getElementById('password').value;
+        const cpw = document.getElementById('konfirmasi_password').value;
+        
+        if (pw !== cpw) {
+            e.preventDefault();
+            alert('Password dan konfirmasi password tidak cocok!');
+            return;
+        }
+
+        const btn = document.getElementById('btnReg');
+        btn.disabled = true;
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+        btn.innerHTML = `
+            <span class="flex items-center gap-2 justify-center">
+                Memproses...
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </span>
+        `;
+    });
 </script>
 </body>
 </html>

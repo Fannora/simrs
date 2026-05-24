@@ -1,486 +1,730 @@
-<?php $title = 'Booking Appointment'; ?>
-<?= $this->extend('pasien/layout') ?>
-<?= $this->section('content') ?>
+<?php
+$db = \Config\Database::connect();
+$id_user = session()->get('id_user');
+$pasien = $db->table('tbl_pasien')->where('id_user', $id_user)->get()->getRowArray();
 
-<!-- Flash Messages -->
-<?php if (session()->getFlashdata('error')): ?>
-  <div class="alert alert-danger alert-dismissible" role="alert">
-    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
-    <strong>Gagal!</strong> <?= session()->getFlashdata('error') ?>
-  </div>
-<?php endif; ?>
-<?php if (session()->getFlashdata('success')): ?>
-  <div class="alert alert-success alert-dismissible" role="alert">
-    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
-    <strong>Berhasil!</strong> <?= session()->getFlashdata('success') ?>
-  </div>
-<?php endif; ?>
+// Greeting based on time
+date_default_timezone_set('Asia/Jakarta');
+$hour = date('H');
+if ($hour < 11) {
+    $greeting = 'Selamat Pagi';
+} elseif ($hour < 15) {
+    $greeting = 'Selamat Siang';
+} elseif ($hour < 18) {
+    $greeting = 'Selamat Sore';
+} else {
+    $greeting = 'Selamat Malam';
+}
+?>
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>MiraCare - Booking Konsultasi</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700;800&amp;family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#000000",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#bec6e0",
+                        "background": "#f1f5f9",
+                        "outline-variant": "#c6c6cd",
+                        "surface-dim": "#dcd9db",
+                        "tertiary-fixed-dim": "#dec29a",
+                        "on-secondary-container": "#fefcff",
+                        "tertiary-fixed": "#fcdeb5",
+                        "on-primary-fixed": "#131b2e",
+                        "success-emerald": "#10B981",
+                        "on-surface-variant": "#45464d",
+                        "inverse-surface": "#303032",
+                        "surface-bright": "#fcf8fa",
+                        "inverse-on-surface": "#f3f0f2",
+                        "surface-tint": "#565e74",
+                        "secondary-fixed": "#d8e2ff",
+                        "secondary": "#0047AB", // Deep Trust Blue
+                        "secondary-container": "#06B6D4", // Ocean Teal
+                        "error": "#ba1a1a",
+                        "outline": "#76777d",
+                        "on-tertiary-container": "#98805d",
+                        "surface": "#fcf8fa",
+                        "slate-surface": "#F8FAFC",
+                        "alert-crimson": "#E11D48",
+                        "electric-cyan": "#06B6D4",
+                        "on-surface": "#1b1b1d",
+                        "primary": "#000000",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-variant": "#e4e2e4",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#eae7e9",
+                        "surface-container-highest": "#e4e2e4",
+                        "primary-fixed": "#dae2fd",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#271901",
+                        "on-background": "#1b1b1d",
+                        "surface-container-low": "#f6f3f5",
+                        "surface-container": "#f0edef",
+                        "on-primary-container": "#7c839b",
+                        "tertiary-container": "#271901",
+                        "on-tertiary-fixed-variant": "#574425",
+                        "primary-container": "#0047AB",
+                        "on-secondary-fixed": "#001a42",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#3f465c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "48px",
+                        "max-width": "1280px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist"],
+                        "label-sm": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["13px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "label-sm": ["11px", {"lineHeight": "1", "letterSpacing": "0.08em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-md": ["30px", {"lineHeight": "1.25", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #f1f5f9;
+            color: #1b1b1d;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface">
 
-<!-- WIZARD STEPS INDICATOR -->
-<div class="card mb-2">
-  <div class="card-body py-2">
-    <div class="row text-center">
-      <div class="col-md-4">
-        <div class="step-indicator active" id="indicator-1">
-          <span class="badge badge-pill badge-info px-2 py-1" id="badge-1">
-            <i class="la la-hospital-o"></i> 1
-          </span>
-          <span class="step-label ml-1 font-weight-bold">Pilih Layanan</span>
+<!-- SideNavBar -->
+<aside class="bg-surface-container-lowest h-screen w-64 fixed left-0 top-0 border-r border-outline-variant flex flex-col py-6 px-4 z-50">
+    <div class="mb-10 px-2 flex items-center gap-3">
+        <div class="w-10 h-10 bg-secondary rounded flex items-center justify-center text-white">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medical_services</span>
         </div>
-      </div>
-      <div class="col-md-4">
-        <div class="step-indicator" id="indicator-2">
-          <span class="badge badge-pill badge-secondary px-2 py-1" id="badge-2">
-            <i class="la la-calendar"></i> 2
-          </span>
-          <span class="step-label ml-1">Pilih Jadwal</span>
+        <div>
+            <h1 class="font-headline-sm text-headline-sm font-bold text-secondary">MiraCare</h1>
+            <p class="font-label-sm text-label-sm text-on-surface-variant">Portal Pasien</p>
         </div>
-      </div>
-      <div class="col-md-4">
-        <div class="step-indicator" id="indicator-3">
-          <span class="badge badge-pill badge-secondary px-2 py-1" id="badge-3">
-            <i class="la la-check-circle"></i> 3
-          </span>
-          <span class="step-label ml-1">Konfirmasi</span>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
+    
+    <nav class="flex-1 space-y-1">
+        <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('pasien/dashboard') ?>">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="font-label-md text-label-md">Beranda</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-secondary text-white font-bold transition-all duration-200" href="<?= base_url('pasien/booking') ?>">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+            <span class="font-label-md text-label-md">Janji Temu</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('pasien/riwayat') ?>">
+            <span class="material-symbols-outlined">history_edu</span>
+            <span class="font-label-md text-label-md">Riwayat</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('pasien/settings') ?>">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="font-label-md text-label-md">Pengaturan</span>
+        </a>
+    </nav>
+    
+    <div class="mt-auto border-t border-outline-variant pt-6">
+        <a class="flex items-center gap-3 px-3 py-2.5 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors font-bold" href="<?= base_url('logout') ?>">
+            <span class="material-symbols-outlined text-rose-600" style="font-variation-settings: 'FILL' 1;">logout</span>
+            <span class="font-label-md text-label-md">Keluar</span>
+        </a>
+    </div>
+</aside>
 
-<!-- FORM MULTI-STEP -->
-<form method="POST" action="<?= base_url('pasien/booking/store') ?>" id="bookingForm">
-  <?= csrf_field() ?>
-  <input type="hidden" id="selectedPoliNama" name="nama_poli_display">
-  <input type="hidden" id="selectedDokterNama" name="nama_dokter_display">
-
-  <!-- ============ STEP 1: Pilih Poli & Dokter ============ -->
-  <div id="step1">
-    <div class="card">
-      <div class="card-header">
-        <h4 class="card-title">Pilih Poli</h4>
-      </div>
-      <div class="card-content">
-        <div class="card-body">
-
-          <!-- Grid card poli -->
-          <div class="row" id="poliContainer">
-            <?php foreach ($poli as $p): ?>
-            <div class="col-md-4 mb-2">
-              <div class="card border poli-card" data-id="<?= $p['id_poli'] ?>"
-                   style="cursor:pointer; border: 2px solid #e0e0e0 !important; transition: all 0.2s; margin-bottom:0;">
-                <div class="card-body text-center py-2">
-                  <i class="la la-stethoscope font-large-1 info"></i>
-                  <h6 class="mt-1 mb-0"><?= esc($p['nama_poli']) ?></h6>
-                  <small class="text-muted"><i class="la la-map-marker"></i> <?= esc($p['gedung']) ?></small>
-                  <input type="radio" name="id_poli" value="<?= $p['id_poli'] ?>" class="d-none poli-radio">
+<!-- TopAppBar -->
+<header class="bg-white border-b border-outline-variant flex justify-between items-center h-16 ml-64 px-8 w-[calc(100%-16rem)] fixed top-0 z-40">
+    <h2 class="font-headline-sm text-headline-sm font-bold text-secondary">Janji Temu Baru</h2>
+    <div class="flex items-center gap-6">
+        <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-3 text-outline">search</span>
+            <input class="bg-slate-50 border-none rounded-full py-2 pl-10 pr-4 w-64 text-body-sm focus:ring-2 focus:ring-secondary focus:outline-none" placeholder="Cari layanan, dokter..." type="text"/>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="<?= base_url('/#demo') ?>" class="text-on-surface-variant hover:text-secondary transition-colors p-2">
+                <span class="material-symbols-outlined">notifications</span>
+            </a>
+            <div class="flex items-center gap-3 border-l border-outline-variant pl-4">
+                <div class="text-right">
+                    <p class="font-label-md text-label-md font-bold"><?= esc($pasien['nama_pasien']) ?></p>
+                    <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">No. RM: <?= esc($pasien['no_rm']) ?></p>
                 </div>
-              </div>
+                <img alt="Foto profil pasien" class="w-10 h-10 rounded-full object-cover border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgZDAHfyLM-kmwULaIyRGid6vmIXH1bS89BHXzfPQ-5u_V6WwCGcP8Nu76OzqW33ITJac0FhyPQynYQaaeT4r-gV_9EJGqFZar5BOLVmbFiCQz4PnAKXucfc8XgGw-VHWkms7WYbqafYuEX0-FgtLERjTpdkJQSJoOit4XJtudje7nFnVYaV51TYi4L9tD9zs4nQjbZmKtD_LNhTfGLu2AcMB2ahFpd5ARl1kfYASIQQB3ZXdhtzLiDW4Tw9kG7ykIKnYE6IooZW8q"/>
             </div>
-            <?php endforeach; ?>
-          </div>
-
-          <!-- Dokter section (awalnya hidden) -->
-          <div id="dokterSection" class="mt-2" style="display:none;">
-            <h5>Pilih Dokter</h5>
-            <div id="dokterLoading" class="text-center py-2" style="display:none;">
-              <div class="spinner-border text-info" role="status"></div>
-              <span class="ml-1">Memuat dokter...</span>
-            </div>
-            <div id="dokterContainer" class="row"></div>
-            <input type="hidden" name="id_dokter" id="selectedDokter">
-          </div>
-
         </div>
-      </div>
     </div>
-    <div class="text-right mb-2">
-      <button type="button" id="toStep2" class="btn btn-info" disabled>
-        Lanjutkan <i class="la la-arrow-right"></i>
-      </button>
-    </div>
-  </div>
+</header>
 
-  <!-- ============ STEP 2: Pilih Jadwal ============ -->
-  <div id="step2" style="display:none;">
-    <div class="card">
-      <div class="card-header">
-        <h4 class="card-title">Pilih Jadwal</h4>
-      </div>
-      <div class="card-content">
-        <div class="card-body">
+<!-- Main Content Area -->
+<main class="ml-64 pt-24 px-8 pb-12 min-h-screen">
+    <div class="max-w-[1280px] mx-auto">
+        
+        <!-- Header Title Section -->
+        <section class="mb-8">
+            <h3 class="font-headline-md text-headline-md text-slate-800 mb-2">Booking Konsultasi Dokter</h3>
+            <p class="font-body-md text-on-surface-variant">Ikuti langkah-langkah di bawah untuk membuat janji temu secara instan.</p>
+        </section>
 
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Tanggal Kunjungan <span class="danger">*</span></label>
-                <input type="date" name="tgl_daftar" id="tglDaftar" class="form-control" required>
-                <small class="text-muted">* Tidak tersedia pada hari Minggu</small>
-              </div>
+        <!-- Flash Messages -->
+        <?php if (session()->getFlashdata('error')): ?>
+            <div class="p-4 mb-6 text-sm text-red-800 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2" role="alert">
+                <span class="material-symbols-outlined text-[20px] text-alert-crimson" style="font-variation-settings: 'FILL' 1;">error</span>
+                <div class="font-semibold"><?= session()->getFlashdata('error') ?></div>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Keluhan Awal <span class="danger">*</span></label>
-                <textarea name="keluhan_awal" id="keluhanAwal" class="form-control" rows="3"
-                          placeholder="Jelaskan keluhan Anda..." maxlength="500" required></textarea>
-                <small id="charCount" class="text-muted">0/500 karakter</small>
-              </div>
+        <?php endif; ?>
+        <?php if (session()->getFlashdata('success')): ?>
+            <div class="p-4 mb-6 text-sm text-emerald-800 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-2" role="alert">
+                <span class="material-symbols-outlined text-[20px] text-success-emerald" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                <div class="font-semibold"><?= session()->getFlashdata('success') ?></div>
             </div>
-          </div>
+        <?php endif; ?>
 
-          <!-- Slot waktu -->
-          <div id="slotSection" style="display:none;">
-            <label>Pilih Slot Waktu <span class="danger">*</span></label>
-            <div id="slotLoading" style="display:none;" class="text-center py-2">
-              <div class="spinner-border text-info" role="status"></div>
+        <!-- STEP PROGRESS INDICATOR -->
+        <div class="bg-white border border-outline-variant rounded-2xl p-6 mb-8 shadow-sm">
+            <div class="flex flex-col md:flex-row justify-around items-center gap-4">
+                <div class="flex items-center gap-3 step-indicator" id="indicator-1">
+                    <span class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-all bg-secondary" id="badge-1">1</span>
+                    <span class="font-semibold text-slate-800 text-sm" id="label-1">Pilih Layanan &amp; Dokter</span>
+                </div>
+                <div class="hidden md:block h-[2px] bg-slate-200 flex-1 mx-4" id="line-1"></div>
+                
+                <div class="flex items-center gap-3 step-indicator" id="indicator-2">
+                    <span class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-slate-400 transition-all bg-slate-100 border border-outline-variant" id="badge-2">2</span>
+                    <span class="font-medium text-slate-500 text-sm" id="label-2">Pilih Jadwal &amp; Keluhan</span>
+                </div>
+                <div class="hidden md:block h-[2px] bg-slate-200 flex-1 mx-4" id="line-2"></div>
+                
+                <div class="flex items-center gap-3 step-indicator" id="indicator-3">
+                    <span class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-slate-400 transition-all bg-slate-100 border border-outline-variant" id="badge-3">3</span>
+                    <span class="font-medium text-slate-500 text-sm" id="label-3">Konfirmasi &amp; Selesai</span>
+                </div>
             </div>
-            <div id="slotContainer" class="d-flex flex-wrap mt-1"></div>
-            <input type="hidden" name="slot_waktu" id="selectedSlot">
-            <div class="mt-1">
-              <span class="badge badge-success"><i class="la la-check"></i> Tersedia</span>
-              <span class="badge badge-warning"><i class="la la-exclamation-triangle"></i> Hampir Penuh</span>
-              <span class="badge badge-danger"><i class="la la-times"></i> Penuh</span>
-            </div>
-          </div>
-
         </div>
-      </div>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <button type="button" id="backToStep1" class="btn btn-outline-secondary">
-        <i class="la la-arrow-left"></i> Kembali
-      </button>
-      <button type="button" id="toStep3" class="btn btn-info" disabled>
-        Lanjutkan <i class="la la-arrow-right"></i>
-      </button>
-    </div>
-  </div>
 
-  <!-- ============ STEP 3: Konfirmasi ============ -->
-  <div id="step3" style="display:none;">
-    <div class="card">
-      <div class="card-header">
-        <h4 class="card-title">Konfirmasi Booking</h4>
-      </div>
-      <div class="card-content">
-        <div class="card-body">
-          <table class="table table-bordered">
-            <tr><th width="35%">Pasien</th><td><?= session()->get('nama_lengkap') ?></td></tr>
-            <tr><th>No. Rekam Medis</th><td><?= session()->get('no_rm') ?></td></tr>
-            <tr><th>Poli</th><td id="confirm-poli">-</td></tr>
-            <tr><th>Dokter</th><td id="confirm-dokter">-</td></tr>
-            <tr><th>Tanggal</th><td id="confirm-tanggal">-</td></tr>
-            <tr><th>Jam</th><td id="confirm-jam">-</td></tr>
-            <tr><th>Keluhan</th><td id="confirm-keluhan">-</td></tr>
-          </table>
-          <div class="form-group mt-2">
-            <label class="d-flex align-items-center" style="cursor:pointer;">
-              <input type="checkbox" id="agreeCheck" class="mr-1">
-              Saya menyatakan data di atas sudah benar dan ingin melanjutkan booking.
-            </label>
-          </div>
-        </div>
-      </div>
+        <!-- FORM MULTI-STEP -->
+        <form method="POST" action="<?= base_url('pasien/booking/store') ?>" id="bookingForm" class="space-y-6">
+            <?= csrf_field() ?>
+            <input type="hidden" id="selectedPoliNama" name="nama_poli_display">
+            <input type="hidden" id="selectedDokterNama" name="nama_dokter_display">
+
+            <!-- ============ STEP 1: PILIH POLI & DOKTER ============ -->
+            <div id="step1" class="space-y-6 animate-in fade-in duration-300">
+                <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-sm">
+                    <h4 class="font-headline-sm text-slate-800 mb-6 font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">local_hospital</span>
+                        Langkah 1: Pilih Poliklinik
+                    </h4>
+                    
+                    <!-- Grid Poliklinik -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="poliContainer">
+                        <?php foreach ($poli as $p): ?>
+                            <div class="border-2 border-slate-150 rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:border-secondary hover:bg-slate-50/50 flex flex-col items-center text-center gap-3 poli-card group" data-id="<?= $p['id_poli'] ?>">
+                                <div class="w-14 h-14 bg-secondary/10 text-secondary rounded-full flex items-center justify-center group-hover:bg-secondary group-hover:text-white transition-colors">
+                                    <span class="material-symbols-outlined text-3xl">stethoscope</span>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-slate-800 mb-1 text-base"><?= esc($p['nama_poli']) ?></h5>
+                                    <p class="text-xs text-on-surface-variant flex items-center justify-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">location_on</span>
+                                        <?= esc($p['gedung']) ?>
+                                    </p>
+                                </div>
+                                <input type="radio" name="id_poli" value="<?= $p['id_poli'] ?>" class="hidden poli-radio">
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    
+                    <!-- Dokter Section (Awalan Hidden) -->
+                    <div id="dokterSection" class="mt-8 pt-8 border-t border-slate-100 hidden">
+                        <h4 class="font-headline-sm text-slate-800 mb-6 font-bold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary">person_check</span>
+                            Pilih Dokter Spesialis
+                        </h4>
+                        
+                        <div id="dokterLoading" class="hidden text-center py-8">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-secondary"></div>
+                            <p class="text-sm text-on-surface-variant mt-2">Memuat daftar dokter spesialis...</p>
+                        </div>
+                        
+                        <!-- Grid Dokter -->
+                        <div id="dokterContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                        <input type="hidden" name="id_dokter" id="selectedDokter">
+                    </div>
+                </div>
+                
+                <div class="flex justify-end pt-2">
+                    <button type="button" id="toStep2" class="bg-secondary text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                        Lanjutkan Langkah 2
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ============ STEP 2: PILIH JADWAL & KELUHAN ============ -->
+            <div id="step2" class="hidden space-y-6 animate-in fade-in duration-300">
+                <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-sm">
+                    <h4 class="font-headline-sm text-slate-800 mb-6 font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">calendar_month</span>
+                        Langkah 2: Tentukan Tanggal &amp; Keluhan
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Left: Date & Time Picker -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Pilih Tanggal Kunjungan</label>
+                                <input type="date" name="tgl_daftar" id="tglDaftar" class="w-full rounded-xl border-slate-300 focus:ring-secondary focus:border-secondary text-sm p-3 bg-slate-50" required>
+                                <p class="text-xs text-on-surface-variant mt-1.5 flex items-center gap-1"><span class="material-symbols-outlined text-sm">info</span> * Jadwal dokter tidak tersedia pada hari Minggu.</p>
+                            </div>
+                            
+                            <!-- Slot Waktu -->
+                            <div id="slotSection" class="hidden pt-2">
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Pilih Jam / Slot Waktu Konsultasi</label>
+                                <div id="slotLoading" class="hidden text-center py-4">
+                                    <div class="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-secondary"></div>
+                                </div>
+                                <div id="slotContainer" class="flex flex-wrap gap-2 mt-2"></div>
+                                <input type="hidden" name="slot_waktu" id="selectedSlot">
+                                
+                                <div class="flex flex-wrap gap-4 mt-4 text-xs">
+                                    <span class="flex items-center gap-1 text-emerald-600 font-semibold"><span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span> Tersedia</span>
+                                    <span class="flex items-center gap-1 text-amber-600 font-semibold"><span class="w-2.5 h-2.5 bg-amber-500 rounded-full"></span> Sisa Terbatas</span>
+                                    <span class="flex items-center gap-1 text-red-600 font-semibold"><span class="w-2.5 h-2.5 bg-red-500 rounded-full"></span> Penuh</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Keluhan Awal -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Tulis Keluhan Kesehatan Utama</label>
+                            <textarea name="keluhan_awal" id="keluhanAwal" class="w-full rounded-xl border-slate-300 focus:ring-secondary focus:border-secondary text-sm min-h-[140px] p-3" placeholder="Jelaskan secara ringkas mengenai gejala, riwayat singkat penyakit, atau keluhan kesehatan yang sedang Anda rasakan..." maxlength="500" required></textarea>
+                            <div class="flex justify-between items-center text-xs text-on-surface-variant mt-1.5">
+                                <span>* Maksimal 500 karakter</span>
+                                <span id="charCount">0/500 karakter</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between pt-2">
+                    <button type="button" id="backToStep1" class="border border-outline-variant text-slate-700 hover:bg-slate-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        Kembali Langkah 1
+                    </button>
+                    <button type="button" id="toStep3" class="bg-secondary text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                        Lanjutkan Langkah 3
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ============ STEP 3: KONFIRMASI ============ -->
+            <div id="step3" class="hidden space-y-6 animate-in fade-in duration-300">
+                <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-sm">
+                    <h4 class="font-headline-sm text-slate-800 mb-6 font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">task_alt</span>
+                        Langkah 3: Konfirmasi Janji Temu Anda
+                    </h4>
+                    
+                    <div class="overflow-hidden border border-slate-100 rounded-2xl bg-slate-50">
+                        <div class="p-6 space-y-4 text-sm text-slate-800">
+                            <div class="grid grid-cols-3 py-2 border-b border-slate-200/55">
+                                <span class="text-slate-500 font-medium">Nama Pasien</span>
+                                <span class="col-span-2 font-bold text-slate-900"><?= esc($pasien['nama_pasien']) ?></span>
+                            </div>
+                            <div class="grid grid-cols-3 py-2 border-b border-slate-200/55">
+                                <span class="text-slate-500 font-medium">Nomor Rekam Medis</span>
+                                <span class="col-span-2 font-mono font-bold text-slate-900"><?= esc($pasien['no_rm']) ?></span>
+                            </div>
+                            <div class="grid grid-cols-3 py-2 border-b border-slate-200/55">
+                                <span class="text-slate-500 font-medium">Poliklinik Tujuan</span>
+                                <span class="col-span-2 font-bold text-secondary" id="confirm-poli">-</span>
+                            </div>
+                            <div class="grid grid-cols-3 py-2 border-b border-slate-200/55">
+                                <span class="text-slate-500 font-medium">Dokter Spesialis</span>
+                                <span class="col-span-2 font-bold text-slate-900" id="confirm-dokter">-</span>
+                            </div>
+                            <div class="grid grid-cols-3 py-2 border-b border-slate-200/55">
+                                <span class="text-slate-500 font-medium">Tanggal Kunjungan</span>
+                                <span class="col-span-2 font-bold text-slate-900" id="confirm-tanggal">-</span>
+                            </div>
+                            <div class="grid grid-cols-3 py-2 border-b border-slate-200/55">
+                                <span class="text-slate-500 font-medium">Jam / Waktu</span>
+                                <span class="col-span-2 font-bold text-slate-900" id="confirm-jam">-</span>
+                            </div>
+                            <div class="grid grid-cols-3 py-2">
+                                <span class="text-slate-500 font-medium">Keluhan Kesehatan</span>
+                                <span class="col-span-2 font-semibold text-slate-700" id="confirm-keluhan">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex items-start gap-2 p-3 bg-cyan-50 rounded-xl border border-cyan-100">
+                        <input type="checkbox" id="agreeCheck" class="w-4.5 h-4.5 rounded border-cyan-300 text-secondary focus:ring-secondary mt-0.5">
+                        <label for="agreeCheck" class="text-xs text-cyan-800 leading-relaxed font-semibold cursor-pointer">
+                            Saya menyatakan bahwa seluruh rincian informasi janji temu di atas telah benar dan saya bersedia hadir tepat waktu di rumah sakit minimal 15 menit sebelum jadwal.
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between pt-2">
+                    <button type="button" id="backToStep2" class="border border-outline-variant text-slate-700 hover:bg-slate-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        Edit Langkah 2
+                    </button>
+                    <button type="submit" id="submitBooking" class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Konfirmasi &amp; Selesaikan Booking
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
-    <div class="d-flex justify-content-between mb-2">
-      <button type="button" id="backToStep2" class="btn btn-outline-secondary">
-        <i class="la la-arrow-left"></i> Edit
-      </button>
-      <button type="submit" id="submitBooking" class="btn btn-success" disabled>
-        <i class="la la-check-circle"></i> Konfirmasi Booking
-      </button>
-    </div>
-  </div>
+</main>
 
-</form>
-
-<?= $this->endSection() ?>
-
-<?= $this->section('js') ?>
 <script>
 $(document).ready(function() {
 
-  // ============================
-  // STEP NAVIGATION
-  // ============================
-  function showStep(n) {
-    $('#step1, #step2, #step3').hide();
-    $('#step' + n).fadeIn(300);
+    // ============================
+    // STEP NAVIGATION
+    // ============================
+    function showStep(n) {
+        $('#step1, #step2, #step3').addClass('hidden');
+        $('#step' + n).removeClass('hidden');
 
-    // Reset all indicators
-    for (var i = 1; i <= 3; i++) {
-      $('#badge-' + i).removeClass('badge-info badge-success').addClass('badge-secondary');
-      $('#indicator-' + i).find('.step-label').removeClass('font-weight-bold');
-    }
+        // Reset progress badges and labels
+        for (let i = 1; i <= 3; i++) {
+            const badge = $('#badge-' + i);
+            const label = $('#label-' + i);
+            const line = $('#line-' + (i-1));
+            
+            badge.removeClass('bg-secondary bg-emerald-500 text-white font-bold bg-slate-100 border border-outline-variant text-slate-400');
+            label.removeClass('font-semibold text-slate-800 font-medium text-slate-500 text-emerald-600');
+            if(line) line.removeClass('bg-secondary bg-emerald-500');
 
-    // Mark completed steps
-    for (var j = 1; j < n; j++) {
-      $('#badge-' + j).removeClass('badge-secondary badge-info').addClass('badge-success');
-    }
-
-    // Mark active step
-    $('#badge-' + n).removeClass('badge-secondary badge-success').addClass('badge-info');
-    $('#indicator-' + n).find('.step-label').addClass('font-weight-bold');
-  }
-
-  // ============================
-  // STEP 1: POLI SELECTION
-  // ============================
-  $('.poli-card').on('click', function() {
-    // Reset all poli cards
-    $('.poli-card').css({
-      'border': '2px solid #e0e0e0',
-      'background': ''
-    });
-    // Highlight selected
-    $(this).css({
-      'border': '2px solid #00b5cc',
-      'background': '#f0fdff'
-    });
-    $(this).find('.poli-radio').prop('checked', true);
-
-    var id_poli = $(this).data('id');
-    var nama_poli = $(this).find('h6').text();
-    $('#selectedPoliNama').val(nama_poli);
-
-    // Reset dokter selection
-    $('#selectedDokter').val('');
-    $('#selectedDokterNama').val('');
-    $('#toStep2').prop('disabled', true);
-
-    fetchDokter(id_poli);
-  });
-
-  // ============================
-  // FETCH DOKTER (AJAX)
-  // ============================
-  function fetchDokter(id_poli) {
-    $('#dokterSection').show();
-    $('#dokterLoading').show();
-    $('#dokterContainer').empty();
-
-    $.get('<?= base_url('pasien/booking/dokter') ?>?id_poli=' + id_poli, function(data) {
-      $('#dokterLoading').hide();
-
-      if (data.length === 0) {
-        $('#dokterContainer').html(
-          '<div class="col-12"><p class="text-muted text-center py-2">' +
-          '<i class="la la-frown-o font-large-1"></i><br>Tidak ada dokter tersedia untuk poli ini.</p></div>'
-        );
-        return;
-      }
-
-      data.forEach(function(d) {
-        var initials = d.nama_dokter.split(' ').slice(0, 2).map(function(w) { return w[0]; }).join('').toUpperCase();
-        var card =
-          '<div class="col-md-6 mb-1">' +
-            '<div class="card border dokter-card" data-id="' + d.id_dokter + '" data-nama="' + d.nama_dokter + '" ' +
-            'style="cursor:pointer; border:2px solid #e0e0e0 !important; transition: all 0.2s; margin-bottom:0;">' +
-              '<div class="card-body d-flex align-items-center py-2">' +
-                '<span class="avatar avatar-md mr-1 rounded-circle d-flex align-items-center justify-content-center text-white font-weight-bold" ' +
-                'style="background:#00b5cc; width:45px; height:45px; min-width:45px; font-size:14px;">' + initials + '</span>' +
-                '<div>' +
-                  '<strong>' + d.nama_dokter + '</strong><br>' +
-                  '<small class="text-muted"><i class="la la-clock-o"></i> ' + d.jam_mulai + ' - ' + d.jam_selesai + '</small>' +
-                '</div>' +
-              '</div>' +
-            '</div>' +
-          '</div>';
-        $('#dokterContainer').append(card);
-      });
-
-      // Dokter card click handler
-      $('#dokterContainer').off('click', '.dokter-card').on('click', '.dokter-card', function() {
-        $('.dokter-card').css({
-          'border': '2px solid #e0e0e0',
-          'background': ''
-        });
-        $(this).css({
-          'border': '2px solid #00b5cc',
-          'background': '#f0fdff'
-        });
-        $('#selectedDokter').val($(this).data('id'));
-        $('#selectedDokterNama').val($(this).data('nama'));
-        checkStep1Valid();
-      });
-    }).fail(function() {
-      $('#dokterLoading').hide();
-      $('#dokterContainer').html(
-        '<div class="col-12"><p class="text-danger text-center py-2">Gagal memuat data dokter.</p></div>'
-      );
-    });
-  }
-
-  function checkStep1Valid() {
-    var poliSelected = $('input[name="id_poli"]:checked').length > 0;
-    var dokterSelected = $('#selectedDokter').val() !== '';
-    $('#toStep2').prop('disabled', !(poliSelected && dokterSelected));
-  }
-
-  // ============================
-  // STEP 2: DATE & SLOT
-  // ============================
-
-  // Set min date = tomorrow
-  var tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  var minDate = tomorrow.toISOString().split('T')[0];
-  $('#tglDaftar').attr('min', minDate);
-
-  // Date validation (no Sunday)
-  $('#tglDaftar').on('change', function() {
-    var date = new Date(this.value + 'T00:00:00');
-    var today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (date.getDay() === 0) {
-      alert('Booking tidak tersedia pada hari Minggu. Silakan pilih hari lain.');
-      this.value = '';
-      $('#slotSection').hide();
-      $('#selectedSlot').val('');
-      checkStep2Valid();
-      return;
-    }
-    if (date <= today) {
-      alert('Tanggal harus minimal besok.');
-      this.value = '';
-      $('#slotSection').hide();
-      $('#selectedSlot').val('');
-      checkStep2Valid();
-      return;
-    }
-    fetchSlot();
-  });
-
-  // Fetch available time slots
-  function fetchSlot() {
-    var id_dokter = $('#selectedDokter').val();
-    var tanggal = $('#tglDaftar').val();
-    if (!id_dokter || !tanggal) return;
-
-    $('#slotSection').show();
-    $('#slotLoading').show();
-    $('#slotContainer').empty();
-    $('#selectedSlot').val('');
-    checkStep2Valid();
-
-    $.get('<?= base_url('pasien/booking/slot') ?>?id_dokter=' + id_dokter + '&tanggal=' + tanggal, function(data) {
-      $('#slotLoading').hide();
-
-      if (data.length === 0) {
-        $('#slotContainer').html('<p class="text-muted">Tidak ada slot tersedia untuk tanggal ini.</p>');
-        return;
-      }
-
-      data.forEach(function(s) {
-        var btnClass, disabled = '', label = '';
-
-        if (s.status === 'penuh') {
-          btnClass = 'btn-danger';
-          disabled = 'disabled';
-          label = ' (Penuh)';
-        } else if (s.hampir_penuh) {
-          btnClass = 'btn-warning';
-          label = ' (Sisa ' + s.sisa + ')';
-        } else {
-          btnClass = 'btn-outline-success';
+            if (i < n) {
+                // Completed
+                badge.addClass('bg-emerald-500 text-white font-bold');
+                label.addClass('text-emerald-600 font-semibold');
+                if(line) line.addClass('bg-emerald-500');
+            } else if (i === n) {
+                // Active
+                badge.addClass('bg-secondary text-white font-bold');
+                label.addClass('text-slate-800 font-semibold');
+                if(line) line.addClass('bg-secondary');
+            } else {
+                // Future
+                badge.addClass('bg-slate-100 border border-outline-variant text-slate-400 font-bold');
+                label.addClass('text-slate-500 font-medium');
+            }
         }
-
-        var btn = '<button type="button" class="btn ' + btnClass + ' btn-sm mr-1 mb-1 slot-btn" ' +
-          'data-slot="' + s.slot + '" ' + disabled + '>' + s.slot + label + '</button>';
-        $('#slotContainer').append(btn);
-      });
-
-      // Slot click handler
-      $('#slotContainer').off('click', '.slot-btn:not([disabled])').on('click', '.slot-btn:not([disabled])', function() {
-        // Reset all non-disabled slots
-        $('.slot-btn:not([disabled])').each(function() {
-          $(this).removeClass('btn-info');
-          // Restore original class
-          if ($(this).data('original-class')) {
-            $(this).addClass($(this).data('original-class'));
-          } else {
-            $(this).addClass('btn-outline-success');
-          }
+        
+        // Smooth scroll to top of progress indicator on step switch
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
         });
+    }
 
-        // Store original class before changing
-        if (!$(this).data('original-class')) {
-          var origClass = $(this).hasClass('btn-warning') ? 'btn-warning' : 'btn-outline-success';
-          $(this).data('original-class', origClass);
+    // ============================
+    // STEP 1: POLI SELECTION
+    // ============================
+    $('.poli-card').on('click', function() {
+        // Reset all poli cards
+        $('.poli-card').removeClass('border-secondary bg-secondary/5 shadow-sm').addClass('border-slate-150 bg-white');
+        $('.poli-card').find('.w-14').removeClass('bg-secondary text-white').addClass('bg-secondary/10 text-secondary');
+        
+        // Highlight selected
+        $(this).addClass('border-secondary bg-secondary/5 shadow-sm').removeClass('border-slate-150 bg-white');
+        $(this).find('.w-14').addClass('bg-secondary text-white').removeClass('bg-secondary/10 text-secondary');
+        $(this).find('.poli-radio').prop('checked', true);
+
+        const id_poli = $(this).data('id');
+        const nama_poli = $(this).find('h5').text();
+        $('#selectedPoliNama').val(nama_poli);
+
+        // Reset dokter selection
+        $('#selectedDokter').val('');
+        $('#selectedDokterNama').val('');
+        $('#toStep2').prop('disabled', true);
+
+        fetchDokter(id_poli);
+    });
+
+    // ============================
+    // FETCH DOKTER (AJAX)
+    // ============================
+    function fetchDokter(id_poli) {
+        $('#dokterSection').removeClass('hidden');
+        $('#dokterLoading').removeClass('hidden');
+        $('#dokterContainer').empty();
+
+        $.get('<?= base_url('pasien/booking/dokter') ?>?id_poli=' + id_poli, function(data) {
+            $('#dokterLoading').addClass('hidden');
+
+            if (data.length === 0) {
+                $('#dokterContainer').html(
+                    '<div class="col-span-2 py-8 text-center bg-slate-50 rounded-xl border border-slate-200">' +
+                    '<span class="material-symbols-outlined text-4xl text-slate-300">mood_bad</span>' +
+                    '<p class="text-sm text-slate-500 mt-2">Tidak ada dokter tersedia untuk poliklinik ini saat ini.</p></div>'
+                );
+                return;
+            }
+
+            data.forEach(function(d) {
+                const initials = d.nama_dokter.split(' ').slice(0, 2).map(function(w) { return w[0]; }).join('').toUpperCase();
+                const card = `
+                    <div class="border-2 border-slate-150 rounded-xl p-4 bg-white cursor-pointer transition-all duration-200 hover:border-secondary hover:bg-slate-50/50 flex items-center gap-4 dokter-card" data-id="${d.id_dokter}" data-nama="${d.nama_dokter}">
+                        <div class="w-12 h-12 bg-secondary text-white font-bold rounded-full flex items-center justify-center text-sm shadow-sm">${initials}</div>
+                        <div class="flex-grow">
+                            <h5 class="font-bold text-slate-800 text-sm">${d.nama_dokter}</h5>
+                            <p class="text-xs text-on-surface-variant flex items-center gap-1 mt-1">
+                                <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                ${d.jam_mulai.substring(0,5)} - ${d.jam_selesai.substring(0,5)} WIB
+                            </p>
+                        </div>
+                    </div>
+                `;
+                $('#dokterContainer').append(card);
+            });
+
+            // Dokter card click handler
+            $('#dokterContainer').off('click', '.dokter-card').on('click', '.dokter-card', function() {
+                $('.dokter-card').removeClass('border-secondary bg-secondary/5 shadow-sm').addClass('border-slate-150 bg-white');
+                $(this).addClass('border-secondary bg-secondary/5 shadow-sm').removeClass('border-slate-150 bg-white');
+                
+                $('#selectedDokter').val($(this).data('id'));
+                $('#selectedDokterNama').val($(this).data('nama'));
+                checkStep1Valid();
+            });
+        }).fail(function() {
+            $('#dokterLoading').addClass('hidden');
+            $('#dokterContainer').html(
+                '<div class="col-span-2 py-4 text-center text-red-500">Gagal memuat data dokter. Hubungi IT support.</div>'
+            );
+        });
+    }
+
+    function checkStep1Valid() {
+        const poliSelected = $('input[name="id_poli"]:checked').length > 0;
+        const dokterSelected = $('#selectedDokter').val() !== '';
+        $('#toStep2').prop('disabled', !(poliSelected && dokterSelected));
+    }
+
+    // ============================
+    // STEP 2: DATE & SLOT
+    // ============================
+
+    // Set min date = tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
+    $('#tglDaftar').attr('min', minDate);
+
+    // Date validation (no Sunday)
+    $('#tglDaftar').on('change', function() {
+        const date = new Date(this.value + 'T00:00:00');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (date.getDay() === 0) {
+            alert('Layanan janji temu tidak tersedia pada hari Minggu. Silakan tentukan hari lain.');
+            this.value = '';
+            $('#slotSection').addClass('hidden');
+            $('#selectedSlot').val('');
+            checkStep2Valid();
+            return;
         }
+        if (date <= today) {
+            alert('Tanggal janji temu harus minimal besok.');
+            this.value = '';
+            $('#slotSection').addClass('hidden');
+            $('#selectedSlot').val('');
+            checkStep2Valid();
+            return;
+        }
+        fetchSlot();
+    });
 
-        $(this).removeClass('btn-outline-success btn-warning').addClass('btn-info');
-        $('#selectedSlot').val($(this).data('slot'));
+    // Fetch available time slots
+    function fetchSlot() {
+        const id_dokter = $('#selectedDokter').val();
+        const tanggal = $('#tglDaftar').val();
+        if (!id_dokter || !tanggal) return;
+
+        $('#slotSection').removeClass('hidden');
+        $('#slotLoading').removeClass('hidden');
+        $('#slotContainer').empty();
+        $('#selectedSlot').val('');
         checkStep2Valid();
-      });
-    }).fail(function() {
-      $('#slotLoading').hide();
-      $('#slotContainer').html('<p class="text-danger">Gagal memuat slot waktu.</p>');
+
+        $.get('<?= base_url('pasien/booking/slot') ?>?id_dokter=' + id_dokter + '&tanggal=' + tanggal, function(data) {
+            $('#slotLoading').addClass('hidden');
+
+            if (data.length === 0) {
+                $('#slotContainer').html('<p class="text-xs text-slate-500 font-semibold py-2">Tidak ada slot waktu tersedia pada tanggal ini.</p>');
+                return;
+            }
+
+            data.forEach(function(s) {
+                let btnClass = '';
+                let disabled = '';
+                let label = '';
+
+                if (s.status === 'penuh') {
+                    btnClass = 'bg-rose-50 border-rose-200 text-rose-500 cursor-not-allowed opacity-60';
+                    disabled = 'disabled';
+                    label = ' (Penuh)';
+                } else if (s.hampir_penuh) {
+                    btnClass = 'border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 font-semibold slot-btn';
+                    label = ' (Sisa ' + s.sisa + ')';
+                } else {
+                    btnClass = 'border-emerald-400 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold slot-btn';
+                }
+
+                const btn = `<button type="button" class="px-4 py-2 border rounded-xl text-xs transition-all ${btnClass}" data-slot="${s.slot}" ${disabled}>${s.slot}${label}</button>`;
+                $('#slotContainer').append(btn);
+            });
+
+            // Slot click handler
+            $('#slotContainer').off('click', '.slot-btn:not([disabled])').on('click', '.slot-btn:not([disabled])', function() {
+                // Restore classes of other slots
+                $('.slot-btn').each(function() {
+                    $(this).removeClass('bg-secondary text-white border-secondary scale-95 shadow-sm');
+                });
+
+                $(this).addClass('bg-secondary text-white border-secondary scale-95 shadow-sm');
+                $('#selectedSlot').val($(this).data('slot'));
+                checkStep2Valid();
+            });
+        }).fail(function() {
+            $('#slotLoading').addClass('hidden');
+            $('#slotContainer').html('<p class="text-xs text-red-500 font-semibold">Gagal memuat slot waktu.</p>');
+        });
+    }
+
+    // Character counter
+    $('#keluhanAwal').on('input', function() {
+        const len = $(this).val().length;
+        $('#charCount').text(len + '/500 karakter');
+        checkStep2Valid();
     });
-  }
 
-  // Character counter
-  $('#keluhanAwal').on('input', function() {
-    var len = $(this).val().length;
-    $('#charCount').text(len + '/500 karakter');
-    checkStep2Valid();
-  });
+    function checkStep2Valid() {
+        const tanggalFilled = $('#tglDaftar').val() !== '';
+        const slotSelected = $('#selectedSlot').val() !== '';
+        const keluhanFilled = $('#keluhanAwal').val().trim().length > 0;
+        $('#toStep3').prop('disabled', !(tanggalFilled && slotSelected && keluhanFilled));
+    }
 
-  function checkStep2Valid() {
-    var tanggalFilled = $('#tglDaftar').val() !== '';
-    var slotSelected = $('#selectedSlot').val() !== '';
-    var keluhanFilled = $('#keluhanAwal').val().trim().length > 0;
-    $('#toStep3').prop('disabled', !(tanggalFilled && slotSelected && keluhanFilled));
-  }
+    // ============================
+    // STEP BUTTON EVENTS
+    // ============================
+    $('#toStep2').on('click', function() {
+        showStep(2);
+    });
 
-  // ============================
-  // STEP BUTTON EVENTS
-  // ============================
+    $('#backToStep1').on('click', function() {
+        showStep(1);
+    });
 
-  $('#toStep2').on('click', function() {
-    showStep(2);
-  });
+    $('#toStep3').on('click', function() {
+        // Populate confirmation table
+        $('#confirm-poli').text($('#selectedPoliNama').val());
+        $('#confirm-dokter').text($('#selectedDokterNama').val());
 
-  $('#backToStep1').on('click', function() {
-    showStep(1);
-  });
+        const tgl = new Date($('#tglDaftar').val() + 'T00:00:00');
+        const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        
+        $('#confirm-tanggal').text(hari[tgl.getDay()] + ', ' + tgl.getDate() + ' ' + bulan[tgl.getMonth()] + ' ' + tgl.getFullYear());
+        $('#confirm-jam').text($('#selectedSlot').val() + ' WIB');
+        $('#confirm-keluhan').text($('#keluhanAwal').val());
 
-  $('#toStep3').on('click', function() {
-    // Populate confirmation table
-    $('#confirm-poli').text($('#selectedPoliNama').val());
-    $('#confirm-dokter').text($('#selectedDokterNama').val());
+        showStep(3);
+    });
 
-    var tgl = new Date($('#tglDaftar').val() + 'T00:00:00');
-    var bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    var hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-    $('#confirm-tanggal').text(hari[tgl.getDay()] + ', ' + tgl.getDate() + ' ' + bulan[tgl.getMonth()] + ' ' + tgl.getFullYear());
-    $('#confirm-jam').text($('#selectedSlot').val() + ' WIB');
-    $('#confirm-keluhan').text($('#keluhanAwal').val());
+    $('#backToStep2').on('click', function() {
+        showStep(2);
+    });
 
-    showStep(3);
-  });
+    // ============================
+    // AGREEMENT CHECKBOX
+    // ============================
+    $('#agreeCheck').on('change', function() {
+        $('#submitBooking').prop('disabled', !this.checked);
+    });
 
-  $('#backToStep2').on('click', function() {
-    showStep(2);
-  });
-
-  // ============================
-  // AGREEMENT CHECKBOX
-  // ============================
-  $('#agreeCheck').on('change', function() {
-    $('#submitBooking').prop('disabled', !this.checked);
-  });
-
-  // ============================
-  // SUBMIT WITH LOADING STATE
-  // ============================
-  $('#bookingForm').on('submit', function() {
-    var btn = $('#submitBooking');
-    btn.prop('disabled', true);
-    btn.html('<i class="la la-spinner la-spin"></i> Memproses...');
-  });
+    // ============================
+    // SUBMIT WITH LOADING STATE
+    // ============================
+    $('#bookingForm').on('submit', function() {
+        const btn = $('#submitBooking');
+        btn.prop('disabled', true);
+        btn.html(`
+            <span class="flex items-center gap-2 justify-center">
+                Memproses Booking...
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </span>
+        `);
+    });
 
 });
 </script>
-<?= $this->endSection() ?>
+</body>
+</html>

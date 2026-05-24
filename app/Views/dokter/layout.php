@@ -4,20 +4,91 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-    <meta name="description" content="RS MedikaCare - Dashboard Dokter">
-    <meta name="author" content="RS MedikaCare">
-    <title><?= $title ?? 'Dashboard Dokter' ?> — RS MedikaCare</title>
+    <meta name="description" content="RS MiraCare - Dashboard Dokter">
+    <meta name="author" content="RS MiraCare">
+    <title><?= $title ?? 'Dashboard Dokter' ?> — RS MiraCare</title>
     <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('pages/template/hospital-menu-template/app-assets/images/ico/favicon.ico') ?>">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/vendors.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/app.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/core/menu/menu-types/vertical-menu.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/core/colors/palette-gradient.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/pages/hospital.css') ?>">
     <style>
-      body { font-family: 'DM Sans', sans-serif; }
+      body { font-family: 'DM Sans', sans-serif; background-color: #f8fafc !important; }
       .brand-text, h1, h2, h3, h4, h5, .card-title { font-family: 'Plus Jakarta Sans', sans-serif !important; }
       .navbar-brand .brand-text { font-weight: 700; }
+      
+      /* RS MiraCare Styling Overrides */
+      nav.header-navbar {
+          background: #0047AB !important; /* Deep Trust Blue */
+      }
+      nav.header-navbar .navbar-header {
+          background: #0047AB !important;
+      }
+      .main-menu.menu-light .navigation > li.active > a {
+          background: linear-gradient(135deg, #0047AB, #06B6D4) !important;
+          color: white !important;
+          box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25) !important;
+          font-weight: 700;
+          border-radius: 8px;
+          margin: 4px 10px;
+      }
+      .main-menu.menu-light .navigation > li > a {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-weight: 600;
+          color: #475569 !important;
+          border-radius: 8px;
+          margin: 4px 10px;
+          transition: all 0.2s ease;
+      }
+      .main-menu.menu-light .navigation > li > a:hover {
+          color: #0047AB !important;
+          background-color: #f1f5f9 !important;
+      }
+      .btn-primary, .btn-info {
+          background: #06B6D4 !important;
+          border-color: #06B6D4 !important;
+          color: white !important;
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-weight: 700 !important;
+          border-radius: 8px !important;
+          transition: all 0.25s !important;
+          box-shadow: 0 4px 10px rgba(6, 182, 212, 0.15) !important;
+      }
+      .btn-primary:hover, .btn-info:hover {
+          background: #0047AB !important;
+          border-color: #0047AB !important;
+          box-shadow: 0 6px 15px rgba(0, 71, 171, 0.25) !important;
+          transform: translateY(-1px);
+      }
+      .btn-danger {
+          border-radius: 8px !important;
+      }
+      .card {
+          border-radius: 16px !important;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+          border: 1px solid rgba(226, 232, 240, 0.8) !important;
+          overflow: hidden;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .card:hover {
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08) !important;
+      }
+      .card-header {
+          border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
+          background-color: #f8fafc !important;
+          padding: 1.5rem !important;
+      }
+      .card-body {
+          padding: 1.5rem !important;
+      }
+      .table th {
+          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-weight: 700 !important;
+          color: #1e293b !important;
+          border-bottom: 2px solid #e2e8f0 !important;
+      }
     </style>
     <?= $this->renderSection('css') ?>
   </head>
@@ -28,9 +99,9 @@
         <div class="navbar-header">
           <ul class="nav navbar-nav flex-row">
             <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
-            <li class="nav-item"><a class="navbar-brand" href="<?= base_url('dokter/dashboard') ?>">
-                <i class="la la-h-square font-large-1 white" style="margin-right:8px;"></i>
-                <h3 class="brand-text">RS MedikaCare — Dokter</h3></a></li>
+            <li class="nav-item"><a class="navbar-brand" href="<?= base_url('dokter/dashboard') ?>" style="display:flex;align-items:center;gap:8px;padding-top:14px;">
+                <img src="<?= base_url('assets/img/MiraCareLogo.png') ?>" alt="MiraCare Logo" class="h-8 w-auto object-contain brightness-0 invert" style="max-height:32px;"/>
+                <h3 class="brand-text white" style="margin:0;color:white !important;">RS MiraCare</h3></a></li>
             <li class="nav-item d-md-none"><a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile"><i class="la la-ellipsis-v"></i></a></li>
           </ul>
         </div>
@@ -117,7 +188,7 @@
 
     <footer class="footer footer-static footer-light navbar-border navbar-shadow">
       <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
-        <span class="float-md-left d-block d-md-inline-block">Copyright &copy; <?= date('Y') ?> <a class="text-bold-800 grey darken-2" href="<?= base_url('/') ?>">RS MedikaCare</a>, All rights reserved.</span>
+        <span class="float-md-left d-block d-md-inline-block">Copyright &copy; <?= date('Y') ?> <a class="text-bold-800 grey darken-2" href="<?= base_url('/') ?>">RS MiraCare</a>, All rights reserved.</span>
         <span class="float-md-right d-block d-md-inline-block d-none d-lg-block">Sistem Informasi Rumah Sakit <i class="ft-heart pink"></i></span>
       </p>
     </footer>

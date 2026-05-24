@@ -133,17 +133,23 @@ class AuthController extends BaseController
 
         // 1. Simpan ke tbl_user
         $db->table('tbl_user')->insert([
-            'username' => $data['username'],
-            'password' => password_hash($data['password'], PASSWORD_DEFAULT),
-            'level_id' => 'Pasien'
+            'username'     => $data['username'],
+            'password'     => password_hash($data['password'], PASSWORD_DEFAULT),
+            'level_id'     => 'Pasien',
+            'nama_lengkap' => $data['nama_lengkap']
         ]);
         
         $id_user = $db->insertID();
 
-        // 2. Generate Nomor Rekam Medis (no_rm)
+        // 2. Generate Nomor Rekam Medis (no_rm) menggunakan MAX()
         // Format: RM-00001
-        $countPasien = $db->table('tbl_pasien')->countAllResults();
-        $no_rm = 'RM-' . str_pad($countPasien + 1, 5, '0', STR_PAD_LEFT);
+        $latestPasien = $db->table('tbl_pasien')->selectMax('no_rm')->get()->getRowArray();
+        $nextNum = 1;
+        if ($latestPasien && !empty($latestPasien['no_rm'])) {
+            $num = (int) str_replace('RM-', '', $latestPasien['no_rm']);
+            $nextNum = $num + 1;
+        }
+        $no_rm = 'RM-' . str_pad($nextNum, 5, '0', STR_PAD_LEFT);
 
         // 3. Simpan ke tbl_pasien
         $db->table('tbl_pasien')->insert([

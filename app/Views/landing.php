@@ -1,398 +1,689 @@
 <!DOCTYPE html>
-<html lang="id">
+<html class="light" lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RS MedikaCare — Sistem Informasi Rumah Sakit</title>
-<meta name="description" content="RS MedikaCare - Layanan kesehatan terbaik dengan dokter profesional berpengalaman. Booking online mudah dan cepat.">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--cyan:#06b6d4;--cyan-dark:#0e7490;--teal:#0d9488;--green-light:#ecfdf5;--green:#10b981;--pink:#f472b6;--dark:#0f172a;--gray:#64748b;--white:#fff}
-html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;color:#1e293b;overflow-x:hidden}
-h1,h2,h3,h4{font-family:'Plus Jakarta Sans',sans-serif}
-a{text-decoration:none;color:inherit}
-.container{max-width:1200px;margin:0 auto;padding:0 24px}
-
-/* NAVBAR */
-.navbar{position:fixed;top:0;left:0;width:100%;z-index:1000;background:var(--cyan);padding:12px 0;transition:box-shadow .3s}
-.navbar.scrolled{box-shadow:0 4px 20px rgba(0,0,0,.15)}
-.nav-inner{display:flex;align-items:center;justify-content:space-between}
-.nav-logo{display:flex;align-items:center;gap:10px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.25rem}
-.nav-logo svg{width:32px;height:32px}
-.nav-links{display:flex;align-items:center;gap:28px;list-style:none}
-.nav-links a{color:rgba(255,255,255,.85);font-size:.95rem;font-weight:500;transition:color .2s}
-.nav-links a:hover{color:#fff}
-.nav-btns{display:flex;gap:10px}
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 22px;border-radius:8px;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s;border:2px solid transparent;font-family:'DM Sans',sans-serif}
-.btn-outline-w{color:#fff;border-color:rgba(255,255,255,.5);background:transparent}
-.btn-outline-w:hover{background:rgba(255,255,255,.15);border-color:#fff}
-.btn-filled{background:#fff;color:var(--cyan);border-color:#fff}
-.btn-filled:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(255,255,255,.3)}
-.btn-cyan{background:var(--cyan);color:#fff;border-color:var(--cyan)}
-.btn-cyan:hover{background:var(--cyan-dark);transform:translateY(-2px);box-shadow:0 4px 15px rgba(6,182,212,.4)}
-.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
-.hamburger span{display:block;width:24px;height:2.5px;background:#fff;border-radius:2px;transition:all .3s}
-
-/* HERO */
-.hero{padding:140px 0 100px;background:linear-gradient(135deg,var(--cyan-dark) 0%,var(--teal) 100%);position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:24px 24px}
-.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:2}
-.hero h1{font-size:3.2rem;font-weight:800;color:#fff;line-height:1.2;margin-bottom:18px}
-.hero p{color:rgba(255,255,255,.85);font-size:1.15rem;line-height:1.7;margin-bottom:32px;max-width:500px}
-.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
-.stats-area{display:flex;flex-direction:column;gap:18px;align-items:flex-end}
-.stat-card{background:rgba(255,255,255,.12);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:20px 28px;color:#fff;min-width:220px;animation:float 3s ease-in-out infinite}
-.stat-card:nth-child(2){animation-delay:.5s}
-.stat-card:nth-child(3){animation-delay:1s}
-.stat-card .num{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.6rem;font-weight:800}
-.stat-card .label{font-size:.85rem;opacity:.8;margin-top:2px}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.hero-wave{position:absolute;bottom:-2px;left:0;width:100%}
-.hero-wave svg{display:block;width:100%}
-
-/* SECTIONS COMMON */
-.section{padding:90px 0}
-.section-title{text-align:center;font-size:2.2rem;font-weight:800;color:var(--dark);margin-bottom:14px}
-.section-sub{text-align:center;color:var(--gray);font-size:1.05rem;margin-bottom:50px;max-width:560px;margin-left:auto;margin-right:auto}
-
-/* LAYANAN */
-.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.svc-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px 24px;text-align:center;transition:all .3s;cursor:pointer}
-.svc-card:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(6,182,212,.12);border-color:var(--cyan)}
-.svc-icon{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#ecfeff,#cffafe);display:inline-flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:1.6rem;color:var(--cyan)}
-.svc-card h3{font-size:1.15rem;font-weight:700;margin-bottom:8px;color:var(--dark)}
-.svc-card p{font-size:.9rem;color:var(--gray);line-height:1.6;margin-bottom:16px}
-.svc-link{color:var(--cyan);font-weight:600;font-size:.9rem}
-
-/* BOOKING STEPS */
-.booking-section{background:var(--green-light)}
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;position:relative}
-.step{text-align:center;position:relative;padding:24px 16px}
-.step-num{width:48px;height:48px;border-radius:50%;background:var(--cyan);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;margin-bottom:14px;font-family:'Plus Jakarta Sans',sans-serif}
-.step-icon{font-size:1.5rem;color:var(--cyan);margin-bottom:10px;display:block}
-.step h4{font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:6px}
-.step p{font-size:.85rem;color:var(--gray);line-height:1.5}
-
-/* DOKTER */
-.doctors-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
-.doc-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px 24px;text-align:center;transition:all .3s}
-.doc-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.08)}
-.doc-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--teal));display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:700;margin-bottom:16px;font-family:'Plus Jakarta Sans',sans-serif}
-.doc-card h3{font-size:1.1rem;font-weight:700;color:var(--dark)}
-.doc-card .spec{color:var(--cyan);font-size:.9rem;font-weight:500;margin:4px 0 10px}
-.stars{color:#fbbf24;font-size:.9rem;margin-bottom:16px}
-
-/* TESTIMONIAL */
-.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.testi-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px;transition:all .3s}
-.testi-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.06)}
-.testi-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--cyan));display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;margin-bottom:12px}
-.testi-card .testi-stars{color:#fbbf24;font-size:.8rem;margin-bottom:10px}
-.testi-card p{font-size:.92rem;color:#475569;line-height:1.6;font-style:italic;margin-bottom:12px}
-.testi-card .testi-name{font-weight:600;color:var(--dark);font-size:.9rem}
-
-/* CTA */
-.cta{padding:80px 0;background:linear-gradient(135deg,var(--cyan-dark),var(--teal));text-align:center;color:#fff}
-.cta h2{font-size:2.2rem;font-weight:800;margin-bottom:14px}
-.cta p{opacity:.85;font-size:1.05rem;margin-bottom:30px;max-width:480px;margin-left:auto;margin-right:auto}
-
-/* FOOTER */
-footer{background:var(--dark);color:rgba(255,255,255,.7);padding:60px 0 0}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.1)}
-.footer-logo{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.3rem;font-weight:800;color:#fff;margin-bottom:12px}
-footer h4{color:#fff;font-size:1rem;font-weight:700;margin-bottom:16px;font-family:'Plus Jakarta Sans',sans-serif}
-footer ul{list-style:none}
-footer li{margin-bottom:10px}
-footer li a{color:rgba(255,255,255,.6);font-size:.9rem;transition:color .2s}
-footer li a:hover{color:var(--cyan)}
-.footer-bottom{text-align:center;padding:24px 0;font-size:.85rem;color:rgba(255,255,255,.4)}
-
-/* ANIMATIONS */
-.fade-up{opacity:0;transform:translateY(30px);transition:all .6s ease}
-.fade-up.visible{opacity:1;transform:translateY(0)}
-
-/* MOBILE NAV */
-.mobile-menu{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--cyan-dark);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:24px}
-.mobile-menu.active{display:flex}
-.mobile-menu a{color:#fff;font-size:1.3rem;font-weight:600}
-.mobile-close{position:absolute;top:20px;right:24px;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer}
-
-/* RESPONSIVE */
-@media(max-width:768px){
-.nav-links,.nav-btns{display:none}
-.hamburger{display:flex}
-.hero-grid{grid-template-columns:1fr;text-align:center}
-.hero h1{font-size:2.2rem}
-.hero p{margin-left:auto;margin-right:auto}
-.hero-btns{justify-content:center}
-.stats-area{align-items:center;margin-top:30px}
-.services-grid,.doctors-grid,.testi-grid{grid-template-columns:1fr}
-.steps{grid-template-columns:repeat(2,1fr)}
-.footer-grid{grid-template-columns:1fr 1fr}
-}
-</style>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>MiraCare - Transformasi Digital Layanan Kesehatan</title>
+    
+    <!-- Tailwind CSS with plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <style>
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at 70% 30%, rgba(13, 148, 136, 0.08) 0%, rgba(255, 255, 255, 0) 50%),
+                        radial-gradient(circle at 10% 80%, rgba(0, 71, 171, 0.05) 0%, rgba(255, 255, 255, 0) 50%);
+        }
+        .cta-glass {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .pulse-teal {
+            box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(13, 148, 136, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#0047AB", // Deep Trust Blue
+                        "secondary": "#06B6D4", // Ocean Teal/Cyan
+                        "accent": "#0D9488", // Teal Accent
+                        "background-dark": "#0F172A",
+                        "background-light": "#F8FAFC",
+                        "surface": "#FFFFFF",
+                        "text-primary": "#1E293B",
+                        "text-secondary": "#64748B",
+                        "text-inverse": "#FFFFFF",
+                        "on-surface-variant": "#434653",
+                        "on-surface": "#111c2d",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#e7eeff",
+                        "outline-variant": "#c3c6d5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "3xl": "120px",
+                        "margin": "32px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "xs": "4px",
+                        "2xl": "64px",
+                        "sm": "8px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "h1": ["Plus Jakarta Sans, sans-serif"],
+                        "h2": ["Plus Jakarta Sans, sans-serif"],
+                        "h3": ["Plus Jakarta Sans, sans-serif"],
+                        "body-lg": ["Inter, sans-serif"],
+                        "body-md": ["Inter, sans-serif"],
+                        "body-sm": ["Inter, sans-serif"],
+                        "label-md": ["Inter, sans-serif"],
+                        "label-sm": ["Inter, sans-serif"]
+                    },
+                    "fontSize": {
+                        "h1": ["3rem", {"lineHeight": "1.2", "fontWeight": "800"}],
+                        "h2": ["2rem", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "h3": ["1.5rem", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "body-lg": ["1.125rem", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-md": ["1rem", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-sm": ["0.875rem", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-md": ["0.875rem", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "label-sm": ["0.75rem", {"lineHeight": "1.2", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
 </head>
-<body>
+<body class="bg-background-light text-on-surface font-body-md overflow-x-hidden">
 
-<!-- NAVBAR -->
-<nav class="navbar" id="navbar">
-<div class="container nav-inner">
-  <a href="<?= base_url('/') ?>" class="nav-logo">
-    <svg viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="18" rx="3" stroke="#fff" stroke-width="2"/><path d="M16 12v8M12 16h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M10 8V6a2 2 0 012-2h8a2 2 0 012 2v2" stroke="#fff" stroke-width="2"/></svg>
-    RS MedikaCare
-  </a>
-  <ul class="nav-links">
-    <li><a href="#beranda">Beranda</a></li>
-    <li><a href="#layanan">Layanan</a></li>
-    <li><a href="#dokter">Dokter</a></li>
-    <li><a href="#tentang">Tentang Kami</a></li>
-    <li><a href="#kontak">Kontak</a></li>
-  </ul>
-  <div class="nav-btns">
-    <a href="<?= base_url('login') ?>" class="btn btn-outline-w">Login</a>
-    <a href="<?= base_url('login') ?>" class="btn btn-filled">Daftar Sekarang</a>
-  </div>
-  <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-</div>
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 glass-nav bg-surface/80 border-b border-outline-variant/20 shadow-sm h-20">
+    <div class="flex justify-between items-center max-w-7xl mx-auto px-margin h-full">
+        <!-- Logo -->
+        <a href="<?= base_url('/') ?>" class="flex items-center gap-2">
+            <img src="<?= base_url('assets/img/MiraCareLogo.png') ?>" alt="SIMRS MiraCare Logo" class="h-12 w-auto object-contain"/>
+        </a>
+        
+        <!-- Navigation Links -->
+        <div class="hidden md:flex items-center gap-xl">
+            <a class="font-label-md text-primary font-semibold border-b-2 border-primary py-2" href="#beranda">Beranda</a>
+            <a class="font-label-md text-on-surface-variant hover:text-primary transition-colors py-2" href="#fitur">Fitur</a>
+            <a class="font-label-md text-on-surface-variant hover:text-primary transition-colors py-2" href="#showcase">Portal</a>
+            <a class="font-label-md text-on-surface-variant hover:text-primary transition-colors py-2" href="#keunggulan">Keunggulan</a>
+            <a class="font-label-md text-on-surface-variant hover:text-primary transition-colors py-2" href="#demo">Layanan IT</a>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-4">
+            <a class="text-primary font-semibold hover:text-opacity-80 transition-all font-label-md" href="<?= base_url('login') ?>">Login Portal</a>
+            <a class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-opacity-95 transition-all shadow-sm font-semibold font-label-md" href="<?= base_url('register') ?>">Register</a>
+        </div>
+    </div>
 </nav>
 
-<!-- MOBILE MENU -->
-<div class="mobile-menu" id="mobileMenu">
-  <button class="mobile-close" id="mobileClose">&times;</button>
-  <a href="#beranda" onclick="closeMobile()">Beranda</a>
-  <a href="#layanan" onclick="closeMobile()">Layanan</a>
-  <a href="#dokter" onclick="closeMobile()">Dokter</a>
-  <a href="#tentang" onclick="closeMobile()">Tentang Kami</a>
-  <a href="#kontak" onclick="closeMobile()">Kontak</a>
-  <a href="<?= base_url('login') ?>" class="btn btn-filled" style="margin-top:10px">Login</a>
-</div>
-
-<!-- HERO -->
-<section class="hero" id="beranda">
-<div class="container hero-grid">
-  <div>
-    <h1>Kesehatan Anda, Prioritas Kami</h1>
-    <p>Dapatkan layanan medis terbaik dengan tim dokter profesional berpengalaman. Booking online mudah dan cepat.</p>
-    <div class="hero-btns">
-      <a href="<?= base_url('login') ?>" class="btn btn-filled">Booking Sekarang</a>
-      <a href="#layanan" class="btn btn-outline-w">Lihat Layanan</a>
+<!-- Hero Section -->
+<section id="beranda" class="pt-3b pb-2xl pt-32 hero-gradient overflow-hidden">
+    <div class="max-w-7xl mx-auto px-margin grid grid-cols-1 lg:grid-cols-2 gap-2xl items-center">
+        <!-- Text Block -->
+        <div class="space-y-lg">
+            <h1 class="font-h1 text-h1 text-slate-900 tracking-tight">
+                Transformasi Digital <br/>
+                Layanan Kesehatan Terbaik
+            </h1>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                SIMRS - MiraCare menghadirkan solusi rumah sakit cerdas berstandar Kemenkes dengan ekosistem rekam medis elektronik yang handal, cepat, dan intuitif.
+            </p>
+            <div class="flex flex-wrap gap-md pt-md">
+                <a href="<?= base_url('login') ?>" class="bg-cyan-500 text-white hover:bg-cyan-600 px-xl py-md rounded-lg font-label-md shadow-xl hover:shadow-cyan-500/20 transition-all flex items-center gap-2 font-semibold">
+                    Booking Online
+                    <span class="material-symbols-outlined">calendar_month</span>
+                </a>
+                <a href="#fitur" class="border border-primary text-primary px-xl py-md rounded-lg font-label-md hover:bg-surface-container transition-all text-center font-semibold">
+                    Lihat Layanan Unggulan
+                </a>
+            </div>
+            
+            <!-- Regulatory Compliance Logos -->
+            <div class="pt-xl flex flex-wrap items-center gap-x-12 gap-y-6 grayscale opacity-70">
+                <!-- Ministry of Health Logo -->
+                <img src="<?= base_url('assets/img/KemenkesRILogo.png') ?>" alt="Kemenkes RI" class="h-12 w-auto object-contain"/>
+                <!-- SATUSEHAT Logo -->
+                <img src="<?= base_url('assets/img/SatuSehatLogo.png') ?>" alt="SATUSEHAT" class="h-12 w-auto object-contain"/>
+                <!-- BPJS Kesehatan Logo -->
+                <img src="<?= base_url('assets/img/BPJSKesehatanLogo.png') ?>" alt="BPJS Kesehatan" class="h-12 w-auto object-contain"/>
+            </div>
+        </div>
+        
+        <!-- Dashboard Mockup Block -->
+        <img alt="MiraCare Dashboard Mockup" class="w-full aspect-[1/1] object-cover" src="<?= base_url('assets/img/Doctor.png') ?>"/>
     </div>
-  </div>
-  <div class="stats-area">
-    <div class="stat-card"><div class="num">150+</div><div class="label">Dokter Spesialis</div></div>
-    <div class="stat-card"><div class="num">50.000+</div><div class="label">Pasien Terbantu</div></div>
-    <div class="stat-card"><div class="num">15 Tahun</div><div class="label">Pengalaman</div></div>
-  </div>
-</div>
-<div class="hero-wave">
-  <svg viewBox="0 0 1440 100" preserveAspectRatio="none"><path d="M0,40 C360,100 1080,0 1440,60 L1440,100 L0,100Z" fill="#ffffff"/></svg>
-</div>
 </section>
 
-<!-- LAYANAN -->
-<section class="section" id="layanan">
-<div class="container">
-  <h2 class="section-title">Layanan Unggulan Kami</h2>
-  <p class="section-sub">Kami menyediakan berbagai layanan kesehatan untuk memenuhi kebutuhan Anda dan keluarga.</p>
-  <div class="services-grid">
-    <div class="svc-card fade-up">
-      <div class="svc-icon">&#x1FA7A;</div>
-      <h3>Poli Umum</h3>
-      <p>Pemeriksaan kesehatan umum dan konsultasi medis dengan dokter berpengalaman.</p>
-      <span class="svc-link">Selengkapnya →</span>
+<!-- Layanan Unggulan -->
+<section class="py-3xl bg-surface" id="fitur">
+    <div class="max-w-7xl mx-auto px-margin">
+        <div class="text-center mb-2xl max-w-2xl mx-auto">
+            <h2 class="font-h2 text-h2 text-on-background mb-md">Layanan Unggulan RS MiraCare</h2>
+            <p class="text-on-surface-variant">Kami berkomitmen memberikan pelayanan medis prima yang berorientasi pada keselamatan dan kenyamanan pasien.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <!-- RME -> Rekam Medis Digital -->
+            <div class="group p-lg bg-surface border border-outline-variant/30 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-2 hover:border-secondary transition-all duration-300">
+                <div class="w-14 h-14 bg-surface-container flex items-center justify-center rounded-xl text-primary mb-md group-hover:bg-secondary group-hover:text-on-tertiary transition-colors">
+                    <span class="material-symbols-outlined text-[32px]">clinical_notes</span>
+                </div>
+                <h3 class="font-headline-md text-h3 mb-sm">Rekam Medis Digital</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Riwayat kesehatan Anda tersimpan aman secara digital, memudahkan diagnosa dokter yang cepat dan akurat.</p>
+            </div>
+            
+            <!-- BPJS -> Layanan BPJS & JKN -->
+            <div class="group p-lg bg-surface border border-outline-variant/30 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-2 hover:border-secondary transition-all duration-300">
+                <div class="w-14 h-14 bg-surface-container flex items-center justify-center rounded-xl text-primary mb-md group-hover:bg-secondary group-hover:text-on-tertiary transition-colors">
+                    <span class="material-symbols-outlined text-[32px]">credit_card</span>
+                </div>
+                <h3 class="font-headline-md text-h3 mb-sm">Integrasi BPJS & JKN</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Pelayanan administrasi yang ringkas bagi peserta BPJS Kesehatan, Mobile JKN, dan berbagai asuransi mitra.</p>
+            </div>
+            
+            <!-- Pharmacy -> Farmasi & Kasir Cerdas -->
+            <div class="group p-lg bg-surface border border-outline-variant/30 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-2 hover:border-secondary transition-all duration-300">
+                <div class="w-14 h-14 bg-surface-container flex items-center justify-center rounded-xl text-primary mb-md group-hover:bg-secondary group-hover:text-on-tertiary transition-colors">
+                    <span class="material-symbols-outlined text-[32px]">medication</span>
+                </div>
+                <h3 class="font-headline-md text-h3 mb-sm">Farmasi & Billing Cepat</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Sistem e-resep langsung terhubung ke apotek rumah sakit untuk penebusan obat tanpa antrean panjang.</p>
+            </div>
+            
+            <!-- Dashboard -> Tenaga Medis Ahli -->
+            <div class="group p-lg bg-surface border border-outline-variant/30 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-2 hover:border-secondary transition-all duration-300">
+                <div class="w-14 h-14 bg-surface-container flex items-center justify-center rounded-xl text-primary mb-md group-hover:bg-secondary group-hover:text-on-tertiary transition-colors">
+                    <span class="material-symbols-outlined text-[32px]">groups</span>
+                </div>
+                <h3 class="font-headline-md text-h3 mb-sm">Tenaga Medis Ahli</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Didukung oleh jajaran dokter spesialis profesional dan perawat berdedikasi tinggi untuk kesembuhan Anda.</p>
+            </div>
+        </div>
     </div>
-    <div class="svc-card fade-up">
-      <div class="svc-icon">&#x1F9B7;</div>
-      <h3>Poli Gigi</h3>
-      <p>Perawatan gigi lengkap mulai dari pembersihan hingga bedah mulut.</p>
-      <span class="svc-link">Selengkapnya →</span>
-    </div>
-    <div class="svc-card fade-up">
-      <div class="svc-icon">&#x1F442;</div>
-      <h3>Poli THT</h3>
-      <p>Penanganan gangguan telinga, hidung, dan tenggorokan secara profesional.</p>
-      <span class="svc-link">Selengkapnya →</span>
-    </div>
-    <div class="svc-card fade-up">
-      <div class="svc-icon">&#x1F476;</div>
-      <h3>Poli Anak</h3>
-      <p>Layanan kesehatan anak dengan pendekatan ramah dan menyenangkan.</p>
-      <span class="svc-link">Selengkapnya →</span>
-    </div>
-    <div class="svc-card fade-up">
-      <div class="svc-icon">&#x2764;&#xFE0F;</div>
-      <h3>Poli Kandungan</h3>
-      <p>Pemeriksaan kehamilan dan kesehatan reproduksi wanita.</p>
-      <span class="svc-link">Selengkapnya →</span>
-    </div>
-    <div class="svc-card fade-up">
-      <div class="svc-icon">&#x1F497;</div>
-      <h3>Poli Jantung</h3>
-      <p>Diagnosis dan penanganan penyakit jantung oleh spesialis kardiovaskular.</p>
-      <span class="svc-link">Selengkapnya →</span>
-    </div>
-  </div>
-</div>
 </section>
 
-<!-- BOOKING STEPS -->
-<section class="section booking-section" id="tentang">
-<div class="container">
-  <h2 class="section-title">Cara Booking Online</h2>
-  <p class="section-sub">Booking jadwal dokter hanya dalam 4 langkah mudah.</p>
-  <div class="steps">
-    <div class="step fade-up">
-      <div class="step-num">1</div>
-      <span class="step-icon">&#x1F464;</span>
-      <h4>Buat Akun</h4>
-      <p>Daftar akun baru dengan data diri Anda.</p>
+<!-- Layanan Digital Terintegrasi -->
+<section id="showcase" class="py-3xl bg-background-light">
+    <div class="max-w-7xl mx-auto px-margin">
+        <div class="text-center mb-2xl">
+            <h2 class="font-h2 text-h2 text-on-background">Portal Layanan Terintegrasi</h2>
+            <p class="text-on-surface-variant mt-2">Pilih tab di bawah untuk melihat bagaimana sistem digital kami melayani kebutuhan Anda.</p>
+        </div>
+        
+        <!-- Tab Controls -->
+        <div class="flex justify-center gap-md mb-xl" id="tab-controls">
+            <button class="px-xl py-md rounded-full font-label-md transition-all border border-outline-variant bg-surface text-on-surface-variant hover:border-primary" id="btn-pasien" onclick="switchTab('pasien')">Portal Pasien</button>
+            <button class="px-xl py-md rounded-full font-label-md transition-all border-2 border-primary bg-primary text-on-primary font-bold shadow-md" id="btn-dokter" onclick="switchTab('dokter')">Portal Dokter</button>
+            <button class="px-xl py-md rounded-full font-label-md transition-all border border-outline-variant bg-surface text-on-surface-variant hover:border-primary" id="btn-admin" onclick="switchTab('admin')">Portal Admin</button>
+        </div>
+        
+        <!-- Tab Content Container -->
+        <div class="relative bg-surface rounded-3xl shadow-2xl overflow-hidden border border-outline-variant/20 min-h-[500px]" id="tab-content">
+            
+            <!-- Default Active Content: Portal Dokter -->
+            <div class="flex flex-col md:flex-row items-stretch h-full" id="display-dokter">
+                <div class="p-2xl flex-1 flex flex-col justify-center space-y-md">
+                    <h3 class="font-h3 text-h2 text-primary">Portal Dokter - Efisiensi Pelayanan</h3>
+                    <p class="text-on-surface-variant">Portal terintegrasi memudahkan dokter dalam mengakses riwayat medis pasien, menulis e-resep instan, dan memproses tindakan medis secara cepat demi hasil diagnosa yang optimal.</p>
+                    <ul class="space-y-sm">
+                        <li class="flex items-center gap-2 text-on-surface font-label-md">
+                            <span class="material-symbols-outlined text-secondary">check_circle</span>
+                            Resume Medis Otomatis & Riwayat Alergi Pasien
+                        </li>
+                        <li class="flex items-center gap-2 text-on-surface font-label-md">
+                            <span class="material-symbols-outlined text-secondary">check_circle</span>
+                            Penulisan Resep Obat Elektronik Terhubung Langsung ke Apotek
+                        </li>
+                    </ul>
+                    <div class="pt-4">
+                        <a href="<?= base_url('login') ?>" class="bg-primary text-on-primary px-xl py-md rounded-lg font-label-md shadow-md hover:bg-opacity-95 transition-all">Masuk Portal Dokter</a>
+                    </div>
+                </div>
+                <div class="flex-1 bg-surface-container relative overflow-hidden flex items-center justify-center p-xl">
+                    <img alt="Doctor Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA23IroM3QhEE1YA2_TlZd2OslVyhB5BEnUf9eSpTPg1sHxrC2LTH1GIxQF0MdU1M7o_kh_SMgd0evHfs1t1iwrix40bpA2l2wxCWH2fBaMttvRbf0Rb7rWQwFyqQCeXNAuAdRdMyuIFf72L64DUpnya8Z14b878iZI7NSoeMTONxAo6LBaati1a-u4sJ9KM-sNGtvDaJkHk0aHVrO4ibpsIwGZyBitBuprbmXlxbJDKWOMsO3Ym9mnftw0SazpFjvf0Z3EGQbPb_8"/>
+                </div>
+            </div>
+            
+        </div>
     </div>
-    <div class="step fade-up">
-      <div class="step-num">2</div>
-      <span class="step-icon">&#x1F50D;</span>
-      <h4>Pilih Dokter</h4>
-      <p>Cari dokter spesialis sesuai kebutuhan.</p>
-    </div>
-    <div class="step fade-up">
-      <div class="step-num">3</div>
-      <span class="step-icon">&#x1F4C5;</span>
-      <h4>Pilih Jadwal</h4>
-      <p>Pilih tanggal dan jam yang tersedia.</p>
-    </div>
-    <div class="step fade-up">
-      <div class="step-num">4</div>
-      <span class="step-icon">&#x2705;</span>
-      <h4>Konfirmasi Booking</h4>
-      <p>Konfirmasi dan dapatkan tiket booking.</p>
-    </div>
-  </div>
-</div>
 </section>
 
-<!-- DOKTER -->
-<section class="section" id="dokter">
-<div class="container">
-  <h2 class="section-title">Tim Dokter Kami</h2>
-  <p class="section-sub">Dokter profesional berpengalaman siap melayani Anda.</p>
-  <div class="doctors-grid">
-    <div class="doc-card fade-up">
-      <div class="doc-avatar">AS</div>
-      <h3>dr. Andi Setiawan, Sp.U</h3>
-      <div class="spec">Poli Umum</div>
-      <div class="stars">★★★★★</div>
-      <a href="<?= base_url('login') ?>" class="btn btn-cyan">Buat Janji</a>
+<!-- Mengapa MiraCare? -->
+<section class="py-3xl bg-surface" id="keunggulan">
+    <div class="max-w-7xl mx-auto px-margin grid grid-cols-1 lg:grid-cols-2 gap-2xl items-center">
+        <!-- Left Column: Visual -->
+        <div class="order-2 lg:order-1">
+            <div class="relative group">
+                <img alt="Medical Technology" class="rounded-2xl shadow-2xl" src="<?= base_url('assets/img/BangunanRumahSakit.png') ?>"/>
+                <div class="absolute -top-6 -right-6 p-lg bg-secondary text-on-tertiary rounded-2xl shadow-xl">
+                    <div class="text-h2 font-h2">15+</div>
+                    <div class="font-label-sm">Tahun Pengalaman</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Benefits list -->
+        <div class="order-1 lg:order-2 space-y-lg">
+            <h2 class="font-h2 text-h2 text-on-background">Mengapa Memilih MiraCare?</h2>
+            <p class="text-on-surface-variant text-body-lg">Kami hadir bukan hanya sebagai vendor sistem faskes biasa, namun sebagai partner strategis untuk akselerasi pelayanan medis digital.</p>
+            <div class="space-y-md">
+                <!-- Benefit 1 -->
+                <div class="flex items-start gap-md">
+                    <div class="mt-1 w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+                        <span class="material-symbols-outlined">gavel</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline-md text-h3 text-on-background">100% Sesuai Regulasi Kemenkes</h4>
+                        <p class="text-on-surface-variant">Update sistem berkala gratis demi pemenuhan Permenkes No. 24 Tahun 2022 tentang kewajiban implementasi RME.</p>
+                    </div>
+                </div>
+                <!-- Benefit 2 -->
+                <div class="flex items-start gap-md">
+                    <div class="mt-1 w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+                        <span class="material-symbols-outlined">bolt</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline-md text-h3 text-on-background">Implementasi Cepat & Pendampingan Staf</h4>
+                        <p class="text-on-surface-variant">Proses instalasi cloud yang instan serta pelatihan langsung ke perawat, dokter, apoteker, dan staf admin.</p>
+                    </div>
+                </div>
+                <!-- Benefit 3 -->
+                <div class="flex items-start gap-md">
+                    <div class="mt-1 w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+                        <span class="material-symbols-outlined">security</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline-md text-h3 text-on-background">Enkripsi Data & Auto-Backup</h4>
+                        <p class="text-on-surface-variant">Keamanan data rekam medis terenkripsi ganda dengan pencadangan server terjadwal untuk menjamin zero data loss.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="doc-card fade-up">
-      <div class="doc-avatar">RA</div>
-      <h3>dr. Rusdi Ambatukam, drg</h3>
-      <div class="spec">Poli Gigi</div>
-      <div class="stars">★★★★★</div>
-      <a href="<?= base_url('login') ?>" class="btn btn-cyan">Buat Janji</a>
-    </div>
-    <div class="doc-card fade-up">
-      <div class="doc-avatar">SD</div>
-      <h3>dr. Sari Dewi, Sp.THT</h3>
-      <div class="spec">Poli THT</div>
-      <div class="stars">★★★★★</div>
-      <a href="<?= base_url('login') ?>" class="btn btn-cyan">Buat Janji</a>
-    </div>
-  </div>
-</div>
 </section>
 
-<!-- TESTIMONIAL -->
-<section class="section">
-<div class="container">
-  <h2 class="section-title">Apa Kata Mereka?</h2>
-  <p class="section-sub">Testimoni dari pasien yang telah menggunakan layanan kami.</p>
-  <div class="testi-grid">
-    <div class="testi-card fade-up">
-      <div class="testi-avatar">BW</div>
-      <div class="testi-stars">★★★★★</div>
-      <p>"Pelayanan sangat ramah dan profesional. Dokternya menjelaskan dengan detail tentang kondisi saya."</p>
-      <div class="testi-name">Budi Widodo</div>
+<!-- Call to Action & Booking Form Section -->
+<section id="demo" class="py-3xl bg-background-light">
+    <div class="max-w-7xl mx-auto px-margin">
+        <div class="cta-glass rounded-3xl p-2xl text-on-tertiary flex flex-col lg:flex-row gap-2xl items-center shadow-2xl">
+            <!-- Left Side Details -->
+            <div class="flex-1 space-y-md">
+                <h2 class="font-h1 text-h2 text-white">Butuh Bantuan Teknis di Website?</h2>
+                <p class="text-slate-300 text-body-lg">
+                    Jika Anda mengalami kendala saat masuk ke portal, menemukan pesan error, atau mengalami hambatan teknis lain di website RS MiraCare, tim IT Support kami siap mendampingi Anda. Tulis laporan keluhan Anda melalui formulir di samping.
+                </p>
+                <div class="flex flex-wrap items-center gap-6 text-slate-300 font-label-md">
+                    <span class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">contact_support</span>
+                        Respon Cepat 24/7
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">security</span>
+                        Data Keluhan Aman
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">done_all</span>
+                        Tiket Penanganan Otomatis
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Right Side Form -->
+            <div class="w-full lg:max-w-md bg-white text-on-surface p-xl rounded-2xl shadow-lg border border-slate-200 relative overflow-hidden" id="complaintFormContainer">
+                <h3 class="font-h3 text-lg mb-md text-primary font-bold text-center">Kirim Laporan ke IT Support</h3>
+                
+                <form id="itComplaintForm" onsubmit="submitComplaint(event);" class="space-y-md">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Pelapor</label>
+                        <input type="text" id="comp_name" required placeholder="Contoh: Budi Santoso" class="w-full rounded-lg border-slate-300 focus:ring-primary focus:border-primary text-sm"/>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">WhatsApp / Email Aktif</label>
+                        <input type="text" id="comp_contact" required placeholder="Contoh: 0812XXXXXXXX atau email@domain.com" class="w-full rounded-lg border-slate-300 focus:ring-primary focus:border-primary text-sm"/>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Kategori Masalah</label>
+                        <select id="comp_category" required class="w-full rounded-lg border-slate-300 focus:ring-primary focus:border-primary text-sm bg-white py-2">
+                            <option value="" disabled selected>-- Pilih Kategori Kendala --</option>
+                            <option value="gagal_login">Gagal Login Portal (Pasien / Staf / Dokter)</option>
+                            <option value="error_halaman">Error Tampilan Halaman / Bug Website</option>
+                            <option value="gagal_register">Registrasi Akun Baru Gagal</option>
+                            <option value="lupa_password">Lupa Password / Akun Terkunci</option>
+                            <option value="lainnya">Kendala Teknis Lainnya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Detail Keluhan</label>
+                        <textarea id="comp_detail" required placeholder="Jelaskan kronologi kendala atau pesan error yang muncul secara detail..." class="w-full rounded-lg border-slate-300 focus:ring-primary focus:border-primary text-sm min-h-[90px] resize-y"></textarea>
+                    </div>
+                    <button type="submit" id="btnSubmitComplaint" class="w-full py-md bg-secondary text-white hover:bg-cyan-600 font-label-md rounded-lg shadow-md hover:shadow-lg transition-all text-center pulse-teal font-extrabold flex items-center justify-center gap-2">
+                        Kirim Laporan Keluhan
+                        <span class="material-symbols-outlined text-[18px]">send</span>
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="testi-card fade-up">
-      <div class="testi-avatar">SR</div>
-      <div class="testi-stars">★★★★★</div>
-      <p>"Booking online sangat mudah dan cepat. Tidak perlu antre lama lagi. Sangat direkomendasikan!"</p>
-      <div class="testi-name">Siti Rahayu</div>
-    </div>
-    <div class="testi-card fade-up">
-      <div class="testi-avatar">AP</div>
-      <div class="testi-stars">★★★★★</div>
-      <p>"Fasilitas rumah sakit sangat bersih dan modern. Dokter anak sangat sabar menangani anak saya."</p>
-      <div class="testi-name">Ahmad Pratama</div>
-    </div>
-  </div>
-</div>
 </section>
 
-<!-- CTA -->
-<section class="cta">
-<div class="container">
-  <h2>Siap Menjaga Kesehatan Anda?</h2>
-  <p>Daftarkan diri Anda sekarang dan nikmati kemudahan booking dokter secara online kapan saja.</p>
-  <a href="<?= base_url('login') ?>" class="btn btn-filled" style="font-size:1.05rem;padding:14px 36px">Daftar &amp; Booking Sekarang</a>
+<!-- Floating Notification Toast -->
+<div id="complaintToast" class="fixed top-24 right-4 z-50 transform translate-x-full transition-all duration-300 ease-out pointer-events-none">
+    <div class="bg-white/95 backdrop-blur-md border border-emerald-100 rounded-xl shadow-2xl p-4 flex items-start gap-3 max-w-sm pointer-events-auto">
+        <div class="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-success-emerald shrink-0 border border-emerald-100">
+            <span class="material-symbols-outlined text-success-emerald" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        </div>
+        <div class="space-y-1">
+            <h4 class="font-semibold text-slate-900 text-sm">Laporan Terkirim</h4>
+            <p class="text-xs text-slate-600">IT Support telah menerima laporan Anda. Tiket penanganan telah dicatat.</p>
+        </div>
+    </div>
 </div>
-</section>
 
-<!-- FOOTER -->
-<footer id="kontak">
-<div class="container">
-  <div class="footer-grid">
-    <div>
-      <div class="footer-logo">&#x1F3E5; RS MedikaCare</div>
-      <p style="font-size:.9rem;line-height:1.7;margin-top:8px">Memberikan pelayanan kesehatan terbaik dengan teknologi modern dan tenaga medis profesional sejak 2011.</p>
+<!-- Footer -->
+<footer class="bg-background-dark text-slate-400 py-2xl border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-margin grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2xl">
+        <!-- Logo and info -->
+        <div class="space-y-md">
+            <img src="<?= base_url('assets/img/MiraCareLogo.png') ?>" alt="SIMRS MiraCare Logo" class="h-10 w-auto object-contain brightness-0 invert opacity-90 mb-2"/>
+            <p class="text-sm leading-relaxed">
+            SIMRS - MiraCare menghadirkan solusi rumah sakit cerdas berstandar Kemenkes dengan ekosistem rekam medis elektronik yang handal, cepat, dan intuitif.
+            </p>
+        </div>
+        <!-- Column 2: Layanan Medis -->
+        <div class="space-y-md">
+            <h4 class="text-white font-semibold text-sm">Layanan Medis</h4>
+            <ul class="space-y-sm text-sm">
+                <li><a href="#fitur" class="hover:text-white transition-colors">Instalasi Gawat Darurat (IGD)</a></li>
+                <li><a href="#fitur" class="hover:text-white transition-colors">Poliklinik Spesialis</a></li>
+                <li><a href="#fitur" class="hover:text-white transition-colors">Farmasi & Apotek 24 Jam</a></li>
+                <li><a href="#fitur" class="hover:text-white transition-colors">Laboratorium & Radiologi</a></li>
+            </ul>
+        </div>
+        <!-- Column 3: Company -->
+        <div class="space-y-md">
+            <h4 class="text-white font-semibold text-sm">Perusahaan</h4>
+            <ul class="space-y-sm text-sm">
+                <li><a href="#keunggulan" class="hover:text-white transition-colors">Tentang Kami</a></li>
+                <li><a href="#" class="hover:text-white transition-colors">Karir & Partnership</a></li>
+                <li><a href="#" class="hover:text-white transition-colors">Kebijakan Privasi</a></li>
+                <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+            </ul>
+        </div>
+        <!-- Column 4: Contact -->
+        <div class="space-y-md">
+            <h4 class="text-white font-semibold text-sm">Hubungi Kami</h4>
+            <ul class="space-y-sm text-sm">
+                <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-secondary text-lg mt-0.5">location_on</span>
+                    Jl. Selambo IV No. 4a, Amplas, Sumatera Utara
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary text-lg">mail</span>
+                    info@miracare.id
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary text-lg">call</span>
+                    +62-813-9688-4263
+                </li>
+            </ul>
+        </div>
     </div>
-    <div>
-      <h4>Layanan</h4>
-      <ul>
-        <li><a href="#layanan">Poli Umum</a></li>
-        <li><a href="#layanan">Poli Gigi</a></li>
-        <li><a href="#layanan">Poli THT</a></li>
-        <li><a href="#layanan">Poli Anak</a></li>
-      </ul>
+    <div class="max-w-7xl mx-auto px-margin pt-xl mt-xl border-t border-slate-800 text-center text-xs">
+        <p>&copy; <?= date('Y') ?> SIMRS MiraCare. Seluruh Hak Cipta Dilindungi Undang-Undang.</p>
     </div>
-    <div>
-      <h4>Informasi</h4>
-      <ul>
-        <li><a href="#tentang">Tentang Kami</a></li>
-        <li><a href="#dokter">Dokter</a></li>
-        <li><a href="#">Karir</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Kontak</h4>
-      <ul>
-        <li>📍 Jl. Sehat No. 123, Jakarta</li>
-        <li>📞 (021) 1234-5678</li>
-        <li>✉️ info@medikacare.id</li>
-        <li>🕐 Senin - Sabtu, 07:00 - 21:00</li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">&copy; 2026 RS MedikaCare. All rights reserved.</div>
-</div>
 </footer>
 
+<!-- Switch Tabs JavaScript -->
 <script>
-// Navbar scroll effect
-window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50)});
+    function switchTab(role) {
+        const tabContent = document.getElementById('tab-content');
+        const btnPasien = document.getElementById('btn-pasien');
+        const btnDokter = document.getElementById('btn-dokter');
+        const btnAdmin = document.getElementById('btn-admin');
+        
+        // Reset button classes
+        [btnPasien, btnDokter, btnAdmin].forEach(btn => {
+            btn.className = "px-xl py-md rounded-full font-label-md transition-all border border-outline-variant bg-surface text-on-surface-variant hover:border-primary";
+        });
+        
+        // Highlight active button and inject corresponding content
+        if (role === 'pasien') {
+            btnPasien.className = "px-xl py-md rounded-full font-label-md transition-all border-2 border-primary bg-primary text-on-primary font-bold shadow-md";
+            tabContent.innerHTML = `
+                <div class="flex flex-col md:flex-row items-stretch h-full" id="display-pasien">
+                    <div class="p-2xl flex-1 flex flex-col justify-center space-y-md">
+                        <h3 class="font-h3 text-h2 text-primary">Portal Pasien - Booking Online & Rekam Medis</h3>
+                        <p class="text-on-surface-variant">Memberikan kemudahan bagi Anda untuk melakukan registrasi mandiri, mencari jadwal dokter spesialis, memesan konsultasi medis online, memantau nomor antrean langsung dari smartphone, serta melihat riwayat kesehatan secara rahasia dan aman.</p>
+                        <ul class="space-y-sm">
+                            <li class="flex items-center gap-2 text-on-surface font-label-md">
+                                <span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Pemesanan Kunjungan Online dalam Hitungan Detik
+                            </li>
+                            <li class="flex items-center gap-2 text-on-surface font-label-md">
+                                <span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Akses Hasil Laboratorium & Rekam Medis Pribadi
+                            </li>
+                        </ul>
+                        <div class="pt-4">
+                            <a href="<?= base_url('login') ?>" class="bg-primary text-on-primary px-xl py-md rounded-lg font-label-md shadow-md hover:bg-opacity-95 transition-all">Masuk Portal Pasien</a>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-surface-container relative overflow-hidden flex items-center justify-center p-xl">
+                        <img alt="Patient Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="<?= base_url('assets/img/PortalPasien.png') ?>"/>
+                    </div>
+                </div>
+            `;
+        } else if (role === 'dokter') {
+            btnDokter.className = "px-xl py-md rounded-full font-label-md transition-all border-2 border-primary bg-primary text-on-primary font-bold shadow-md";
+            tabContent.innerHTML = `
+                <div class="flex flex-col md:flex-row items-stretch h-full" id="display-dokter">
+                    <div class="p-2xl flex-1 flex flex-col justify-center space-y-md">
+                        <h3 class="font-h3 text-h2 text-primary">Portal Dokter - Efisiensi Pelayanan</h3>
+                        <p class="text-on-surface-variant">Portal terintegrasi memudahkan dokter dalam mengakses riwayat medis pasien, menulis e-resep instan, dan memproses tindakan medis secara cepat demi hasil diagnosa yang optimal.</p>
+                        <ul class="space-y-sm">
+                            <li class="flex items-center gap-2 text-on-surface font-label-md">
+                                <span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Resume Medis Otomatis & Riwayat Alergi Pasien
+                            </li>
+                            <li class="flex items-center gap-2 text-on-surface font-label-md">
+                                <span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Penulisan Resep Obat Elektronik Terhubung Langsung ke Apotek
+                            </li>
+                        </ul>
+                        <div class="pt-4">
+                            <a href="<?= base_url('login') ?>" class="bg-primary text-on-primary px-xl py-md rounded-lg font-label-md shadow-md hover:bg-opacity-95 transition-all">Masuk Portal Dokter</a>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-surface-container relative overflow-hidden flex items-center justify-center p-xl">
+                        <img alt="Doctor Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA23IroM3QhEE1YA2_TlZd2OslVyhB5BEnUf9eSpTPg1sHxrC2LTH1GIxQF0MdU1M7o_kh_SMgd0evHfs1t1iwrix40bpA2l2wxCWH2fBaMttvRbf0Rb7rWQwFyqQCeXNAuAdRdMyuIFf72L64DUpnya8Z14b878iZI7NSoeMTONxAo6LBaati1a-u4sJ9KM-sNGtvDaJkHk0aHVrO4ibpsIwGZyBitBuprbmXlxbJDKWOMsO3Ym9mnftw0SazpFjvf0Z3EGQbPb_8"/>
+                    </div>
+                </div>
+            `;
+        } else if (role === 'admin') {
+            btnAdmin.className = "px-xl py-md rounded-full font-label-md transition-all border-2 border-primary bg-primary text-on-primary font-bold shadow-md";
+            tabContent.innerHTML = `
+                <div class="flex flex-col md:flex-row items-stretch h-full" id="display-admin">
+                    <div class="p-2xl flex-1 flex flex-col justify-center space-y-md">
+                        <h3 class="font-h3 text-h2 text-primary">Portal Staf & Admin - Manajemen Efisien</h3>
+                        <p class="text-on-surface-variant">Memungkinkan staf administrasi dan manajemen rumah sakit mengelola pendaftaran pasien baru, jadwal dokter, ketersediaan kamar rawat inap (BOR), serta laporan pelayanan medis secara real-time.</p>
+                        <ul class="space-y-sm">
+                            <li class="flex items-center gap-2 text-on-surface font-label-md">
+                                <span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Registrasi Pasien & Validasi Keanggotaan BPJS Cepat
+                            </li>
+                            <li class="flex items-center gap-2 text-on-surface font-label-md">
+                                <span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Monitoring BOR & Laporan Statistik Pelayanan Medis
+                            </li>
+                        </ul>
+                        <div class="pt-4">
+                            <a href="<?= base_url('login') ?>" class="bg-primary text-on-primary px-xl py-md rounded-lg font-label-md shadow-md hover:bg-opacity-95 transition-all">Masuk Portal Staf</a>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-surface-container relative overflow-hidden flex items-center justify-center p-xl">
+                        <img alt="Admin Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCszWsIownbpQwczSFwQJK4gMa_lK_Ssn3PiVtShTV7uLe_2DGwKwCnn9QKLb3b8Er9UupCkBdFkbnUtk9V_hbTtAIQVsJYg1WNy16qgVudjP6pA8808Nl6TjyaYgW8HYf4IR1DUTQkPJxLA4BzAhwCP0OhuR7iKbQKfN84Vf6r6j0yOAqs4jGZvgJVHruPfYq44SQtxBNv3vhlYdNo-MFsemEAdK-YlOUEdeav-9lKAy0bNfMmPvFGAW_87iPANLuImJTGPdwyj1k"/>
+                    </div>
+                </div>
+            `;
+    }
+    }
 
-// Hamburger
-document.getElementById('hamburgerBtn').addEventListener('click',()=>{document.getElementById('mobileMenu').classList.add('active')});
-document.getElementById('mobileClose').addEventListener('click',closeMobile);
-function closeMobile(){document.getElementById('mobileMenu').classList.remove('active')}
+    // IT Support Complaint Form Handlers
+    function submitComplaint(event) {
+        event.preventDefault();
+        const btn = document.getElementById('btnSubmitComplaint');
+        const container = document.getElementById('complaintFormContainer');
+        const name = document.getElementById('comp_name').value;
+        const categorySelect = document.getElementById('comp_category');
+        const categoryText = categorySelect.options[categorySelect.selectedIndex].text;
+        
+        // Generate random ticket
+        const ticketId = 'MIRA-TKT-' + Math.floor(10000 + Math.random() * 90000);
+        
+        btn.disabled = true;
+        btn.innerHTML = `
+            <span class="flex items-center gap-2 justify-center">
+                Mengirim Laporan...
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </span>
+        `;
+        
+        setTimeout(() => {
+            // Show toast notification
+            const toast = document.getElementById('complaintToast');
+            if (toast) {
+                toast.classList.remove('translate-x-full');
+                toast.classList.add('translate-x-0');
+                
+                // Auto hide after 4 seconds
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-0');
+                    toast.classList.add('translate-x-full');
+                }, 4000);
+            }
 
-// Intersection Observer for fade-in
-const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:0.15});
-document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+            container.innerHTML = `
+                <div class="text-center py-8 px-4 space-y-4 animate-in fade-in zoom-in-95 duration-500">
+                    <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-success-emerald mx-auto border border-emerald-100 shadow-sm">
+                        <span class="material-symbols-outlined text-[40px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    </div>
+                    <h3 class="font-h3 text-h3 text-success-emerald font-bold">Laporan Terkirim!</h3>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-left space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-500">ID Tiket Anda:</span>
+                            <span class="font-mono font-bold text-primary bg-primary-container/10 px-2 py-0.5 rounded text-xs select-all">${ticketId}</span>
+                        </div>
+                        <div class="border-t border-slate-100 my-1"></div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Terima kasih <strong class="text-slate-900">${name}</strong>. Laporan Anda mengenai <strong>"${categoryText}"</strong> telah dicatat oleh sistem IT Support RS MiraCare. Kami akan menghubungi Anda segera melalui kontak WhatsApp atau email yang terdaftar.
+                        </p>
+                    </div>
+                    <button onclick="resetComplaintForm()" class="mt-4 px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition-all text-sm">
+                        Kirim Keluhan Lain
+                    </button>
+                </div>
+            `;
+        }, 1200);
+    }
+
+    function resetComplaintForm() {
+        location.reload();
+    }
+
+    // Smooth Scroll & Scroll Spy for Navigation Links
+    document.addEventListener("DOMContentLoaded", function () {
+        const navLinks = document.querySelectorAll('nav a[href^="#"]');
+        const footerLinks = document.querySelectorAll('footer a[href^="#"]');
+        const sections = document.querySelectorAll('section[id]');
+        const headerHeight = 80;
+
+        // Smooth scroll for all anchor links (header, footer, buttons)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+
+                    // Update active nav class immediately
+                    const matchingNavLink = document.querySelector(`nav a[href="${targetId}"]`);
+                    if (matchingNavLink) {
+                        updateActiveLink(matchingNavLink);
+                    }
+                    
+                    // Update active footer link immediately
+                    updateActiveFooterLink(targetId);
+                }
+            });
+        });
+
+        function updateActiveLink(activeLink) {
+            navLinks.forEach(link => {
+                link.className = "font-label-md text-on-surface-variant hover:text-primary transition-colors py-2";
+            });
+            activeLink.className = "font-label-md text-primary font-semibold border-b-2 border-primary py-2";
+        }
+
+        function updateActiveFooterLink(targetId) {
+            footerLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === targetId) {
+                    link.className = "text-cyan-400 font-bold transition-all underline decoration-2 decoration-cyan-400/50 underline-offset-4";
+                } else {
+                    link.className = "text-slate-400 hover:text-white transition-colors";
+                }
+            });
+        }
+
+        // Scroll Spy: Update active link on scroll
+        window.addEventListener('scroll', () => {
+            let currentSectionId = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - headerHeight - 20; // 20px buffer
+                const sectionHeight = section.offsetHeight;
+                if (window.pageYOffset >= sectionTop && window.pageYOffset < sectionTop + sectionHeight) {
+                    currentSectionId = section.getAttribute('id');
+                }
+            });
+
+            if (currentSectionId) {
+                const targetId = `#${currentSectionId}`;
+                const activeLink = document.querySelector(`nav a[href="${targetId}"]`);
+                if (activeLink) {
+                    updateActiveLink(activeLink);
+                }
+                updateActiveFooterLink(targetId);
+            }
+        });
+    });
 </script>
+
 </body>
 </html>

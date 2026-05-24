@@ -288,13 +288,23 @@ class PasienController extends BaseController
             return redirect()->to(base_url('pasien/booking'));
         }
 
-        // Generate no_rawat: RW-YYYYMMDD-XXX
+        // Generate no_rawat: RW-YYYYMMDD-XXX menggunakan MAX()
         $tglFormatted = str_replace('-', '', $tgl_daftar);
-        $countToday = $this->db->table('tbl_pendaftaran')
-            ->where('tgl_daftar', $tgl_daftar)
-            ->countAllResults(false);
-        $noUrut  = str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
-        $noRawat = 'RW-' . $tglFormatted . '-' . $noUrut;
+        $prefix = 'RW-' . $tglFormatted . '-';
+        
+        $latestBooking = $this->db->table('tbl_pendaftaran')
+            ->selectMax('no_rawat')
+            ->like('no_rawat', $prefix, 'after')
+            ->get()
+            ->getRowArray();
+
+        $nextNum = 1;
+        if ($latestBooking && !empty($latestBooking['no_rawat'])) {
+            $num = (int) str_replace($prefix, '', $latestBooking['no_rawat']);
+            $nextNum = $num + 1;
+        }
+        $noUrut  = str_pad($nextNum, 3, '0', STR_PAD_LEFT);
+        $noRawat = $prefix . $noUrut;
 
         // INSERT pendaftaran
         $this->db->table('tbl_pendaftaran')->insert([
@@ -348,22 +358,8 @@ class PasienController extends BaseController
             ->get()
             ->getResultArray();
 
-        return view('pasien/riwayat', ['kunjungan' => $kunjungan]);
-    }
-
-    /**
-     * 7. Rekam Medis
-     */
-    public function rekamMedis()
-    {
-        if (!$this->checkPasienSession()) {
-            return redirect()->to(base_url('login'));
-        }
-
-        $no_rm = session()->get('no_rm');
-
         $rekamMedis = $this->db->table('tbl_rekam_medis rm')
-            ->select('rm.*, p.tgl_daftar, p.keluhan_awal, d.nama_dokter, po.nama_poli')
+            ->select('rm.*, p.tgl_daftar, d.nama_dokter, po.nama_poli')
             ->join('tbl_pendaftaran p', 'rm.no_rawat = p.no_rawat')
             ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
             ->join('tbl_poli po', 'd.id_poli = po.id_poli')
@@ -372,8 +368,13 @@ class PasienController extends BaseController
             ->get()
             ->getResultArray();
 
-        return view('pasien/rekam_medis', ['rekamMedis' => $rekamMedis]);
+        return view('pasien/riwayat', [
+            'kunjungan' => $kunjungan,
+            'rekamMedis' => $rekamMedis
+        ]);
     }
+
+
 
     /**
      * 8. Batalkan Booking
@@ -425,4 +426,74 @@ class PasienController extends BaseController
         session()->setFlashdata('success', 'Booking ' . $no_rawat . ' berhasil dibatalkan.');
         return redirect()->to(base_url('pasien/riwayat'));
     }
+
+    /**
+     * 9. Halaman Pengaturan
+     */
+    public function settings()
+    {
+        if (!$this->checkPasienSession()) {
+            return redirect()->to(base_url('login'));
+        }
+
+        $id_user = session()->get('id_user');
+        $pasien = $this->db->table('tbl_pasien')
+            ->where('id_user', $id_user)
+            ->get()
+            ->getRowArray();
+
+        $user = $this->db->table('tbl_user')
+            ->where('id_user', $id_user)
+            ->get()
+            ->getRowArray();
+
+        return view('pasien/settings', compact('pasien', 'user'));
+    }
+
+    /**
+     * 10. Update Pengaturan (AJAX)
+     */
+    public function updateSettings()
+    {
+        if (!$this->checkPasienSession()) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Session expired.']);
+        }
+
+        $id_user = session()->get('id_user');
+        $nama_lengkap = $this->request->getPost('nama_lengkap');
+        $password = $this->request->getPost('password');
+
+        if (empty($nama_lengkap)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Nama lengkap wajib diisi.']);
+        }
+
+        $this->db->transStart();
+
+        // Update tbl_pasien
+        $this->db->table('tbl_pasien')
+            ->where('id_user', $id_user)
+            ->update(['nama_pasien' => $nama_lengkap]);
+
+        // Update tbl_user
+        $userUpdate = ['nama_lengkap' => $nama_lengkap];
+        if (!empty($password)) {
+            $userUpdate['password'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+
+        $this->db->table('tbl_user')
+            ->where('id_user', $id_user)
+            ->update($userUpdate);
+
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === FALSE) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan perubahan.']);
+        }
+
+        // Update session values
+        session()->set('nama_lengkap', $nama_lengkap);
+
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Pengaturan berhasil disimpan.']);
+    }
 }
+
