@@ -191,6 +191,26 @@ class DokterDashboardController extends BaseController
             return redirect()->to(base_url('dokter/rekam-medis/' . $no_rawat));
         }
 
+        // 1. Cek kecukupan stok obat terlebih dahulu (Fail-Fast)
+        if (!empty($resep_obat_ids) && is_array($resep_obat_ids)) {
+            foreach ($resep_obat_ids as $index => $idObat) {
+                if (empty($idObat)) continue;
+
+                $jumlah = (int)($resep_jumlah[$index] ?? 0);
+                $obatDetail = $this->db->table('tbl_obat')->where('id_obat', $idObat)->get()->getRowArray();
+                
+                if (!$obatDetail) {
+                    session()->setFlashdata('error', 'Gagal: Data obat tidak ditemukan di database.');
+                    return redirect()->to(base_url('dokter/rekam-medis/' . $no_rawat));
+                }
+
+                if ($obatDetail['stok'] < $jumlah) {
+                    session()->setFlashdata('error', 'Gagal: Stok obat "' . esc($obatDetail['nama_obat']) . '" tidak mencukupi (Tersedia: ' . $obatDetail['stok'] . ', Dibutuhkan: ' . $jumlah . ').');
+                    return redirect()->to(base_url('dokter/rekam-medis/' . $no_rawat));
+                }
+            }
+        }
+
         $this->db->transStart();
 
         // 1. Compile resep_obat text for tbl_rekam_medis (backward compatibility)
@@ -265,6 +285,37 @@ class DokterDashboardController extends BaseController
         $this->db->table('tbl_pendaftaran')
             ->where('no_rawat', $no_rawat)
             ->update(['status_periksa' => 'Selesai']);
+
+        // 5. Hitung total biaya & INSERT otomatis ke tbl_tagihan
+        $totalBiaya = 0;
+        if (!empty($resep_obat_ids) && is_array($resep_obat_ids)) {
+            foreach ($resep_obat_ids as $index => $idObat) {
+                if (empty($idObat)) continue;
+                $jumlah = (int)($resep_jumlah[$index] ?? 0);
+                $obatPrice = $this->db->table('tbl_obat')
+                    ->select('harga')
+                    ->where('id_obat', $idObat)
+                    ->get()->getRowArray();
+                if ($obatPrice) {
+                    $totalBiaya += (float)$obatPrice['harga'] * $jumlah;
+                }
+            }
+        }
+
+        // Cek apakah tagihan untuk no_rawat ini sudah ada (dari dokter simpan ulang)
+        $existingTagihan = $this->db->table('tbl_tagihan')
+            ->where('no_rawat', $no_rawat)
+            ->countAllResults();
+
+        if ($existingTagihan === 0) {
+            $this->db->table('tbl_tagihan')->insert([
+                'no_rawat'     => $no_rawat,
+                'total_biaya'  => $totalBiaya,
+                'jenis_bayar'  => 'Umum',
+                'status_bayar' => 'Belum Lunas',
+                'tgl_bayar'    => null,
+            ]);
+        }
 
         $this->db->transComplete();
 

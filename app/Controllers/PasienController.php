@@ -288,9 +288,9 @@ class PasienController extends BaseController
             return redirect()->to(base_url('pasien/booking'));
         }
 
-        // Generate no_rawat: RW-YYYYMMDD-XXX menggunakan MAX()
+        // Generate no_rawat: RWT-YYYYMMDD-XXX menggunakan MAX()
         $tglFormatted = str_replace('-', '', $tgl_daftar);
-        $prefix = 'RW-' . $tglFormatted . '-';
+        $prefix = 'RWT-' . $tglFormatted . '-';
         
         $latestBooking = $this->db->table('tbl_pendaftaran')
             ->selectMax('no_rawat')

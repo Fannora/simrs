@@ -10,7 +10,7 @@ class PendaftaranModel extends Model
     protected $primaryKey       = 'no_rawat';
     // $useAutoIncrement is true by default, but no_rawat is varchar.
     protected $useAutoIncrement = false;
-    protected $allowedFields    = ['no_rawat', 'no_rm', 'id_dokter', 'tgl_daftar', 'jam_kunjungan', 'keluhan_awal', 'status_periksa'];
+    protected $allowedFields    = ['no_rawat', 'no_rm', 'id_dokter', 'tgl_daftar', 'jam_kunjungan', 'keluhan_awal', 'status_periksa', 'slot_waktu'];
 
     public function getPendaftaran()
     {

@@ -93,9 +93,9 @@ class PendaftaranController extends BaseController
             $jam_kunjungan = '08:00:00'; // Default jam mulai praktek
         }
 
-        // Generate No Rawat (misal: 20231024-001)
+        // Generate No Rawat (misal: RWT-20231024-001)
         $count_today = $db->table('tbl_pendaftaran')->where('tgl_daftar', $tgl_daftar)->countAllResults();
-        $no_rawat = date('Ymd') . '-' . str_pad($count_today + 1, 3, '0', STR_PAD_LEFT);
+        $no_rawat = 'RWT-' . date('Ymd') . '-' . str_pad($count_today + 1, 3, '0', STR_PAD_LEFT);
 
         $this->pendaftaranModel->insert([
             'no_rawat' => $no_rawat,
@@ -111,9 +111,11 @@ class PendaftaranController extends BaseController
         return redirect()->to('/pendaftaran');
     }
 
-    public function hapusdata($id)
+    public function hapusdata($no_rawat = null)
     {
-        $this->pendaftaranModel->delete($id);
+        if ($no_rawat) {
+            $this->pendaftaranModel->where('no_rawat', $no_rawat)->delete();
+        }
         session()->setFlashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><h5><i class="icon fas fa-check"></i> Success!</h5>Data Berhasil Dihapus</div>');
         return redirect()->to('/pendaftaran');
     }
