@@ -349,9 +349,9 @@ if ($hour < 11) {
                             <!-- Action Bottom -->
                             <div class="mt-5 pt-5 border-t border-slate-100 flex items-center justify-end gap-3">
                                 <?php if ($k['status_periksa'] === 'Selesai'): ?>
-                                    <a href="<?= base_url('pasien/rekam-medis') ?>" class="text-secondary hover:underline text-xs font-bold flex items-center gap-1.5 mr-auto">
+                                    <button type="button" onclick="showRmModal('<?= $k['no_rawat'] ?>')" class="text-secondary hover:underline text-xs font-bold flex items-center gap-1.5 mr-auto">
                                         <span class="material-symbols-outlined text-sm">visibility</span> Lihat Rekam Medis
-                                    </a>
+                                    </button>
                                 <?php endif; ?>
                                 <?php if ($k['status_periksa'] === 'Belum Diperiksa'): ?>
                                     <a href="<?= base_url('pasien/booking/batal/' . $k['no_rawat']) ?>" class="border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 btn-batal" data-no-rawat="<?= $k['no_rawat'] ?>">
@@ -428,6 +428,43 @@ if ($hour < 11) {
                                     <a class="p-1 text-secondary hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center" href="<?= base_url('rekammedis/cetak?no_rawat=' . $rm['no_rawat']) ?>" target="_blank" title="Unduh Kuitansi / Laporan">
                                         <span class="material-symbols-outlined text-lg">download</span>
                                     </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Riwayat Tagihan & Pembayaran -->
+                <div class="bg-white border border-outline-variant rounded-2xl p-6 shadow-sm space-y-4">
+                    <h5 class="font-headline-sm text-base text-slate-800 font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">payments</span>
+                        Tagihan & Pembayaran
+                    </h5>
+                    <?php if (empty($tagihan)): ?>
+                        <div class="py-6 text-center text-slate-400 text-xs">
+                            <span class="material-symbols-outlined text-3xl mb-1 text-slate-300">receipt_long</span>
+                            <p>Belum ada riwayat tagihan.</p>
+                        </div>
+                    <?php else: ?>
+                        <ul class="space-y-4 max-h-[380px] overflow-y-auto pr-1">
+                            <?php foreach ($tagihan as $t): ?>
+                                <li class="p-3.5 rounded-xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div class="min-w-0">
+                                            <p class="font-bold text-xs text-slate-850 truncate"><?= esc($t['no_rawat']) ?></p>
+                                            <p class="text-[10px] text-slate-400 font-semibold mt-0.5"><?= date('d M Y', strtotime($t['tgl_daftar'])) ?> • dr. <?= esc($t['nama_dokter']) ?></p>
+                                        </div>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full <?= $t['status_bayar'] === 'Lunas' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100' ?>">
+                                            <?= esc($t['status_bayar']) ?>
+                                        </span>
+                                    </div>
+                                    <div class="flex justify-between items-center pt-1.5 border-t border-slate-150/45">
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Metode: <strong class="text-slate-600"><?= esc($t['jenis_bayar']) ?></strong></span>
+                                        <span class="font-bold text-xs text-slate-800">Rp <?= number_format($t['total_biaya'], 0, ',', '.') ?></span>
+                                    </div>
+                                    <?php if ($t['status_bayar'] === 'Lunas' && $t['tgl_bayar']): ?>
+                                        <p class="text-[9px] text-slate-400 mt-2 text-right">Lunas pada: <?= date('d M Y, H:i', strtotime($t['tgl_bayar'])) ?> WIB</p>
+                                    <?php endif; ?>
                                 </li>
                             <?php endforeach; ?>
                         </ul>
@@ -524,6 +561,142 @@ $(document).ready(function() {
     });
 
 });
+
+// ============================
+// MODAL REKAM MEDIS & RESEP
+// ============================
+const rmData = <?= json_encode($rekamMedis) ?>;
+const resepData = <?= json_encode($reseps) ?>;
+
+function showRmModal(noRawat) {
+    const rm = rmData.find(r => r.no_rawat === noRawat);
+    if (!rm) return;
+    
+    document.getElementById('rm_no_rawat').textContent = rm.no_rawat;
+    document.getElementById('rm_tgl_periksa').textContent = formatDateStr(rm.tgl_periksa);
+    document.getElementById('rm_dokter').textContent = rm.nama_dokter;
+    document.getElementById('rm_poli').textContent = rm.nama_poli;
+    document.getElementById('rm_diagnosa').textContent = rm.diagnosa || '-';
+    document.getElementById('rm_tindakan').textContent = rm.tindakan || '-';
+    
+    const resepContainer = document.getElementById('rm_resep_container');
+    resepContainer.innerHTML = '';
+    
+    const idRm = rm.id_rm;
+    const items = resepData[idRm] || [];
+    
+    if (items.length === 0) {
+        resepContainer.innerHTML = '<p class="text-xs text-slate-400 italic">Tidak ada resep obat terstruktur.</p>';
+    } else {
+        let listHtml = `<div class="overflow-hidden border border-outline-variant/50 rounded-xl">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-outline-variant/35">
+                    <tr>
+                        <th class="py-2.5 px-4">Nama Obat</th>
+                        <th class="py-2.5 px-4">Dosis</th>
+                        <th class="py-2.5 px-4 text-center">Jumlah</th>
+                        <th class="py-2.5 px-4">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/25 text-slate-700 font-medium bg-white">`;
+        
+        items.forEach(it => {
+            listHtml += `<tr class="hover:bg-slate-50/45 transition-colors">
+                <td class="py-2.5 px-4 font-bold text-slate-800">${it.nama_obat}</td>
+                <td class="py-2.5 px-4">${it.dosis}</td>
+                <td class="py-2.5 px-4 text-center">${it.jumlah} ${it.satuan}</td>
+                <td class="py-2.5 px-4 text-slate-500">${it.keterangan || '-'}</td>
+            </tr>`;
+        });
+        
+        listHtml += '</tbody></table></div>';
+        resepContainer.innerHTML = listHtml;
+    }
+    
+    document.getElementById('rm_btn_cetak').href = `<?= base_url('rekammedis/cetak?no_rawat=') ?>${rm.no_rawat}`;
+    
+    openModal('modalDetailRm');
+}
+
+function formatDateStr(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB';
+}
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.querySelector('.bg-white').classList.remove('scale-95');
+    modal.querySelector('.bg-white').classList.add('scale-100');
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.querySelector('.bg-white').classList.remove('scale-100');
+    modal.querySelector('.bg-white').classList.add('scale-95');
+}
 </script>
+
+<!-- Modal Detail Rekam Medis -->
+<div id="modalDetailRm" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-all duration-300">
+        <div class="bg-gradient-to-r from-secondary to-secondary-container text-white px-6 py-5 flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">medical_information</span>
+                <h3 class="font-headline-sm text-lg font-bold text-white">Detail Rekam Medis</h3>
+            </div>
+            <button type="button" onclick="closeModal('modalDetailRm')" class="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-6 space-y-4 max-h-[420px] overflow-y-auto">
+            <div class="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">No. Rawat</span>
+                    <span id="rm_no_rawat" class="font-semibold text-slate-700 text-sm">-</span>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tanggal Periksa</span>
+                    <span id="rm_tgl_periksa" class="font-semibold text-slate-700 text-sm">-</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Dokter Pemeriksa</span>
+                    <span id="rm_dokter" class="font-bold text-slate-800 text-sm">-</span>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Poli Spesialis</span>
+                    <span id="rm_poli" class="text-xs bg-blue-50 text-secondary border border-blue-100 px-2 py-0.5 rounded-full font-bold inline-block mt-0.5">-</span>
+                </div>
+            </div>
+            
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Diagnosa Medis</span>
+                <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 text-slate-850 text-sm font-semibold whitespace-pre-wrap leading-relaxed" id="rm_diagnosa">-</div>
+            </div>
+            
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tindakan Medis</span>
+                <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 text-slate-850 text-sm font-semibold whitespace-pre-wrap leading-relaxed" id="rm_tindakan">-</div>
+            </div>
+            
+            <div class="space-y-2">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Resep Obat Terstruktur</span>
+                <div id="rm_resep_container" class="space-y-2">
+                    <!-- Medicine rows populated here -->
+                </div>
+            </div>
+        </div>
+        <div class="pt-4 pb-6 px-6 border-t border-slate-100 flex gap-2 justify-end bg-slate-50">
+            <button type="button" onclick="closeModal('modalDetailRm')" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300/80 text-slate-700 rounded-xl text-sm font-bold transition-all">Tutup</button>
+            <a id="rm_btn_cetak" href="#" target="_blank" class="px-6 py-2.5 bg-secondary text-white hover:opacity-90 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">print</span> Cetak Laporan
+            </a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

@@ -1,5 +1,5 @@
 <?php 
-  $title = 'Dashboard Dokter'; 
+  $title = 'Antrian Pasien'; 
   // Get initials from doctor name (excluding "dr.")
   $cleanName = preg_replace('/^dr\.\s+/i', '', $dokter['nama_dokter']);
   $words = explode(' ', $cleanName);
@@ -20,7 +20,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SIMRS MiraCare - Portal Dokter</title>
+    <title>SIMRS MiraCare - Antrian Pasien</title>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -158,16 +158,17 @@
 
     
     <nav class="flex-1 space-y-1">
-        <!-- Active Navigation -->
-        <a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-secondary text-white font-bold transition-all duration-200 shadow-sm" href="<?= base_url('dokter/dashboard') ?>">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+        <!-- Inactive Navigation -->
+        <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('dokter/dashboard') ?>">
+            <span class="material-symbols-outlined">dashboard</span>
             <span class="font-label-md text-label-md">Dashboard</span>
         </a>
-        <!-- Inactive Navigations -->
-        <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('dokter/antrian') ?>">
-            <span class="material-symbols-outlined">format_list_numbered</span>
+        <!-- Active Navigation -->
+        <a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-secondary text-white font-bold transition-all duration-200 shadow-sm" href="<?= base_url('dokter/antrian') ?>">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">format_list_numbered</span>
             <span class="font-label-md text-label-md">Antrian Pasien</span>
         </a>
+        <!-- Inactive Navigation -->
         <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('dokter/jadwal') ?>">
             <span class="material-symbols-outlined">history</span>
             <span class="font-label-md text-label-md">Riwayat Pemeriksaan</span>
@@ -188,12 +189,11 @@
 
 <!-- TopAppBar -->
 <header class="bg-white border-b border-outline-variant flex justify-between items-center h-16 ml-64 px-8 w-[calc(100%-16rem)] fixed top-0 z-40">
-    <?php
-      date_default_timezone_set('Asia/Jakarta');
-      $hour = date('H');
-      $greeting = $hour < 11 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
-    ?>
-    <h2 class="font-headline-sm text-headline-sm font-bold text-secondary"><?= $greeting ?>, dr. <?= esc(explode(' ', $dokter['nama_dokter'])[0] ?? $dokter['nama_dokter']) ?> 👋</h2>
+    <div class="flex items-center gap-2">
+        <span class="text-on-surface-variant font-body-md text-body-sm">Pages</span>
+        <span class="text-on-surface-variant opacity-40">/</span>
+        <span class="text-secondary font-bold font-body-md text-body-sm">Antrian Pasien</span>
+    </div>
     <div class="flex items-center gap-6">
         <div class="flex items-center gap-4">
             <div class="flex items-center gap-3 border-l border-outline-variant pl-4">
@@ -209,9 +209,9 @@
     </div>
 </header>
 
-<!-- Main Content Area -->
+<!-- Main Content Canvas -->
 <main class="ml-64 pt-24 px-8 pb-12 min-h-screen">
-    <div class="max-w-[1280px] mx-auto space-y-8">
+    <div class="max-w-[1280px] mx-auto space-y-6">
         
         <!-- Flash Messages -->
         <?php if (session()->getFlashdata('error')): ?>
@@ -232,89 +232,18 @@
             </div>
         <?php endif; ?>
 
-        <!-- Hero Greeting Card (Patient-Style Elegant Gradient) -->
-        <section class="relative overflow-hidden bg-gradient-to-r from-[#0047AB] to-[#06B6D4] rounded-[24px] p-8 text-white flex justify-between items-center bento-card shadow-sm">
-            <div class="relative z-10 space-y-2">
-                <?php
-                  $hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-                  $bulan = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-                  $formattedDate = $hari[date('w')] . ', ' . date('d') . ' ' . $bulan[(int)date('m')] . ' ' . date('Y');
-                ?>
-                <h3 class="font-headline-md text-headline-md text-white">Semangat mengabdi, dr. <?= esc($dokter['nama_dokter']) ?></h3>
-                <p class="opacity-90 font-body-md flex items-center gap-2 max-w-xl text-white">
-                    <span class="material-symbols-outlined text-sm text-white" data-icon="calendar_month">calendar_month</span>
-                    <?= $formattedDate ?> • <?= esc($dokter['nama_poli'] ?? 'Poli Umum') ?> • Jaga kesehatan Anda selama bertugas.
-                </p>
-            </div>
-            <div class="absolute right-[-20px] top-[-20px] opacity-10">
-                <span class="material-symbols-outlined text-[180px] text-white" data-icon="stethoscope">stethoscope</span>
-            </div>
-        </section>
-
-        <!-- Stat Cards Row -->
-        <?php
-          $antreanMenunggu = 0;
-          $sedangDiperiksa = 0;
-          foreach ($jadwalHariIni as $j) {
-              if ($j['status_periksa'] === 'Belum Diperiksa') {
-                  $antreanMenunggu++;
-              } elseif ($j['status_periksa'] === 'Sedang Diperiksa') {
-                  $sedangDiperiksa++;
-              }
-          }
-        ?>
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col justify-between shadow-sm bento-card">
-                <div class="flex justify-between items-start mb-4">
-                    <span class="text-on-surface-variant font-label-md">Pasien Hari Ini</span>
-                    <span class="bg-success-emerald/10 text-success-emerald px-2 py-1 rounded-lg text-[10px] font-bold">Aktif</span>
-                </div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-bold font-headline-md text-slate-800"><?= $totalHariIni ?></span>
-                    <span class="text-on-surface-variant text-sm">Pasien</span>
-                </div>
-            </div>
-            
-            <div class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col justify-between shadow-sm bento-card">
-                <div class="flex justify-between items-start mb-4">
-                    <span class="text-on-surface-variant font-label-md">Menunggu</span>
-                    <div class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
-                </div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-bold font-headline-md text-amber-600"><?= $antreanMenunggu ?></span>
-                    <span class="text-on-surface-variant text-sm">Antrian</span>
-                </div>
-            </div>
-            
-            <div class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col justify-between shadow-sm bento-card">
-                <div class="flex justify-between items-start mb-4">
-                    <span class="text-on-surface-variant font-label-md">Sedang Diperiksa</span>
-                    <span class="material-symbols-outlined text-cyan-500 text-xl" style="font-variation-settings: 'FILL' 1;">clinical_notes</span>
-                </div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-bold font-headline-md text-cyan-600"><?= $sedangDiperiksa ?></span>
-                    <span class="text-on-surface-variant text-sm">Pasien</span>
-                </div>
-            </div>
-            
-            <div class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col justify-between shadow-sm bento-card">
-                <div class="flex justify-between items-start mb-4">
-                    <span class="text-on-surface-variant font-label-md">Selesai</span>
-                    <span class="material-symbols-outlined text-success-emerald text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                </div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-bold font-headline-md text-success-emerald"><?= $selesai ?></span>
-                    <span class="text-on-surface-variant text-sm">Selesai</span>
-                </div>
-            </div>
-        </section>
-
         <!-- Antrian Pasien Table Section (Patient-Style Bento Box) -->
         <section class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm bento-card">
             <div class="p-6 border-b border-outline-variant/60 flex justify-between items-center bg-slate-50/50">
                 <div>
-                    <h3 class="font-headline-sm text-headline-sm font-bold text-slate-800">Antrian Pasien Hari Ini</h3>
-                    <p class="text-on-surface-variant text-sm mt-0.5">Daftar pasien aktif di <?= esc($dokter['nama_poli'] ?? 'Poli Umum') ?></p>
+                    <h3 class="font-headline-sm text-headline-sm font-bold text-slate-800">Daftar Antrian Aktif Hari Ini</h3>
+                    <p class="text-on-surface-variant text-sm mt-0.5">Daftar pasien yang akan diperiksa di <?= esc($dokter['nama_poli'] ?? 'Poli Umum') ?></p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="<?= base_url('dokter/dashboard') ?>" class="px-4 py-2 border border-outline-variant hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
+                        <span class="material-symbols-outlined text-sm">dashboard</span>
+                        Kembali Ke Dashboard
+                    </a>
                 </div>
             </div>
             
@@ -331,15 +260,15 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-outline-variant/40">
-                        <?php if (empty($jadwalHariIni)): ?>
+                        <?php if (empty($antrian)): ?>
                             <tr>
                                 <td colspan="6" class="text-center py-10 text-on-surface-variant">
-                                    <span class="material-symbols-outlined text-4xl mb-2 text-slate-300">calendar_today</span>
-                                    <p class="font-semibold text-slate-500">Tidak ada jadwal pasien hari ini.</p>
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-slate-300" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    <p class="font-semibold text-slate-500">Tidak ada pasien aktif dalam antrean saat ini.</p>
                                 </td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach ($jadwalHariIni as $index => $j): ?>
+                            <?php foreach ($antrian as $index => $j): ?>
                             <tr class="hover:bg-slate-50/60 transition-colors">
                                 <td class="px-6 py-5 text-slate-900 font-bold"><?= str_pad($index + 1, 3, '0', STR_PAD_LEFT) ?></td>
                                 <td class="px-6 py-5">
@@ -373,13 +302,6 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
-            </div>
-            
-            <div class="p-6 bg-slate-50/50 flex justify-center border-t border-outline-variant/40">
-                <a href="<?= base_url('dokter/antrian') ?>" class="text-secondary font-bold text-sm hover:underline flex items-center gap-2">
-                    Lihat Semua Antrian
-                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                </a>
             </div>
         </section>
     </div>

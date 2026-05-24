@@ -2,176 +2,254 @@
 <?= $this->extend('admin/layout') ?>
 <?= $this->section('content') ?>
 
-<div class="mb-2">
-  <button class="btn btn-danger" data-toggle="modal" data-target="#modalTambahPasien">
-    <i class="la la-plus"></i> Tambah Pasien
-  </button>
+<!-- Header Area -->
+<div class="flex justify-between items-center mb-6 animate-in fade-in duration-300">
+    <button type="button" onclick="openModal('modalTambahPasien')" class="bg-secondary text-white hover:opacity-90 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all">
+        <span class="material-symbols-outlined">person_add</span>
+        Tambah Pasien Baru
+    </button>
 </div>
 
-<div class="card">
-  <div class="card-content">
-    <div class="table-responsive">
-      <table class="table table-hover table-xl mb-0">
-        <thead>
-          <tr><th>No. RM</th><th>NIK</th><th>Nama Pasien</th><th>Tgl Lahir</th><th>JK</th><th>No. BPJS</th><th>Aksi</th></tr>
-        </thead>
-        <tbody>
-          <?php if (empty($pasien)): ?>
-          <tr><td colspan="7" class="text-center text-muted py-3">Belum ada data pasien.</td></tr>
-          <?php else: ?>
-          <?php foreach ($pasien as $p): ?>
-          <?php
-            $bulan = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
-            $tgl = explode('-', $p['tgl_lahir']);
-            $tglFmt = (int)$tgl[2] . ' ' . $bulan[(int)$tgl[1]] . ' ' . $tgl[0];
-          ?>
-          <tr>
-            <td><code><?= esc($p['no_rm']) ?></code></td>
-            <td><?= esc($p['nik']) ?></td>
-            <td><strong><?= esc($p['nama_pasien']) ?></strong></td>
-            <td><?= $tglFmt ?></td>
-            <td><?= $p['jk'] == 'L' ? 'Laki-laki' : 'Perempuan' ?></td>
-            <td><?= esc($p['no_bpjs'] ?? '-') ?></td>
-            <td>
-              <button class="btn btn-sm btn-outline-warning" onclick="populateEditPasien('<?= esc($p['no_rm'], 'js') ?>', '<?= esc($p['nik'], 'js') ?>', '<?= esc($p['nama_pasien'], 'js') ?>', '<?= $p['tgl_lahir'] ?>', '<?= $p['jk'] ?>', '<?= esc($p['alamat'] ?? '', 'js') ?>', '<?= esc($p['no_bpjs'] ?? '', 'js') ?>')">
-                <i class="la la-pencil"></i>
-              </button>
-              <a href="<?= base_url('admin/pasien/hapus/' . $p['no_rm']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus pasien <?= esc($p['nama_pasien'], 'js') ?>?')">
-                <i class="la la-trash"></i>
-              </a>
-            </td>
-          </tr>
-          <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+<!-- Table Card -->
+<div class="bg-white border border-outline-variant/65 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-outline-variant/35 bg-slate-50 text-slate-600 text-xs font-bold uppercase tracking-wider">
+                    <th class="py-4 px-6">No. Rekam Medis (RM)</th>
+                    <th class="py-4 px-6">Nomor NIK</th>
+                    <th class="py-4 px-6">Nama Lengkap Pasien</th>
+                    <th class="py-4 px-6">Tanggal Lahir</th>
+                    <th class="py-4 px-6">Jenis Kelamin</th>
+                    <th class="py-4 px-6">Nomor BPJS</th>
+                    <th class="py-4 px-6 text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/25 text-sm text-slate-700">
+                <?php if (empty($pasien)): ?>
+                <tr>
+                    <td colspan="7" class="text-center text-slate-400 py-12">
+                        <span class="material-symbols-outlined text-[48px] text-slate-300 block mb-2">no_accounts</span>
+                        Belum ada data pasien terdaftar di database RS.
+                    </td>
+                </tr>
+                <?php else: ?>
+                <?php foreach ($pasien as $p): ?>
+                <?php
+                    $bulan = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+                    $tgl = explode('-', $p['tgl_lahir']);
+                    $tglFmt = (int)$tgl[2] . ' ' . $bulan[(int)$tgl[1]] . ' ' . $tgl[0];
+                ?>
+                <tr class="hover:bg-slate-50/45 transition-colors">
+                    <td class="py-5 px-6">
+                        <span class="font-mono text-xs font-bold text-secondary bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg">
+                            <?= esc($p['no_rm']) ?>
+                        </span>
+                    </td>
+                    <td class="py-5 px-6 font-semibold text-slate-600 font-mono text-xs">
+                        <?= esc($p['nik']) ?>
+                    </td>
+                    <td class="py-5 px-6">
+                        <strong class="text-slate-800 font-bold"><?= esc($p['nama_pasien']) ?></strong>
+                    </td>
+                    <td class="py-5 px-6 font-medium text-slate-600">
+                        <?= $tglFmt ?>
+                    </td>
+                    <td class="py-5 px-6">
+                        <span class="text-xs px-2.5 py-1 rounded-full font-bold border <?= $p['jk'] == 'L' ? 'bg-indigo-50 border-indigo-100 text-indigo-700' : 'bg-pink-50 border-pink-100 text-pink-700' ?>">
+                            <?= $p['jk'] == 'L' ? 'Laki-laki' : 'Perempuan' ?>
+                        </span>
+                    </td>
+                    <td class="py-5 px-6 font-semibold text-slate-600">
+                        <?php if(!empty($p['no_bpjs'])): ?>
+                            <span class="text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md text-xs font-mono"><?= esc($p['no_bpjs']) ?></span>
+                        <?php else: ?>
+                            <span class="text-slate-400">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td class="py-5 px-6 text-center">
+                        <div class="inline-flex gap-2">
+                            <button type="button" class="p-2 bg-amber-50 hover:bg-amber-100/80 text-amber-600 rounded-lg border border-amber-200 transition-colors" 
+                                onclick="populateEditPasien('<?= esc($p['no_rm'], 'js') ?>', '<?= esc($p['nik'], 'js') ?>', '<?= esc($p['nama_pasien'], 'js') ?>', '<?= $p['tgl_lahir'] ?>', '<?= $p['jk'] ?>', '<?= esc($p['alamat'] ?? '', 'js') ?>', '<?= esc($p['no_bpjs'] ?? '', 'js') ?>')">
+                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                            </button>
+                            <a href="<?= base_url('admin/pasien/hapus/' . $p['no_rm']) ?>" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg border border-rose-200 transition-colors" 
+                                onclick="return confirm('Apakah Anda yakin ingin menghapus data pasien <?= esc($p['nama_pasien'], 'js') ?>?')">
+                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </div>
-  </div>
 </div>
 
-<!-- Modal Tambah -->
-<div class="modal fade" id="modalTambahPasien" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="POST" action="<?= base_url('admin/pasien/simpan') ?>">
-        <?= csrf_field() ?>
-        <div class="modal-header bg-danger white">
-          <h5 class="modal-title">Tambah Pasien</h5>
-          <button type="button" class="close" data-dismiss="modal" style="color:#fff;">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>NIK <span class="text-danger">*</span></label>
-            <input type="text" name="nik" class="form-control" maxlength="16" required>
-          </div>
-          <div class="form-group">
-            <label>Nama Pasien <span class="text-danger">*</span></label>
-            <input type="text" name="nama_pasien" class="form-control" required>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Tanggal Lahir <span class="text-danger">*</span></label>
-                <input type="date" name="tgl_lahir" class="form-control" required>
-              </div>
+<!-- Modal Tambah Pasien -->
+<div id="modalTambahPasien" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-all duration-300">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-secondary to-secondary-container text-white px-6 py-5 flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">person_add</span>
+                <h3 class="font-headline-sm text-lg font-bold text-white">Tambah Pasien Baru</h3>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Jenis Kelamin <span class="text-danger">*</span></label>
-                <select name="jk" class="form-control" required>
-                  <option value="L">Laki-laki</option>
-                  <option value="P">Perempuan</option>
-                </select>
-              </div>
+            <button type="button" onclick="closeModal('modalTambahPasien')" class="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <!-- Form -->
+        <form method="POST" action="<?= base_url('admin/pasien/simpan') ?>" class="p-6 space-y-4">
+            <?= csrf_field() ?>
+            
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor NIK <span class="text-rose-500">*</span></label>
+                <input type="text" name="nik" required maxlength="16" minlength="16" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm" placeholder="Masukkan 16 digit NIK">
             </div>
-          </div>
-          <div class="form-group">
-            <label>Alamat</label>
-            <textarea name="alamat" class="form-control" rows="2"></textarea>
-          </div>
-          <div class="form-group">
-            <label>No. BPJS</label>
-            <input type="text" name="no_bpjs" class="form-control">
-          </div>
-          <small class="text-muted"><i class="la la-info-circle"></i> No. Rekam Medis akan di-generate otomatis oleh sistem.</small>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-danger">Simpan</button>
-        </div>
-      </form>
+            
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nama Lengkap Pasien <span class="text-rose-500">*</span></label>
+                <input type="text" name="nama_pasien" required class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm" placeholder="Contoh: Budi Santoso">
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Tanggal Lahir <span class="text-rose-500">*</span></label>
+                    <input type="date" name="tgl_lahir" required class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                    <select name="jk" required class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm bg-white py-2.5">
+                        <option value="L">Laki-laki</option>
+                        <option value="P">Perempuan</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Alamat Tempat Tinggal</label>
+                <textarea name="alamat" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm min-h-[70px] resize-y" placeholder="Masukkan alamat lengkap pasien..."></textarea>
+            </div>
+            
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor BPJS (Opsional)</label>
+                <input type="text" name="no_bpjs" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm" placeholder="Contoh: 0001XXXXXXXXX">
+            </div>
+            
+            <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl flex items-start gap-2 text-xs text-slate-600">
+                <span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5" style="font-variation-settings: 'FILL' 1;">info</span>
+                <p>Nomor Rekam Medis (RM) akan dibuat dan di-generate secara otomatis oleh sistem rumah sakit setelah formulir disimpan.</p>
+            </div>
+            
+            <!-- Actions -->
+            <div class="pt-4 border-t border-slate-100 flex gap-2 justify-end">
+                <button type="button" onclick="closeModal('modalTambahPasien')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-xl text-sm font-bold transition-all">
+                    Batal
+                </button>
+                <button type="submit" class="px-6 py-2.5 bg-secondary text-white hover:opacity-90 rounded-xl text-sm font-bold shadow-sm transition-all">
+                    Simpan Pasien
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
 
-<!-- Modal Edit -->
-<div class="modal fade" id="modalEditPasien" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="POST" action="<?= base_url('admin/pasien/edit') ?>">
-        <?= csrf_field() ?>
-        <input type="hidden" name="no_rm" id="edit_no_rm">
-        <div class="modal-header bg-warning white">
-          <h5 class="modal-title">Edit Pasien</h5>
-          <button type="button" class="close" data-dismiss="modal" style="color:#fff;">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>NIK</label>
-            <input type="text" name="nik" id="edit_nik" class="form-control" maxlength="16" required>
-          </div>
-          <div class="form-group">
-            <label>Nama Pasien</label>
-            <input type="text" name="nama_pasien" id="edit_nama_pasien" class="form-control" required>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Tanggal Lahir</label>
-                <input type="date" name="tgl_lahir" id="edit_tgl_lahir" class="form-control" required>
-              </div>
+<!-- Modal Edit Pasien -->
+<div id="modalEditPasien" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-all duration-300">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-5 flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">edit_square</span>
+                <h3 class="font-headline-sm text-lg font-bold text-white">Edit Data Pasien</h3>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Jenis Kelamin</label>
-                <select name="jk" id="edit_jk" class="form-control" required>
-                  <option value="L">Laki-laki</option>
-                  <option value="P">Perempuan</option>
-                </select>
-              </div>
+            <button type="button" onclick="closeModal('modalEditPasien')" class="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <!-- Form -->
+        <form method="POST" action="<?= base_url('admin/pasien/edit') ?>" class="p-6 space-y-4">
+            <?= csrf_field() ?>
+            <input type="hidden" name="no_rm" id="edit_no_rm">
+            
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor NIK <span class="text-rose-500">*</span></label>
+                <input type="text" name="nik" id="edit_nik" required maxlength="16" minlength="16" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
             </div>
-          </div>
-          <div class="form-group">
-            <label>Alamat</label>
-            <textarea name="alamat" id="edit_alamat" class="form-control" rows="2"></textarea>
-          </div>
-          <div class="form-group">
-            <label>No. BPJS</label>
-            <input type="text" name="no_bpjs" id="edit_no_bpjs" class="form-control">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-warning">Simpan Perubahan</button>
-        </div>
-      </form>
+            
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nama Lengkap Pasien <span class="text-rose-500">*</span></label>
+                <input type="text" name="nama_pasien" id="edit_nama_pasien" required class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Tanggal Lahir <span class="text-rose-500">*</span></label>
+                    <input type="date" name="tgl_lahir" id="edit_tgl_lahir" required class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                    <select name="jk" id="edit_jk" required class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm bg-white py-2.5">
+                        <option value="L">Laki-laki</option>
+                        <option value="P">Perempuan</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Alamat Tempat Tinggal</label>
+                <textarea name="alamat" id="edit_alamat" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm min-h-[70px] resize-y"></textarea>
+            </div>
+            
+            <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor BPJS</label>
+                <input type="text" name="no_bpjs" id="edit_no_bpjs" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
+            </div>
+            
+            <!-- Actions -->
+            <div class="pt-4 border-t border-slate-100 flex gap-2 justify-end">
+                <button type="button" onclick="closeModal('modalEditPasien')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-xl text-sm font-bold transition-all">
+                    Batal
+                </button>
+                <button type="submit" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold shadow-sm transition-all">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
 
 <?= $this->endSection() ?>
 
 <?= $this->section('js') ?>
 <script>
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.querySelector('.bg-white').classList.remove('scale-95');
+    modal.querySelector('.bg-white').classList.add('scale-100');
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.querySelector('.bg-white').classList.remove('scale-100');
+    modal.querySelector('.bg-white').classList.add('scale-95');
+}
+
 function populateEditPasien(noRm, nik, nama, tglLahir, jk, alamat, noBpjs) {
-  document.getElementById('edit_no_rm').value = noRm;
-  document.getElementById('edit_nik').value = nik;
-  document.getElementById('edit_nama_pasien').value = nama;
-  document.getElementById('edit_tgl_lahir').value = tglLahir;
-  document.getElementById('edit_jk').value = jk;
-  document.getElementById('edit_alamat').value = alamat;
-  document.getElementById('edit_no_bpjs').value = noBpjs;
-  $('#modalEditPasien').modal('show');
+    document.getElementById('edit_no_rm').value = noRm;
+    document.getElementById('edit_nik').value = nik;
+    document.getElementById('edit_nama_pasien').value = nama;
+    document.getElementById('edit_tgl_lahir').value = tglLahir;
+    document.getElementById('edit_jk').value = jk;
+    document.getElementById('edit_alamat').value = alamat;
+    document.getElementById('edit_no_bpjs').value = noBpjs;
+    openModal('modalEditPasien');
 }
 </script>
 <?= $this->endSection() ?>

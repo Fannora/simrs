@@ -157,15 +157,6 @@
 
         <!-- Login Card -->
         <div class="bg-surface-container-lowest border border-outline-variant rounded-xl login-card-shadow overflow-hidden">
-            <!-- Role Selection Header -->
-            <div class="flex border-b border-outline-variant bg-surface-container-low">
-                <button class="flex-1 py-4 text-center font-label-md text-label-md border-b-2 border-secondary text-secondary font-bold transition-all" id="patientTab" onclick="switchTab('patient')">
-                    Masuk sebagai Pasien
-                </button>
-                <button class="flex-1 py-4 text-center font-label-md text-label-md border-b-2 border-transparent text-on-surface-variant hover:text-secondary transition-all" id="adminTab" onclick="switchTab('admin')">
-                    Masuk sebagai Admin/Dokter
-                </button>
-            </div>
             
             <div class="p-6 md:p-10 space-y-6">
                 <!-- Brand Identity inside Card -->
@@ -182,10 +173,10 @@
                     <?= csrf_field() ?>
                     
                     <div class="space-y-2">
-                        <label class="font-label-md text-label-md text-on-surface block" for="username" id="idLabel">Username Pasien</label>
+                        <label class="font-label-md text-label-md text-on-surface block" for="username" id="idLabel">Username</label>
                         <div class="relative group">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">person</span>
-                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="username" name="username" placeholder="contoh: budi_santoso" type="text" required autocomplete="username"/>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="username" name="username" placeholder="contoh: budi_santoso atau dr_rusdi" type="text" required autocomplete="username"/>
                         </div>
                     </div>
                     
@@ -252,29 +243,6 @@
 </footer>
 
 <script>
-    function switchTab(role) {
-        const patientTab = document.getElementById('patientTab');
-        const adminTab = document.getElementById('adminTab');
-        const idLabel = document.getElementById('idLabel');
-        const idInput = document.getElementById('username');
-
-        if (role === 'patient') {
-            patientTab.classList.add('border-secondary', 'text-secondary', 'font-bold');
-            patientTab.classList.remove('border-transparent', 'text-on-surface-variant');
-            adminTab.classList.remove('border-secondary', 'text-secondary', 'font-bold');
-            adminTab.classList.add('border-transparent', 'text-on-surface-variant');
-            idLabel.textContent = 'Username Pasien';
-            idInput.placeholder = 'contoh: budi_santoso';
-        } else {
-            adminTab.classList.add('border-secondary', 'text-secondary', 'font-bold');
-            adminTab.classList.remove('border-transparent', 'text-on-surface-variant');
-            patientTab.classList.remove('border-secondary', 'text-secondary', 'font-bold');
-            patientTab.classList.add('border-transparent', 'text-on-surface-variant');
-            idLabel.textContent = 'Username Admin / Dokter';
-            idInput.placeholder = 'contoh: dr_rusdi';
-        }
-    }
-
     function togglePassword() {
         const passwordInput = document.getElementById('password');
         const eyeIcon = document.getElementById('eyeIcon');

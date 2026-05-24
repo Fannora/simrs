@@ -368,14 +368,35 @@ class PasienController extends BaseController
             ->get()
             ->getResultArray();
 
+        $resepsGrouped = [];
+        $reseps = $this->db->table('tbl_resep r')
+            ->select('r.*, o.nama_obat, o.satuan')
+            ->join('tbl_obat o', 'r.id_obat = o.id_obat')
+            ->join('tbl_rekam_medis rm', 'r.id_rm = rm.id_rm')
+            ->join('tbl_pendaftaran p', 'rm.no_rawat = p.no_rawat')
+            ->where('p.no_rm', $no_rm)
+            ->get()
+            ->getResultArray();
+
+        foreach ($reseps as $res) {
+            $resepsGrouped[$res['id_rm']][] = $res;
+        }        $tagihan = $this->db->table('tbl_tagihan t')
+            ->select('t.*, p.tgl_daftar, d.nama_dokter, po.nama_poli')
+            ->join('tbl_pendaftaran p', 't.no_rawat = p.no_rawat')
+            ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
+            ->join('tbl_poli po', 'd.id_poli = po.id_poli')
+            ->where('p.no_rm', $no_rm)
+            ->orderBy('t.id_tagihan', 'DESC')
+            ->get()
+            ->getResultArray();
+
         return view('pasien/riwayat', [
             'kunjungan' => $kunjungan,
-            'rekamMedis' => $rekamMedis
+            'rekamMedis' => $rekamMedis,
+            'reseps' => $resepsGrouped,
+            'tagihan' => $tagihan
         ]);
     }
-
-
-
     /**
      * 8. Batalkan Booking
      */

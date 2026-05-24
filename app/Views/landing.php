@@ -252,9 +252,6 @@
                             Penulisan Resep Obat Elektronik Terhubung Langsung ke Apotek
                         </li>
                     </ul>
-                    <div class="pt-4">
-                        <a href="<?= base_url('login') ?>" class="bg-primary text-on-primary px-xl py-md rounded-lg font-label-md shadow-md hover:bg-opacity-95 transition-all">Masuk Portal Dokter</a>
-                    </div>
                 </div>
                 <div class="flex-1 bg-surface-container relative overflow-hidden flex items-center justify-center p-xl">
                     <img alt="Doctor Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA23IroM3QhEE1YA2_TlZd2OslVyhB5BEnUf9eSpTPg1sHxrC2LTH1GIxQF0MdU1M7o_kh_SMgd0evHfs1t1iwrix40bpA2l2wxCWH2fBaMttvRbf0Rb7rWQwFyqQCeXNAuAdRdMyuIFf72L64DUpnya8Z14b878iZI7NSoeMTONxAo6LBaati1a-u4sJ9KM-sNGtvDaJkHk0aHVrO4ibpsIwGZyBitBuprbmXlxbJDKWOMsO3Ym9mnftw0SazpFjvf0Z3EGQbPb_8"/>
@@ -481,9 +478,6 @@
                                 Akses Hasil Laboratorium & Rekam Medis Pribadi
                             </li>
                         </ul>
-                        <div class="pt-4">
-                            <a href="<?= base_url('login') ?>" class="bg-primary text-on-primary px-xl py-md rounded-lg font-label-md shadow-md hover:bg-opacity-95 transition-all">Masuk Portal Pasien</a>
-                        </div>
                     </div>
                     <div class="flex-1 bg-surface-container relative overflow-hidden flex items-center justify-center p-xl">
                         <img alt="Patient Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="<?= base_url('assets/img/PortalPasien.png') ?>"/>
@@ -507,12 +501,9 @@
                                 Penulisan Resep Obat Elektronik Terhubung Langsung ke Apotek
                             </li>
                         </ul>
-                        <div class="pt-4">
-                            <a href="<?= base_url('login') ?>" class="bg-primary text-on-primary px-xl py-md rounded-lg font-label-md shadow-md hover:bg-opacity-95 transition-all">Masuk Portal Dokter</a>
-                        </div>
                     </div>
                     <div class="flex-1 bg-surface-container relative overflow-hidden flex items-center justify-center p-xl">
-                        <img alt="Doctor Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA23IroM3QhEE1YA2_TlZd2OslVyhB5BEnUf9eSpTPg1sHxrC2LTH1GIxQF0MdU1M7o_kh_SMgd0evHfs1t1iwrix40bpA2l2wxCWH2fBaMttvRbf0Rb7rWQwFyqQCeXNAuAdRdMyuIFf72L64DUpnya8Z14b878iZI7NSoeMTONxAo6LBaati1a-u4sJ9KM-sNGtvDaJkHk0aHVrO4ibpsIwGZyBitBuprbmXlxbJDKWOMsO3Ym9mnftw0SazpFjvf0Z3EGQbPb_8"/>
+                        <img alt="Doctor Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="<?= base_url('assets/img/PortalDokter.png') ?>"/>
                     </div>
                 </div>
             `;
@@ -533,16 +524,13 @@
                                 Monitoring BOR & Laporan Statistik Pelayanan Medis
                             </li>
                         </ul>
-                        <div class="pt-4">
-                            <a href="<?= base_url('login') ?>" class="bg-primary text-on-primary px-xl py-md rounded-lg font-label-md shadow-md hover:bg-opacity-95 transition-all">Masuk Portal Staf</a>
-                        </div>
                     </div>
                     <div class="flex-1 bg-surface-container relative overflow-hidden flex items-center justify-center p-xl">
-                        <img alt="Admin Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCszWsIownbpQwczSFwQJK4gMa_lK_Ssn3PiVtShTV7uLe_2DGwKwCnn9QKLb3b8Er9UupCkBdFkbnUtk9V_hbTtAIQVsJYg1WNy16qgVudjP6pA8808Nl6TjyaYgW8HYf4IR1DUTQkPJxLA4BzAhwCP0OhuR7iKbQKfN84Vf6r6j0yOAqs4jGZvgJVHruPfYq44SQtxBNv3vhlYdNo-MFsemEAdK-YlOUEdeav-9lKAy0bNfMmPvFGAW_87iPANLuImJTGPdwyj1k"/>
+                        <img alt="Admin Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="<?= base_url('assets/img/PortalAdmin.png') ?>"/>
                     </div>
                 </div>
             `;
-    }
+        }
     }
 
     // IT Support Complaint Form Handlers
