@@ -204,16 +204,16 @@
                         <!-- Jenis Kelamin -->
                         <div class="space-y-2">
                             <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider">Jenis Kelamin</label>
-                            <div class="grid grid-cols-2 gap-2">
+                            <div class="flex flex-col gap-2">
                                 <label class="cursor-pointer block relative">
-                                    <input type="radio" name="jk" value="Laki-laki" class="sr-only peer" required <?= old('jk') === 'Laki-laki' ? 'checked' : '' ?>/>
+                                    <input type="radio" name="jk" value="L" class="sr-only peer" required <?= old('jk') === 'L' ? 'checked' : '' ?>/>
                                     <div class="flex items-center justify-center gap-1.5 px-3 py-3 bg-white border border-outline-variant rounded-lg transition-all peer-checked:border-secondary peer-checked:bg-secondary/5 peer-checked:text-secondary hover:bg-surface-container-low">
                                         <span class="material-symbols-outlined text-[18px]">male</span>
                                         <span class="font-body-sm">Laki-laki</span>
                                     </div>
                                 </label>
                                 <label class="cursor-pointer block relative">
-                                    <input type="radio" name="jk" value="Perempuan" class="sr-only peer" <?= old('jk') === 'Perempuan' ? 'checked' : '' ?>/>
+                                    <input type="radio" name="jk" value="P" class="sr-only peer" <?= old('jk') === 'P' ? 'checked' : '' ?>/>
                                     <div class="flex items-center justify-center gap-1.5 px-3 py-3 bg-white border border-outline-variant rounded-lg transition-all peer-checked:border-secondary peer-checked:bg-secondary/5 peer-checked:text-secondary hover:bg-surface-container-low">
                                         <span class="material-symbols-outlined text-[18px]">female</span>
                                         <span class="font-body-sm">Perempuan</span>
