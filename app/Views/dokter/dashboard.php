@@ -164,6 +164,9 @@
             <span class="font-label-md text-label-md">Dashboard</span>
         </a>
         <!-- Inactive Navigations -->
+        <div class="pt-4 pb-2 px-3">
+            <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Menu</p>
+        </div>
         <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('dokter/antrian') ?>">
             <span class="material-symbols-outlined">format_list_numbered</span>
             <span class="font-label-md text-label-md">Antrian Pasien</span>
@@ -172,6 +175,9 @@
             <span class="material-symbols-outlined">history</span>
             <span class="font-label-md text-label-md">Riwayat Pemeriksaan</span>
         </a>
+        <div class="pt-4 pb-2 px-3">
+            <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Akun</p>
+        </div>
         <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('dokter/settings') ?>">
             <span class="material-symbols-outlined">settings</span>
             <span class="font-label-md text-label-md">Pengaturan</span>
@@ -190,6 +196,7 @@
 <header class="bg-white border-b border-outline-variant flex justify-between items-center h-16 ml-64 px-8 w-[calc(100%-16rem)] fixed top-0 z-40">
     <?php
       date_default_timezone_set('Asia/Jakarta');
+      $now = new DateTime();
       $hour = date('H');
       $greeting = $hour < 11 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
     ?>
@@ -360,10 +367,27 @@
                                     <span class="px-3 py-1 rounded-full text-xs font-bold border whitespace-nowrap inline-block text-center <?= $statusStyle ?>"><?= esc($j['status_periksa']) ?></span>
                                 </td>
                                 <td class="px-6 py-5">
+                                    <?php
+                                      $timeStr = $j['slot_waktu'] ?: (!empty($j['jam_kunjungan']) ? substr($j['jam_kunjungan'], 0, 5) : '00:00');
+                                      $appointmentTime = new DateTime($j['tgl_daftar'] . ' ' . $timeStr);
+                                      $isTime = $now >= $appointmentTime;
+                                      
+                                      $tglJanji = date('d M Y', strtotime($j['tgl_daftar']));
+                                      $waktuJanji = esc($j['slot_waktu'] ?? substr($j['jam_kunjungan'], 0, 5));
+                                      $tooltip = "Belum memasuki waktu janji temu ($tglJanji $waktuJanji WIB)";
+                                    ?>
                                     <?php if ($j['status_periksa'] === 'Sedang Diperiksa'): ?>
-                                        <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="bg-secondary text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-85 transition-opacity inline-block shadow-sm">Input Rekam Medis</a>
+                                        <?php if ($isTime): ?>
+                                            <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="bg-secondary text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-85 transition-opacity inline-block shadow-sm">Input Rekam Medis</a>
+                                        <?php else: ?>
+                                            <button type="button" class="bg-secondary/40 text-white/70 px-4 py-2 rounded-lg text-xs font-bold cursor-not-allowed inline-block shadow-sm" title="<?= $tooltip ?>">Input Rekam Medis</button>
+                                        <?php endif; ?>
                                     <?php elseif ($j['status_periksa'] === 'Belum Diperiksa'): ?>
-                                        <a href="<?= base_url('dokter/panggil/' . $j['no_rawat']) ?>" class="border border-secondary text-secondary px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors inline-block shadow-sm">Panggil</a>
+                                        <?php if ($isTime): ?>
+                                            <a href="<?= base_url('dokter/panggil/' . $j['no_rawat']) ?>" class="border border-secondary text-secondary px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors inline-block shadow-sm">Panggil</a>
+                                        <?php else: ?>
+                                            <button type="button" class="border border-secondary/30 text-secondary/35 px-4 py-2 rounded-lg text-xs font-bold cursor-not-allowed inline-block shadow-sm" title="<?= $tooltip ?>">Panggil</button>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="text-xs text-on-surface-variant font-medium">—</span>
                                     <?php endif; ?>

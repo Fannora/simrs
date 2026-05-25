@@ -1,4 +1,6 @@
 <?php 
+  date_default_timezone_set('Asia/Jakarta');
+  $now = new DateTime();
   $title = 'Riwayat Pemeriksaan Pasien'; 
   // Get initials from doctor name (excluding "dr.")
   $cleanName = preg_replace('/^dr\.\s+/i', '', $dokter['nama_dokter']);
@@ -163,6 +165,9 @@
             <span class="material-symbols-outlined">dashboard</span>
             <span class="font-label-md text-label-md">Dashboard</span>
         </a>
+        <div class="pt-4 pb-2 px-3">
+            <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Menu</p>
+        </div>
         <!-- Inactive Navigation -->
         <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('dokter/antrian') ?>">
             <span class="material-symbols-outlined">format_list_numbered</span>
@@ -173,6 +178,9 @@
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">history</span>
             <span class="font-label-md text-label-md">Riwayat Pemeriksaan</span>
         </a>
+        <div class="pt-4 pb-2 px-3">
+            <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Akun</p>
+        </div>
         <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('dokter/settings') ?>">
             <span class="material-symbols-outlined">settings</span>
             <span class="font-label-md text-label-md">Pengaturan</span>
@@ -359,15 +367,47 @@
                                             Lihat Rekam Medis
                                         </button>
                                     <?php elseif ($j['status_periksa'] === 'Sedang Diperiksa'): ?>
-                                        <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-85 transition-opacity inline-flex items-center gap-1.5 shadow-sm">
-                                            <span class="material-symbols-outlined text-[14px]">edit_square</span>
-                                            Lanjutkan Periksa
-                                        </a>
+                                        <?php
+                                          $timeStr = $j['slot_waktu'] ?: (!empty($j['jam_kunjungan']) ? substr($j['jam_kunjungan'], 0, 5) : '00:00');
+                                          $appointmentTime = new DateTime($j['tgl_daftar'] . ' ' . $timeStr);
+                                          $isTime = $now >= $appointmentTime;
+                                          
+                                          $tglJanji = date('d M Y', strtotime($j['tgl_daftar']));
+                                          $waktuJanji = esc($j['slot_waktu'] ?? substr($j['jam_kunjungan'], 0, 5));
+                                          $tooltip = "Belum memasuki waktu janji temu ($tglJanji $waktuJanji WIB)";
+                                        ?>
+                                        <?php if ($isTime): ?>
+                                            <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-85 transition-opacity inline-flex items-center gap-1.5 shadow-sm">
+                                                <span class="material-symbols-outlined text-[14px]">edit_square</span>
+                                                Lanjutkan Periksa
+                                            </a>
+                                        <?php else: ?>
+                                            <button type="button" class="bg-amber-500/40 text-white/70 px-4 py-2 rounded-lg text-xs font-bold cursor-not-allowed inline-flex items-center gap-1.5 shadow-sm" title="<?= $tooltip ?>">
+                                                <span class="material-symbols-outlined text-[14px] opacity-40">edit_square</span>
+                                                Lanjutkan Periksa
+                                            </button>
+                                        <?php endif; ?>
                                     <?php elseif ($j['status_periksa'] === 'Belum Diperiksa'): ?>
-                                        <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="border border-secondary text-secondary px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all inline-flex items-center gap-1.5 shadow-sm">
-                                            <span class="material-symbols-outlined text-[14px]">stethoscope</span>
-                                            Periksa Pasien
-                                        </a>
+                                        <?php
+                                          $timeStr = $j['slot_waktu'] ?: (!empty($j['jam_kunjungan']) ? substr($j['jam_kunjungan'], 0, 5) : '00:00');
+                                          $appointmentTime = new DateTime($j['tgl_daftar'] . ' ' . $timeStr);
+                                          $isTime = $now >= $appointmentTime;
+                                          
+                                          $tglJanji = date('d M Y', strtotime($j['tgl_daftar']));
+                                          $waktuJanji = esc($j['slot_waktu'] ?? substr($j['jam_kunjungan'], 0, 5));
+                                          $tooltip = "Belum memasuki waktu janji temu ($tglJanji $waktuJanji WIB)";
+                                        ?>
+                                        <?php if ($isTime): ?>
+                                            <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="border border-secondary text-secondary px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all inline-flex items-center gap-1.5 shadow-sm">
+                                                <span class="material-symbols-outlined text-[14px]">stethoscope</span>
+                                                Periksa Pasien
+                                            </a>
+                                        <?php else: ?>
+                                            <button type="button" class="border border-secondary/30 text-secondary/35 px-4 py-2 rounded-lg text-xs font-bold cursor-not-allowed inline-flex items-center gap-1.5 shadow-sm" title="<?= $tooltip ?>">
+                                                <span class="material-symbols-outlined text-[14px] opacity-40">stethoscope</span>
+                                                Periksa Pasien
+                                            </button>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="text-xs text-on-surface-variant font-medium">—</span>
                                     <?php endif; ?>

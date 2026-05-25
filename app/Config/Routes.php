@@ -13,6 +13,8 @@ $routes->post('/login', 'AuthController::attemptLogin');
 $routes->get('/logout', 'AuthController::logout');
 $routes->get('/register', 'AuthController::register');
 $routes->post('/register', 'AuthController::attemptRegister');
+$routes->get('/forgot-password', 'AuthController::forgotPassword');
+$routes->post('/forgot-password', 'AuthController::attemptForgotPassword');
 
 // === Dashboard Pasien (proteksi session dilakukan di Controller) ===
 $routes->get('pasien/dashboard', 'PasienController::dashboard');

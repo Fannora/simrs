@@ -153,6 +153,9 @@ if ($hour < 11) {
             <span class="material-symbols-outlined">dashboard</span>
             <span class="font-label-md text-label-md">Beranda</span>
         </a>
+        <div class="pt-4 pb-2 px-3">
+            <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Layanan</p>
+        </div>
         <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('pasien/booking') ?>">
             <span class="material-symbols-outlined">calendar_today</span>
             <span class="font-label-md text-label-md">Janji Temu</span>
@@ -161,6 +164,9 @@ if ($hour < 11) {
             <span class="material-symbols-outlined">history_edu</span>
             <span class="font-label-md text-label-md">Riwayat</span>
         </a>
+        <div class="pt-4 pb-2 px-3">
+            <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Akun</p>
+        </div>
         <a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-secondary text-white font-bold transition-all duration-200" href="<?= base_url('pasien/settings') ?>">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
             <span class="font-label-md text-label-md">Pengaturan</span>
@@ -192,7 +198,20 @@ if ($hour < 11) {
                     <p class="font-label-md text-label-md font-bold"><?= esc($pasien['nama_pasien']) ?></p>
                     <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">No. RM: <?= esc($pasien['no_rm']) ?></p>
                 </div>
-                <img alt="Foto profil pasien" class="w-10 h-10 rounded-full object-cover border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgZDAHfyLM-kmwULaIyRGid6vmIXH1bS89BHXzfPQ-5u_V6WwCGcP8Nu76OzqW33ITJac0FhyPQynYQaaeT4r-gV_9EJGqFZar5BOLVmbFiCQz4PnAKXucfc8XgGw-VHWkms7WYbqafYuEX0-FgtLERjTpdkJQSJoOit4XJtudje7nFnVYaV51TYi4L9tD9zs4nQjbZmKtD_LNhTfGLu2AcMB2ahFpd5ARl1kfYASIQQB3ZXdhtzLiDW4Tw9kG7ykIKnYE6IooZW8q"/>
+                <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary border border-outline-variant font-bold font-headline-sm select-none">
+                    <?php
+                        $words = explode(' ', $pasien['nama_pasien']);
+                        $initials = '';
+                        $count = 0;
+                        foreach ($words as $w) {
+                            if ($count < 2) {
+                                $initials .= strtoupper(substr($w, 0, 1));
+                                $count++;
+                            }
+                        }
+                        echo esc(!empty($initials) ? $initials : 'PS');
+                    ?>
+                </div>
             </div>
         </div>
     </div>

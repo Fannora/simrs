@@ -163,6 +163,9 @@
             <span class="material-symbols-outlined">dashboard</span>
             <span class="font-label-md text-label-md">Dashboard</span>
         </a>
+        <div class="pt-4 pb-2 px-3">
+            <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Menu</p>
+        </div>
         <!-- Active Navigation -->
         <a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-secondary text-white font-bold transition-all duration-200 shadow-sm" href="<?= base_url('dokter/antrian') ?>">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">format_list_numbered</span>
@@ -173,6 +176,9 @@
             <span class="material-symbols-outlined">history</span>
             <span class="font-label-md text-label-md">Riwayat Pemeriksaan</span>
         </a>
+        <div class="pt-4 pb-2 px-3">
+            <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Akun</p>
+        </div>
         <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-secondary hover:bg-slate-50 transition-colors duration-200" href="<?= base_url('dokter/settings') ?>">
             <span class="material-symbols-outlined">settings</span>
             <span class="font-label-md text-label-md">Pengaturan</span>

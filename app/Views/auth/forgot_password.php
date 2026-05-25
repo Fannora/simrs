@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Login - MiraCare Hospital</title>
+    <title>Lupa Kata Sandi Pasien - MiraCare Hospital</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700&amp;family=Geist:wght@500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -121,24 +121,24 @@
 </head>
 <body class="bg-background font-body-md text-on-surface min-h-screen flex flex-col">
 
-<!-- Header Navigation (Simplified for Transactional Page) -->
+<!-- Header Navigation -->
 <header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 fixed top-0 z-50">
     <a href="<?= base_url('/') ?>" class="flex items-center gap-2">
         <img src="<?= base_url('assets/img/MiraCareLogo.png') ?>" alt="MiraCare Logo" class="h-10 w-auto object-contain"/>
     </a>
     <div class="hidden md:flex gap-6 items-center">
         <a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="<?= base_url('/') ?>">Beranda</a>
-        <a class="font-label-md text-label-md text-secondary border border-secondary px-4 py-1.5 rounded-lg hover:bg-secondary hover:text-white transition-all font-semibold" href="<?= base_url('register') ?>">Register</a>
+        <a class="font-label-md text-label-md text-secondary border border-secondary px-4 py-1.5 rounded-lg hover:bg-secondary hover:text-white transition-all font-semibold" href="<?= base_url('login') ?>">Masuk</a>
     </div>
 </header>
 
 <!-- Main Content Area -->
 <main class="flex-grow flex items-center justify-center pt-24 pb-16 px-margin-mobile abstract-medical-pattern">
-    <div class="w-full max-w-[440px]">
+    <div class="w-full max-w-[480px]">
         
         <!-- Flash Messages -->
         <?php if (session()->getFlashdata('error')): ?>
-            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200 flex items-center gap-2" role="alert">
+            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200 flex items-center gap-2 animate-fadeIn" role="alert">
                 <span class="material-symbols-outlined text-[20px] text-alert-crimson" style="font-variation-settings: 'FILL' 1;">error</span>
                 <div>
                     <?= session()->getFlashdata('error') ?>
@@ -147,7 +147,7 @@
         <?php endif; ?>
 
         <?php if (session()->getFlashdata('success')): ?>
-            <div class="p-4 mb-4 text-sm text-emerald-800 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2" role="alert">
+            <div class="p-4 mb-4 text-sm text-emerald-800 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2 animate-fadeIn" role="alert">
                 <span class="material-symbols-outlined text-[20px] text-success-emerald" style="font-variation-settings: 'FILL' 1;">check_circle</span>
                 <div>
                     <?= session()->getFlashdata('success') ?>
@@ -155,75 +155,101 @@
             </div>
         <?php endif; ?>
 
-        <!-- Login Card -->
+        <!-- Forgot Password Card -->
         <div class="bg-surface-container-lowest border border-outline-variant rounded-xl login-card-shadow overflow-hidden">
             
             <div class="p-6 md:p-10 space-y-6">
-                <!-- Brand Identity inside Card -->
+                <!-- Brand Identity & Header -->
                 <div class="text-center space-y-2">
                     <div class="flex justify-center mb-4">
                         <img src="<?= base_url('assets/img/MiraCareLogo.png') ?>" alt="MiraCare Logo" class="h-12 w-auto object-contain"/>
                     </div>
-                    <h1 class="font-headline-sm text-headline-sm text-primary">Selamat Datang Kembali</h1>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant">Silakan masukkan detail akun Anda untuk melanjutkan akses layanan kesehatan.</p>
+                    <h1 class="font-headline-sm text-headline-sm text-primary">Lupa Kata Sandi Pasien</h1>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Silakan verifikasi data rekam medis Anda untuk melakukan reset kata sandi mandiri.</p>
+                </div>
+
+                <div class="p-3.5 bg-secondary-fixed/30 rounded-lg flex items-start gap-2.5">
+                    <span class="material-symbols-outlined text-secondary text-[22px] mt-0.5" style="font-variation-settings: 'FILL' 1;">info</span>
+                    <p class="font-body-sm text-[13px] leading-relaxed text-on-secondary-fixed">
+                        Layanan atur ulang kata sandi mandiri ini <strong>hanya tersedia untuk Pasien</strong>. Bagi Dokter dan Admin, silakan menghubungi IT Support untuk pemulihan akun.
+                    </p>
                 </div>
                 
-                <!-- Login Form -->
-                <form class="space-y-5" action="<?= base_url('login') ?>" method="POST" id="loginForm">
+                <!-- Forgot Password Form -->
+                <form class="space-y-5" action="<?= base_url('forgot-password') ?>" method="POST" id="forgotForm">
                     <?= csrf_field() ?>
                     
+                    <!-- Username Field -->
                     <div class="space-y-2">
-                        <label class="font-label-md text-label-md text-on-surface block" for="username" id="idLabel">Username</label>
+                        <label class="font-label-md text-label-md text-on-surface block" for="username">Username Pasien</label>
                         <div class="relative group">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">person</span>
-                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="username" name="username" placeholder="contoh: budi_santoso atau dr_rusdi" type="text" required autocomplete="username"/>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="username" name="username" placeholder="Masukkan username terdaftar Anda" type="text" required autocomplete="username"/>
                         </div>
                     </div>
-                    
+
+                    <!-- Pasien NIK Field -->
                     <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <label class="font-label-md text-label-md text-on-surface block" for="password">Kata Sandi</label>
-                            <a class="font-label-md text-label-md text-secondary hover:underline" href="<?= base_url('forgot-password') ?>">Lupa Kata Sandi?</a>
-                        </div>
+                        <label class="font-label-md text-label-md text-on-surface block" for="nik">Nomor NIK KTP Pasien</label>
                         <div class="relative group">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">lock</span>
-                            <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="password" name="password" placeholder="••••••••" type="password" required autocomplete="current-password"/>
-                            <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button" onclick="togglePassword()">
-                                <span class="material-symbols-outlined" id="eyeIcon">visibility</span>
-                            </button>
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">fingerprint</span>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="nik" name="nik" placeholder="Masukkan 16 digit NIK Anda" type="text" pattern="[0-9]{16}" title="NIK harus berupa 16 digit angka" required/>
+                        </div>
+                    </div>
+
+
+
+                    <!-- New Password Fields -->
+                    <div class="space-y-4 pt-2 border-t border-outline-variant">
+                        <div class="space-y-2">
+                            <label class="font-label-md text-label-md text-on-surface block" for="password">Kata Sandi Baru</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">lock_reset</span>
+                                <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="password" name="password" placeholder="Min. 8 karakter, kombinasi unik" type="password" required autocomplete="new-password"/>
+                                <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button" onclick="togglePassword('password', 'eyeIcon1')">
+                                    <span class="material-symbols-outlined" id="eyeIcon1">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="font-label-md text-label-md text-on-surface block" for="konfirmasi_password">Konfirmasi Kata Sandi Baru</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">lock</span>
+                                <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="konfirmasi_password" name="konfirmasi_password" placeholder="Ulangi kata sandi baru" type="password" required autocomplete="new-password"/>
+                                <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button" onclick="togglePassword('konfirmasi_password', 'eyeIcon2')">
+                                    <span class="material-symbols-outlined" id="eyeIcon2">visibility</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-2 py-1">
-                        <input class="w-4 h-4 rounded border-outline-variant text-secondary focus:ring-secondary" id="remember" name="remember" type="checkbox"/>
-                        <label class="font-body-sm text-body-sm text-on-surface-variant cursor-pointer" for="remember">Ingat saya di perangkat ini</label>
-                    </div>
-                    
-                    <button class="w-full py-3.5 bg-secondary text-white font-label-md text-label-md rounded-lg hover:bg-opacity-90 active:opacity-80 transition-all shadow-sm flex items-center justify-center gap-2 font-semibold" type="submit" id="btnLogin">
+                    <button class="w-full py-3.5 bg-secondary text-white font-label-md text-label-md rounded-lg hover:bg-opacity-90 active:opacity-80 transition-all shadow-sm flex items-center justify-center gap-2 font-semibold" type="submit" id="btnSubmit">
                         <span class="btn-text flex items-center gap-2 justify-center">
-                            Masuk Ke Portal
-                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                            Atur Ulang Kata Sandi
+                            <span class="material-symbols-outlined text-[18px]">vpn_key</span>
                         </span>
                     </button>
                 </form>
                 
-                <!-- IT Support Help -->
+                <!-- Security Note -->
                 <div class="pt-4 border-t border-outline-variant">
                     <div class="flex items-start gap-3 p-3 bg-surface-container-low rounded-lg">
-                        <span class="material-symbols-outlined text-secondary">contact_support</span>
-                        <p class="font-body-sm text-body-sm text-on-surface-variant">
-                            Butuh bantuan akses? <a class="text-secondary font-semibold hover:underline" href="<?= base_url('/#demo') ?>">Hubungi IT Support kami</a> atau kunjungi meja informasi hospital.
+                        <span class="material-symbols-outlined text-secondary">security</span>
+                        <p class="font-body-sm text-[13px] text-on-surface-variant">
+                            Jika Anda mengalami kendala verifikasi medis, silakan hubungi <a class="text-secondary font-semibold hover:underline" href="<?= base_url('/#demo') ?>">IT Support MiraCare</a> di Gedung Administrasi Lt. 2.
                         </p>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Additional Links -->
-        <div class="mt-8 text-center space-y-4">
-            <p class="font-body-sm text-body-sm text-on-surface-variant">
-                Belum memiliki akun MiraCare? <a class="text-secondary font-semibold hover:underline" href="<?= base_url('register') ?>">Daftar sekarang</a>
-            </p>
+        <!-- Back to Login Link -->
+        <div class="mt-8 text-center">
+            <a class="font-body-sm text-body-sm text-secondary font-semibold hover:underline flex items-center justify-center gap-1.5" href="<?= base_url('login') ?>">
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                Kembali ke Halaman Login
+            </a>
         </div>
     </div>
 </main>
@@ -243,9 +269,9 @@
 </footer>
 
 <script>
-    function togglePassword() {
-        const passwordInput = document.getElementById('password');
-        const eyeIcon = document.getElementById('eyeIcon');
+    function togglePassword(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const eyeIcon = document.getElementById(iconId);
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             eyeIcon.textContent = 'visibility_off';
@@ -255,14 +281,14 @@
         }
     }
 
-    // Loading state on submit
-    document.getElementById('loginForm').addEventListener('submit', function() {
-        const btn = document.getElementById('btnLogin');
+    // Loading State on Submit
+    document.getElementById('forgotForm').addEventListener('submit', function() {
+        const btn = document.getElementById('btnSubmit');
         btn.disabled = true;
         btn.classList.add('opacity-70', 'cursor-not-allowed');
         btn.innerHTML = `
             <span class="flex items-center gap-2 justify-center">
-                Memproses...
+                Memverifikasi & Menyimpan...
                 <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

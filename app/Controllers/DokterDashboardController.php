@@ -32,6 +32,15 @@ class DokterDashboardController extends BaseController
             ->getRowArray();
     }
 
+    private function isAppointmentTime($pendaftaran)
+    {
+        date_default_timezone_set('Asia/Jakarta');
+        $now = new \DateTime();
+        $timeStr = $pendaftaran['slot_waktu'] ?: (!empty($pendaftaran['jam_kunjungan']) ? substr($pendaftaran['jam_kunjungan'], 0, 5) : '00:00');
+        $appointmentTime = new \DateTime($pendaftaran['tgl_daftar'] . ' ' . $timeStr);
+        return $now >= $appointmentTime;
+    }
+
     /**
      * Dashboard Dokter
      */
@@ -48,7 +57,7 @@ class DokterDashboardController extends BaseController
         }
 
         $jadwalHariIni = $this->db->table('tbl_pendaftaran p')
-            ->select('p.no_rawat, p.no_rm, ps.nama_pasien, ps.tgl_lahir, ps.jk, p.jam_kunjungan, p.slot_waktu, p.keluhan_awal, p.status_periksa')
+            ->select('p.no_rawat, p.no_rm, p.tgl_daftar, ps.nama_pasien, ps.tgl_lahir, ps.jk, p.jam_kunjungan, p.slot_waktu, p.keluhan_awal, p.status_periksa')
             ->join('tbl_pasien ps', 'p.no_rm = ps.no_rm')
             ->where('p.id_dokter', $dokter['id_dokter'])
             ->where('p.tgl_daftar', date('Y-m-d'))
@@ -147,6 +156,14 @@ class DokterDashboardController extends BaseController
         // Pastikan dokter yang login adalah pemilik jadwal ini
         if ((int) $pendaftaran['id_dokter'] !== (int) $dokter['id_dokter']) {
             session()->setFlashdata('error', 'Anda tidak memiliki akses ke data ini.');
+            return redirect()->to(base_url('dokter/dashboard'));
+        }
+
+        // Cek apakah sudah waktunya periksa (tanggal dan jam janji temu)
+        if (!$this->isAppointmentTime($pendaftaran)) {
+            $tglJanji = date('d M Y', strtotime($pendaftaran['tgl_daftar']));
+            $waktuJanji = $pendaftaran['slot_waktu'] ?: substr($pendaftaran['jam_kunjungan'], 0, 5);
+            session()->setFlashdata('error', 'Belum memasuki waktu janji temu pasien (' . $tglJanji . ' ' . $waktuJanji . ' WIB).');
             return redirect()->to(base_url('dokter/dashboard'));
         }
 
@@ -343,7 +360,7 @@ class DokterDashboardController extends BaseController
 
         // Fetch active queue for today (Belum Diperiksa & Sedang Diperiksa)
         $antrian = $this->db->table('tbl_pendaftaran p')
-            ->select('p.no_rawat, p.no_rm, ps.nama_pasien, ps.tgl_lahir, ps.jk, p.jam_kunjungan, p.slot_waktu, p.keluhan_awal, p.status_periksa')
+            ->select('p.no_rawat, p.no_rm, p.tgl_daftar, ps.nama_pasien, ps.tgl_lahir, ps.jk, p.jam_kunjungan, p.slot_waktu, p.keluhan_awal, p.status_periksa')
             ->join('tbl_pasien ps', 'p.no_rm = ps.no_rm')
             ->where('p.id_dokter', $dokter['id_dokter'])
             ->where('p.tgl_daftar', date('Y-m-d'))
@@ -384,6 +401,14 @@ class DokterDashboardController extends BaseController
 
         if (!$pendaftaran || (int)$pendaftaran['id_dokter'] !== (int)$dokter['id_dokter']) {
             session()->setFlashdata('error', 'Anda tidak memiliki akses ke data ini.');
+            return redirect()->back();
+        }
+
+        // Cek apakah sudah waktunya periksa (tanggal dan jam janji temu)
+        if (!$this->isAppointmentTime($pendaftaran)) {
+            $tglJanji = date('d M Y', strtotime($pendaftaran['tgl_daftar']));
+            $waktuJanji = $pendaftaran['slot_waktu'] ?: substr($pendaftaran['jam_kunjungan'], 0, 5);
+            session()->setFlashdata('error', 'Belum memasuki waktu janji temu pasien (' . $tglJanji . ' ' . $waktuJanji . ' WIB).');
             return redirect()->back();
         }
 

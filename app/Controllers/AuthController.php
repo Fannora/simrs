@@ -173,4 +173,61 @@ class AuthController extends BaseController
         session()->setFlashdata('success', 'Registrasi berhasil! Silakan login dengan akun Anda.');
         return redirect()->to(base_url('login'));
     }
+
+    public function forgotPassword()
+    {
+        return view('auth/forgot_password');
+    }
+
+    public function attemptForgotPassword()
+    {
+        $username = $this->request->getPost('username');
+        $nik = $this->request->getPost('nik');
+        $password = $this->request->getPost('password');
+        $konfirmasi_password = $this->request->getPost('konfirmasi_password');
+
+        if (empty($username) || empty($nik) || empty($password) || empty($konfirmasi_password)) {
+            session()->setFlashdata('error', 'Semua field wajib harus diisi.');
+            return redirect()->back();
+        }
+
+        if ($password !== $konfirmasi_password) {
+            session()->setFlashdata('error', 'Kata sandi baru dan konfirmasi tidak cocok.');
+            return redirect()->back();
+        }
+
+        $db = \Config\Database::connect();
+        $user = $db->table('tbl_user')->where('username', $username)->get()->getRowArray();
+        
+        if (!$user) {
+            session()->setFlashdata('error', 'Username tidak ditemukan.');
+            return redirect()->back();
+        }
+
+        // Batasi hanya untuk Pasien
+        if ($user['level_id'] !== 'Pasien') {
+            session()->setFlashdata('error', 'Fitur atur ulang kata sandi mandiri hanya berlaku untuk Pasien. Bagi Dokter dan Admin, silakan hubungi pihak IT Support.');
+            return redirect()->back();
+        }
+
+        // Verifikasi NIK Pasien
+        $pasien = $db->table('tbl_pasien')
+            ->where('id_user', $user['id_user'])
+            ->where('nik', $nik)
+            ->get()
+            ->getRowArray();
+
+        if ($pasien) {
+            $db->table('tbl_user')
+                ->where('id_user', $user['id_user'])
+                ->update(['password' => password_hash($password, PASSWORD_DEFAULT)]);
+
+            session()->setFlashdata('success', 'Kata sandi berhasil diatur ulang! Silakan masuk.');
+            return redirect()->to(base_url('login'));
+        } else {
+            session()->setFlashdata('error', 'Verifikasi gagal: Nomor NIK salah.');
+        }
+
+        return redirect()->back();
+    }
 }
