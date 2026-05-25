@@ -1,221 +1,50 @@
-<!DOCTYPE html>
-<html class="loading" lang="id" data-textdirection="ltr">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-    <meta name="description" content="RS MiraCare - Sistem Informasi Rumah Sakit">
-    <meta name="author" content="RS MiraCare">
-    <title><?= $title ?? 'Dashboard Pasien' ?> — RS MiraCare</title>
-    <link rel="shortcut icon" type="image/x-icon" href="<?= base_url('pages/template/hospital-menu-template/app-assets/images/ico/favicon.ico') ?>">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- BEGIN VENDOR CSS-->
-    <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/vendors.css') ?>">
-    <!-- END VENDOR CSS-->
-    <!-- BEGIN MODERN CSS-->
-    <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/app.css') ?>">
-    <!-- END MODERN CSS-->
-    <!-- BEGIN Page Level CSS-->
-    <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/core/menu/menu-types/vertical-menu.css') ?>">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/core/colors/palette-gradient.css') ?>">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('pages/template/hospital-menu-template/app-assets/css/pages/hospital.css') ?>">
-    <!-- END Page Level CSS-->
-    <!-- BEGIN Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/style.css') ?>">
-    <!-- END Custom CSS-->
-    <style>
-      body { font-family: 'DM Sans', sans-serif; background-color: #f8fafc !important; }
-      .brand-text, h1, h2, h3, h4, h5, .card-title { font-family: 'Plus Jakarta Sans', sans-serif !important; }
-      .navbar-brand .brand-text { font-weight: 700; }
-      
-      /* RS MiraCare Styling Overrides */
-      nav.header-navbar {
-          background: #0047AB !important; /* Deep Trust Blue */
-      }
-      nav.header-navbar .navbar-header {
-          background: #0047AB !important;
-      }
-      .main-menu.menu-light .navigation > li.active > a {
-          background: linear-gradient(135deg, #0047AB, #06B6D4) !important;
-          color: white !important;
-          box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25) !important;
-          font-weight: 700;
-          border-radius: 8px;
-          margin: 4px 10px;
-      }
-      .main-menu.menu-light .navigation > li > a {
-          font-family: 'Plus Jakarta Sans', sans-serif !important;
-          font-weight: 600;
-          color: #475569 !important;
-          border-radius: 8px;
-          margin: 4px 10px;
-          transition: all 0.2s ease;
-      }
-      .main-menu.menu-light .navigation > li > a:hover {
-          color: #0047AB !important;
-          background-color: #f1f5f9 !important;
-      }
-      .btn-primary, .btn-info {
-          background: #06B6D4 !important;
-          border-color: #06B6D4 !important;
-          color: white !important;
-          font-family: 'Plus Jakarta Sans', sans-serif !important;
-          font-weight: 700 !important;
-          border-radius: 8px !important;
-          transition: all 0.25s !important;
-          box-shadow: 0 4px 10px rgba(6, 182, 212, 0.15) !important;
-      }
-      .btn-primary:hover, .btn-info:hover {
-          background: #0047AB !important;
-          border-color: #0047AB !important;
-          box-shadow: 0 6px 15px rgba(0, 71, 171, 0.25) !important;
-          transform: translateY(-1px);
-      }
-      .btn-danger {
-          border-radius: 8px !important;
-      }
-      .card {
-          border-radius: 16px !important;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
-          border: 1px solid rgba(226, 232, 240, 0.8) !important;
-          overflow: hidden;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-      .card:hover {
-          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08) !important;
-      }
-      .card-header {
-          border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
-          background-color: #f8fafc !important;
-          padding: 1.5rem !important;
-      }
-      .card-body {
-          padding: 1.5rem !important;
-      }
-      .table th {
-          font-family: 'Plus Jakarta Sans', sans-serif !important;
-          font-weight: 700 !important;
-          color: #1e293b !important;
-          border-bottom: 2px solid #e2e8f0 !important;
-      }
-    </style>
-    <?= $this->renderSection('css') ?>
-  </head>
-  <body class="vertical-layout vertical-menu 2-columns menu-expanded fixed-navbar" data-open="click" data-menu="vertical-menu" data-col="2-columns">
+<?= $this->extend('template/layout') ?>
 
-    <!-- fixed-top-->
-    <nav class="header-navbar navbar-expand-md navbar navbar-with-menu navbar-without-dd-arrow fixed-top navbar-semi-light bg-info navbar-shadow">
-      <div class="navbar-wrapper">
-        <div class="navbar-header">
-          <ul class="nav navbar-nav flex-row">
-            <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
-            <li class="nav-item"><a class="navbar-brand" href="<?= base_url('pasien/dashboard') ?>" style="display:flex;align-items:center;gap:8px;padding-top:14px;">
-                <img src="<?= base_url('assets/img/MiraCareLogo.png') ?>" alt="MiraCare Logo" class="h-8 w-auto object-contain brightness-0 invert" style="max-height:32px;"/>
-                <h3 class="brand-text white" style="margin:0;color:white !important;">RS MiraCare</h3></a></li>
-            <li class="nav-item d-md-none"><a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile"><i class="la la-ellipsis-v"></i></a></li>
-          </ul>
-        </div>
-        <div class="navbar-container content">
-          <div class="collapse navbar-collapse" id="navbar-mobile">
-            <ul class="nav navbar-nav mr-auto float-left">
-              <li class="nav-item d-none d-md-block"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu"></i></a></li>
-              <li class="nav-item d-none d-md-block"><a class="nav-link nav-link-expand" href="#"><i class="ficon ft-maximize"></i></a></li>
-            </ul>
-            <ul class="nav navbar-nav float-right">
-              <li class="dropdown dropdown-user nav-item"><a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
-                  <span class="mr-1">Halo, <strong><?= session()->get('nama_lengkap') ?? 'Pasien' ?></strong></span>
-                  <span class="avatar avatar-online">
-                    <img src="<?= base_url('pages/template/hospital-menu-template/app-assets/images/portrait/small/avatar-s-19.png') ?>" alt="avatar"><i></i>
-                  </span></a>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="<?= base_url('pasien/dashboard') ?>"><i class="ft-user"></i> Dashboard</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="<?= base_url('logout') ?>"><i class="ft-power"></i> Keluar</a>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+<?php
+    // Set portal-specific variables
+    $sidebarIcon = 'person';
+    $portalLabel = 'Portal Pasien';
+?>
 
-    <!-- ////////////////////////////////////////////////////////////////////////////-->
+<?= $this->section('sidebar') ?>
+    <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'pasien/dashboard') ? 'bg-secondary text-white font-bold shadow-sm' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('pasien/dashboard') ?>">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+        <span class="font-label-md text-label-md">Dashboard</span>
+    </a>
 
-    <div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
-      <div class="main-menu-content">
-        <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-
-          <li class="<?= (uri_string() == 'pasien/dashboard') ? 'active' : '' ?>">
-            <a href="<?= base_url('pasien/dashboard') ?>">
-              <i class="la la-home"></i>
-              <span class="menu-title">Dashboard</span>
-            </a>
-          </li>
-
-          <li class="navigation-header"><span>Layanan</span></li>
-
-          <li class="<?= (uri_string() == 'pasien/booking') ? 'active' : '' ?>">
-            <a href="<?= base_url('pasien/booking') ?>">
-              <i class="la la-calendar-plus-o"></i>
-              <span class="menu-title">Booking Baru</span>
-            </a>
-          </li>
-
-          <li class="<?= (uri_string() == 'pasien/riwayat') ? 'active' : '' ?>">
-            <a href="<?= base_url('pasien/riwayat') ?>">
-              <i class="la la-clock-o"></i>
-              <span class="menu-title">Riwayat</span>
-            </a>
-          </li>
-
-          <li class="<?= (uri_string() == 'pasien/rekam-medis') ? 'active' : '' ?>">
-            <a href="<?= base_url('pasien/rekam-medis') ?>">
-              <i class="la la-file-text"></i>
-              <span class="menu-title">Rekam Medis</span>
-            </a>
-          </li>
-
-          <li class="navigation-header"><span>Akun</span></li>
-
-          <li>
-            <a href="<?= base_url('logout') ?>">
-              <i class="la la-power-off danger"></i>
-              <span class="menu-title">Keluar</span>
-            </a>
-          </li>
-
-        </ul>
-      </div>
+    <div class="pt-4 pb-2 px-3">
+        <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Layanan</p>
     </div>
 
-    <div class="app-content content">
-      <div class="content-wrapper">
-        <div class="content-header row">
-          <div class="content-header-left col-md-6 col-12 mb-2 breadcrumb-new">
-            <h3 class="content-header-title mb-0 d-inline-block"><?= $title ?? 'Dashboard' ?></h3>
-          </div>
-        </div>
-        <div class="content-body">
-          <?= $this->renderSection('content') ?>
-        </div>
-      </div>
+    <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'pasien/booking') ? 'bg-secondary text-white font-bold shadow-sm' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('pasien/booking') ?>">
+        <span class="material-symbols-outlined">calendar_add_on</span>
+        <span class="font-label-md text-label-md">Booking Baru</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'pasien/riwayat') ? 'bg-secondary text-white font-bold shadow-sm' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('pasien/riwayat') ?>">
+        <span class="material-symbols-outlined">schedule</span>
+        <span class="font-label-md text-label-md">Riwayat</span>
+    </a>
+
+    <div class="pt-4 pb-2 px-3">
+        <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Akun</p>
     </div>
-    <!-- ////////////////////////////////////////////////////////////////////////////-->
 
-    <footer class="footer footer-static footer-light navbar-border navbar-shadow">
-      <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
-        <span class="float-md-left d-block d-md-inline-block">Copyright &copy; <?= date('Y') ?> <a class="text-bold-800 grey darken-2" href="<?= base_url('/') ?>">RS MiraCare</a>, All rights reserved.</span>
-        <span class="float-md-right d-block d-md-inline-block d-none d-lg-block">Sistem Informasi Rumah Sakit <i class="ft-heart pink"></i></span>
-      </p>
-    </footer>
+    <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'pasien/settings') ? 'bg-secondary text-white font-bold shadow-sm' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('pasien/settings') ?>">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="font-label-md text-label-md">Pengaturan</span>
+    </a>
+<?= $this->endSection() ?>
 
-    <!-- BEGIN VENDOR JS-->
-    <script src="<?= base_url('pages/template/hospital-menu-template/app-assets/vendors/js/vendors.min.js') ?>"></script>
-    <!-- BEGIN VENDOR JS-->
-    <!-- BEGIN MODERN JS-->
-    <script src="<?= base_url('pages/template/hospital-menu-template/app-assets/js/core/app-menu.js') ?>"></script>
-    <script src="<?= base_url('pages/template/hospital-menu-template/app-assets/js/core/app.js') ?>"></script>
-    <!-- END MODERN JS-->
-    <?= $this->renderSection('js') ?>
-  </body>
-</html>
+<?= $this->section('topbar_left') ?>
+    <h2 class="font-headline-sm text-headline-sm font-bold text-secondary"><?= $title ?? 'Dashboard Pasien' ?></h2>
+<?= $this->endSection() ?>
+
+<?= $this->section('topbar_right') ?>
+    <div class="text-right">
+        <p class="font-label-md text-label-md font-bold"><?= session()->get('nama_lengkap') ?? 'Pasien' ?></p>
+        <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Level: Pasien</p>
+    </div>
+    <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary border border-outline-variant font-bold font-headline-sm">
+        PS
+    </div>
+<?= $this->endSection() ?>
