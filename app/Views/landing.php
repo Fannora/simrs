@@ -229,32 +229,32 @@
         
         <!-- Tab Controls -->
         <div class="flex justify-center gap-md mb-xl" id="tab-controls">
-            <button class="px-xl py-md rounded-full font-label-md transition-all border border-outline-variant bg-surface text-on-surface-variant hover:border-primary" id="btn-pasien" onclick="switchTab('pasien')">Portal Pasien</button>
-            <button class="px-xl py-md rounded-full font-label-md transition-all border-2 border-primary bg-primary text-on-primary font-bold shadow-md" id="btn-dokter" onclick="switchTab('dokter')">Portal Dokter</button>
+            <button class="px-xl py-md rounded-full font-label-md transition-all border-2 border-primary bg-primary text-on-primary font-bold shadow-md" id="btn-pasien" onclick="switchTab('pasien')">Portal Pasien</button>
+            <button class="px-xl py-md rounded-full font-label-md transition-all border border-outline-variant bg-surface text-on-surface-variant hover:border-primary" id="btn-dokter" onclick="switchTab('dokter')">Portal Dokter</button>
             <button class="px-xl py-md rounded-full font-label-md transition-all border border-outline-variant bg-surface text-on-surface-variant hover:border-primary" id="btn-admin" onclick="switchTab('admin')">Portal Admin</button>
         </div>
         
         <!-- Tab Content Container -->
         <div class="relative bg-surface rounded-3xl shadow-2xl overflow-hidden border border-outline-variant/20 min-h-[500px]" id="tab-content">
             
-            <!-- Default Active Content: Portal Dokter -->
-            <div class="flex flex-col md:flex-row items-stretch h-full" id="display-dokter">
+            <!-- Default Active Content: Portal Pasien -->
+            <div class="flex flex-col md:flex-row items-stretch h-full" id="display-pasien">
                 <div class="p-2xl flex-1 flex flex-col justify-center space-y-md">
-                    <h3 class="font-h3 text-h2 text-primary">Portal Dokter - Efisiensi Pelayanan</h3>
-                    <p class="text-on-surface-variant">Portal terintegrasi memudahkan dokter dalam mengakses riwayat medis pasien, menulis e-resep instan, dan memproses tindakan medis secara cepat demi hasil diagnosa yang optimal.</p>
+                    <h3 class="font-h3 text-h2 text-primary">Portal Pasien - Booking Online & Rekam Medis</h3>
+                    <p class="text-on-surface-variant">Memberikan kemudahan bagi Anda untuk melakukan registrasi mandiri, mencari jadwal dokter spesialis, memesan konsultasi medis online, memantau nomor antrean langsung dari smartphone, serta melihat riwayat kesehatan secara rahasia dan aman.</p>
                     <ul class="space-y-sm">
                         <li class="flex items-center gap-2 text-on-surface font-label-md">
                             <span class="material-symbols-outlined text-secondary">check_circle</span>
-                            Resume Medis Otomatis & Riwayat Alergi Pasien
+                            Pemesanan Kunjungan Online dalam Hitungan Detik
                         </li>
                         <li class="flex items-center gap-2 text-on-surface font-label-md">
                             <span class="material-symbols-outlined text-secondary">check_circle</span>
-                            Penulisan Resep Obat Elektronik Terhubung Langsung ke Apotek
+                            Akses Hasil Laboratorium & Rekam Medis Pribadi
                         </li>
                     </ul>
                 </div>
                 <div class="flex-1 bg-surface-container relative overflow-hidden flex items-center justify-center p-xl">
-                    <img alt="Doctor Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA23IroM3QhEE1YA2_TlZd2OslVyhB5BEnUf9eSpTPg1sHxrC2LTH1GIxQF0MdU1M7o_kh_SMgd0evHfs1t1iwrix40bpA2l2wxCWH2fBaMttvRbf0Rb7rWQwFyqQCeXNAuAdRdMyuIFf72L64DUpnya8Z14b878iZI7NSoeMTONxAo6LBaati1a-u4sJ9KM-sNGtvDaJkHk0aHVrO4ibpsIwGZyBitBuprbmXlxbJDKWOMsO3Ym9mnftw0SazpFjvf0Z3EGQbPb_8"/>
+                    <img alt="Patient Portal Mockup" class="w-full h-auto rounded-xl shadow-lg border border-outline-variant/50" src="<?= base_url('assets/img/PortalPasien.png') ?>"/>
                 </div>
             </div>
             
@@ -429,7 +429,7 @@
             <ul class="space-y-sm text-sm">
                 <li class="flex items-start gap-2">
                     <span class="material-symbols-outlined text-secondary text-lg mt-0.5">location_on</span>
-                    Jl. Selambo IV No. 4a, Amplas, Sumatera Utara
+                    Jl. Selambo IV No. 4a, Amplas, Medan, Sumatera Utara
                 </li>
                 <li class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-secondary text-lg">mail</span>

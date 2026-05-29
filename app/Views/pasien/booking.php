@@ -26,6 +26,8 @@ if ($hour < 11) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700;800&amp;family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 for premium notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script id="tailwind-config">
         tailwind.config = {
@@ -199,9 +201,9 @@ if ($hour < 11) {
             <input class="bg-slate-50 border-none rounded-full py-2 pl-10 pr-4 w-64 text-body-sm focus:ring-2 focus:ring-secondary focus:outline-none" placeholder="Cari layanan, dokter..." type="text"/>
         </div>
         <div class="flex items-center gap-4">
-            <a href="<?= base_url('/#demo') ?>" class="text-on-surface-variant hover:text-secondary transition-colors p-2">
+            <div class="text-on-surface-variant p-2 select-none">
                 <span class="material-symbols-outlined">notifications</span>
-            </a>
+            </div>
             <div class="flex items-center gap-3 border-l border-outline-variant pl-4">
                 <div class="text-right">
                     <p class="font-label-md text-label-md font-bold"><?= esc($pasien['nama_pasien']) ?></p>
@@ -430,9 +432,9 @@ if ($hour < 11) {
                         </div>
                     </div>
                     
-                    <div class="mt-6 flex items-start gap-2 p-3 bg-cyan-50 rounded-xl border border-cyan-100">
-                        <input type="checkbox" id="agreeCheck" class="w-4.5 h-4.5 rounded border-cyan-300 text-secondary focus:ring-secondary mt-0.5">
-                        <label for="agreeCheck" class="text-xs text-cyan-800 leading-relaxed font-semibold cursor-pointer">
+                    <div class="mt-6 flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-300">
+                        <input type="checkbox" id="agreeCheck" class="w-5 h-5 rounded border-slate-400 text-slate-900 focus:ring-slate-900 mt-0.5 cursor-pointer">
+                        <label for="agreeCheck" class="text-xs text-slate-900 leading-relaxed font-semibold cursor-pointer select-none">
                             Saya menyatakan bahwa seluruh rincian informasi janji temu di atas telah benar dan saya bersedia hadir tepat waktu di rumah sakit minimal 15 menit sebelum jadwal.
                         </label>
                     </div>
@@ -519,6 +521,13 @@ $(document).ready(function() {
         $('#selectedDokterNama').val('');
         $('#toStep2').prop('disabled', true);
 
+        // Reset Step 2 fields as well because the polyclinic/doctor has changed
+        $('#tglDaftar').val('');
+        $('#selectedSlot').val('');
+        $('#slotSection').addClass('hidden');
+        $('#slotContainer').empty();
+        checkStep2Valid();
+
         fetchDokter(id_poli);
     });
 
@@ -564,8 +573,24 @@ $(document).ready(function() {
                 $('.dokter-card').removeClass('border-secondary bg-secondary/5 shadow-sm').addClass('border-slate-150 bg-white');
                 $(this).addClass('border-secondary bg-secondary/5 shadow-sm').removeClass('border-slate-150 bg-white');
                 
-                $('#selectedDokter').val($(this).data('id'));
+                const newDocId = $(this).data('id');
+                const oldDocId = $('#selectedDokter').val();
+                
+                $('#selectedDokter').val(newDocId);
                 $('#selectedDokterNama').val($(this).data('nama'));
+                
+                // If they changed the doctor to a different one, reset slot and refresh if date is filled
+                if (newDocId != oldDocId) {
+                    $('#selectedSlot').val('');
+                    if ($('#tglDaftar').val() !== '') {
+                        fetchSlot();
+                    } else {
+                        $('#slotSection').addClass('hidden');
+                        $('#slotContainer').empty();
+                    }
+                    checkStep2Valid();
+                }
+                
                 checkStep1Valid();
             });
         }).fail(function() {
@@ -599,7 +624,17 @@ $(document).ready(function() {
         today.setHours(0, 0, 0, 0);
 
         if (date.getDay() === 0) {
-            alert('Layanan janji temu tidak tersedia pada hari Minggu. Silakan tentukan hari lain.');
+            Swal.fire({
+                title: 'Jadwal Tidak Tersedia',
+                text: 'Layanan janji temu tidak tersedia pada hari Minggu. Silakan tentukan hari lain.',
+                icon: 'warning',
+                confirmButtonColor: '#0047AB',
+                confirmButtonText: 'Pilih Tanggal Lain',
+                customClass: {
+                    popup: 'rounded-2xl shadow-xl border border-slate-100',
+                    confirmButton: 'rounded-xl font-semibold px-6 py-2.5 text-sm transition-all hover:bg-opacity-95'
+                }
+            });
             this.value = '';
             $('#slotSection').addClass('hidden');
             $('#selectedSlot').val('');
@@ -607,7 +642,17 @@ $(document).ready(function() {
             return;
         }
         if (date <= today) {
-            alert('Tanggal janji temu harus minimal besok.');
+            Swal.fire({
+                title: 'Tanggal Tidak Valid',
+                text: 'Tanggal janji temu harus minimal besok.',
+                icon: 'error',
+                confirmButtonColor: '#0047AB',
+                confirmButtonText: 'Mengerti',
+                customClass: {
+                    popup: 'rounded-2xl shadow-xl border border-slate-100',
+                    confirmButton: 'rounded-xl font-semibold px-6 py-2.5 text-sm transition-all hover:bg-opacity-95'
+                }
+            });
             this.value = '';
             $('#slotSection').addClass('hidden');
             $('#selectedSlot').val('');
@@ -632,6 +677,63 @@ $(document).ready(function() {
         $.get('<?= base_url('pasien/booking/slot') ?>?id_dokter=' + id_dokter + '&tanggal=' + tanggal, function(data) {
             $('#slotLoading').addClass('hidden');
 
+            if (data.error_limit) {
+                Swal.fire({
+                    title: 'Batas Booking Tercapai',
+                    text: data.error_limit,
+                    icon: 'warning',
+                    confirmButtonColor: '#0047AB',
+                    confirmButtonText: 'Mengerti',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-xl border border-slate-100',
+                        confirmButton: 'rounded-xl font-semibold px-6 py-2.5 text-sm transition-all hover:bg-opacity-95'
+                    }
+                });
+                $('#tglDaftar').val('');
+                $('#slotSection').addClass('hidden');
+                $('#selectedSlot').val('');
+                checkStep2Valid();
+                return;
+            }
+
+            if (data.error_penalty) {
+                Swal.fire({
+                    title: 'Akun Ditangguhkan',
+                    text: data.error_penalty,
+                    icon: 'error',
+                    confirmButtonColor: '#ba1a1a',
+                    confirmButtonText: 'Mengerti',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-xl border border-slate-100',
+                        confirmButton: 'rounded-xl font-semibold px-6 py-2.5 text-sm transition-all hover:bg-opacity-95'
+                    }
+                });
+                $('#tglDaftar').val('');
+                $('#slotSection').addClass('hidden');
+                $('#selectedSlot').val('');
+                checkStep2Valid();
+                return;
+            }
+
+            if (data.error_existing) {
+                Swal.fire({
+                    title: 'Jadwal Sudah Ada',
+                    text: data.error_existing,
+                    icon: 'warning',
+                    confirmButtonColor: '#0047AB',
+                    confirmButtonText: 'Pilih Tanggal Lain',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-xl border border-slate-100',
+                        confirmButton: 'rounded-xl font-semibold px-6 py-2.5 text-sm transition-all hover:bg-opacity-95'
+                    }
+                });
+                $('#tglDaftar').val('');
+                $('#slotSection').addClass('hidden');
+                $('#selectedSlot').val('');
+                checkStep2Valid();
+                return;
+            }
+
             if (data.length === 0) {
                 $('#slotContainer').html('<p class="text-xs text-slate-500 font-semibold py-2">Tidak ada slot waktu tersedia pada tanggal ini.</p>');
                 return;
@@ -641,30 +743,44 @@ $(document).ready(function() {
                 let btnClass = '';
                 let disabled = '';
                 let label = '';
+                let defaultClass = '';
 
                 if (s.status === 'penuh') {
-                    btnClass = 'bg-rose-50 border-rose-200 text-rose-500 cursor-not-allowed opacity-60';
+                    defaultClass = 'bg-red-50 border-red-300 text-red-500 cursor-not-allowed font-medium opacity-65';
+                    btnClass = defaultClass;
                     disabled = 'disabled';
                     label = ' (Penuh)';
                 } else if (s.hampir_penuh) {
-                    btnClass = 'border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 font-semibold slot-btn';
+                    defaultClass = 'border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 font-semibold';
+                    btnClass = defaultClass + ' slot-btn';
                     label = ' (Sisa ' + s.sisa + ')';
                 } else {
-                    btnClass = 'border-emerald-400 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold slot-btn';
+                    defaultClass = 'border-emerald-400 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold';
+                    btnClass = defaultClass + ' slot-btn';
                 }
 
-                const btn = `<button type="button" class="px-4 py-2 border rounded-xl text-xs transition-all ${btnClass}" data-slot="${s.slot}" ${disabled}>${s.slot}${label}</button>`;
+                const btn = `<button type="button" class="px-4 py-2 border rounded-xl text-xs transition-all ${btnClass}" data-slot="${s.slot}" data-default-class="${defaultClass}" data-type="${s.hampir_penuh ? 'limited' : 'available'}" ${disabled}>${s.slot}${label}</button>`;
                 $('#slotContainer').append(btn);
             });
 
             // Slot click handler
             $('#slotContainer').off('click', '.slot-btn:not([disabled])').on('click', '.slot-btn:not([disabled])', function() {
-                // Restore classes of other slots
+                // Restore default classes of all slot buttons
                 $('.slot-btn').each(function() {
-                    $(this).removeClass('bg-secondary text-white border-secondary scale-95 shadow-sm');
+                    const def = $(this).data('default-class');
+                    $(this).attr('class', 'px-4 py-2 border rounded-xl text-xs transition-all slot-btn ' + def);
                 });
 
-                $(this).addClass('bg-secondary text-white border-secondary scale-95 shadow-sm');
+                // Apply premium, bright selected classes to the clicked button
+                const type = $(this).data('type');
+                if (type === 'limited') {
+                    // Bright, prominent selected state for limited slot
+                    $(this).attr('class', 'px-4 py-2 border rounded-xl text-xs transition-all slot-btn bg-amber-500 text-white border-amber-500 font-bold scale-105 shadow-md ring-4 ring-amber-200');
+                } else {
+                    // Bright, prominent selected state for available slot
+                    $(this).attr('class', 'px-4 py-2 border rounded-xl text-xs transition-all slot-btn bg-emerald-500 text-white border-emerald-500 font-bold scale-105 shadow-md ring-4 ring-emerald-200');
+                }
+
                 $('#selectedSlot').val($(this).data('slot'));
                 checkStep2Valid();
             });
@@ -692,7 +808,60 @@ $(document).ready(function() {
     // STEP BUTTON EVENTS
     // ============================
     $('#toStep2').on('click', function() {
-        showStep(2);
+        const btn = $(this);
+        const originalContent = btn.html();
+        
+        btn.prop('disabled', true);
+        btn.html(`
+            <span class="flex items-center gap-2 justify-center">
+                Memeriksa Akun...
+                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </span>
+        `);
+
+        $.get('<?= base_url('pasien/booking/check-limits') ?>', function(data) {
+            btn.prop('disabled', false);
+            btn.html(originalContent);
+
+            if (data.error_penalty) {
+                Swal.fire({
+                    title: 'Akun Ditangguhkan',
+                    text: data.error_penalty,
+                    icon: 'error',
+                    confirmButtonColor: '#ba1a1a',
+                    confirmButtonText: 'Mengerti',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-xl border border-slate-100',
+                        confirmButton: 'rounded-xl font-semibold px-6 py-2.5 text-sm transition-all hover:bg-opacity-95'
+                    }
+                });
+                return;
+            }
+
+            if (data.error_limit) {
+                Swal.fire({
+                    title: 'Batas Booking Tercapai',
+                    text: data.error_limit,
+                    icon: 'warning',
+                    confirmButtonColor: '#0047AB',
+                    confirmButtonText: 'Mengerti',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-xl border border-slate-100',
+                        confirmButton: 'rounded-xl font-semibold px-6 py-2.5 text-sm transition-all hover:bg-opacity-95'
+                    }
+                });
+                return;
+            }
+
+            showStep(2);
+        }).fail(function() {
+            btn.prop('disabled', false);
+            btn.html(originalContent);
+            showStep(2);
+        });
     });
 
     $('#backToStep1').on('click', function() {

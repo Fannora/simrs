@@ -60,7 +60,6 @@ class AuthController extends BaseController
                 ]);
             }
 
-            session()->setFlashdata('success', 'Login berhasil!');
             return redirect()->to(base_url('pasien/dashboard'));
         }
 
@@ -77,13 +76,11 @@ class AuthController extends BaseController
                 session()->set('nama_lengkap', $user['username']);
             }
 
-            session()->setFlashdata('success', 'Login berhasil!');
             return redirect()->to(base_url('dokter/dashboard'));
         }
 
         // Admin → dashboard admin
         session()->set('nama_lengkap', $user['username']);
-        session()->setFlashdata('success', 'Login berhasil!');
         return redirect()->to(base_url('admin/dashboard'));
     }
 

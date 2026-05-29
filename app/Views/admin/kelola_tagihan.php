@@ -56,8 +56,21 @@
                             <?= esc($t['jenis_bayar']) ?>
                         </span>
                     </td>
-                    <td class="py-5 px-6 text-right font-bold text-slate-800 text-sm">
-                        Rp <?= number_format($t['total_biaya'], 0, ',', '.') ?>
+                    <td class="py-5 px-6 text-right">
+                        <div class="font-bold text-slate-800 text-sm">Rp <?= number_format($t['total_biaya'], 0, ',', '.') ?></div>
+                        <?php if (isset($t['biaya_konsultasi'])): ?>
+                        <div class="text-[10px] text-slate-400 mt-1 space-y-0.5">
+                            <?php if ($t['biaya_konsultasi'] > 0): ?>
+                            <div>Konsultasi: Rp <?= number_format($t['biaya_konsultasi'], 0, ',', '.') ?></div>
+                            <?php endif; ?>
+                            <?php if ($t['biaya_obat'] > 0): ?>
+                            <div>Obat: Rp <?= number_format($t['biaya_obat'], 0, ',', '.') ?></div>
+                            <?php endif; ?>
+                            <?php if (($t['biaya_kamar'] ?? 0) > 0): ?>
+                            <div>Kamar: Rp <?= number_format($t['biaya_kamar'], 0, ',', '.') ?></div>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
                     </td>
                     <td class="py-5 px-6 text-center">
                         <form method="POST" action="<?= base_url('admin/tagihan/update-status') ?>" class="inline-block">

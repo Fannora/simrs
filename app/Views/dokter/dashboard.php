@@ -133,13 +133,6 @@
         body {
             background-color: #f1f5f9;
         }
-        .bento-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .bento-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-        }
     </style>
 </head>
 <body class="font-body-md text-on-surface">
@@ -376,21 +369,25 @@
                                       $waktuJanji = esc($j['slot_waktu'] ?? substr($j['jam_kunjungan'], 0, 5));
                                       $tooltip = "Belum memasuki waktu janji temu ($tglJanji $waktuJanji WIB)";
                                     ?>
+                                    <div class="flex flex-wrap gap-2">
                                     <?php if ($j['status_periksa'] === 'Sedang Diperiksa'): ?>
                                         <?php if ($isTime): ?>
                                             <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="bg-secondary text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-85 transition-opacity inline-block shadow-sm">Input Rekam Medis</a>
                                         <?php else: ?>
                                             <button type="button" class="bg-secondary/40 text-white/70 px-4 py-2 rounded-lg text-xs font-bold cursor-not-allowed inline-block shadow-sm" title="<?= $tooltip ?>">Input Rekam Medis</button>
                                         <?php endif; ?>
+                                        <a href="<?= base_url('dokter/tidak-hadir/' . $j['no_rawat']) ?>" class="border border-rose-200 text-rose-600 hover:bg-rose-50 px-3 py-2 rounded-lg text-xs font-bold transition-all inline-block shadow-sm btn-tidak-hadir" data-no-rawat="<?= esc($j['no_rawat']) ?>">Tidak Hadir</a>
                                     <?php elseif ($j['status_periksa'] === 'Belum Diperiksa'): ?>
                                         <?php if ($isTime): ?>
                                             <a href="<?= base_url('dokter/panggil/' . $j['no_rawat']) ?>" class="border border-secondary text-secondary px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors inline-block shadow-sm">Panggil</a>
                                         <?php else: ?>
                                             <button type="button" class="border border-secondary/30 text-secondary/35 px-4 py-2 rounded-lg text-xs font-bold cursor-not-allowed inline-block shadow-sm" title="<?= $tooltip ?>">Panggil</button>
                                         <?php endif; ?>
+                                        <a href="<?= base_url('dokter/tidak-hadir/' . $j['no_rawat']) ?>" class="border border-rose-200 text-rose-600 hover:bg-rose-50 px-3 py-2 rounded-lg text-xs font-bold transition-all inline-block shadow-sm btn-tidak-hadir" data-no-rawat="<?= esc($j['no_rawat']) ?>">Tidak Hadir</a>
                                     <?php else: ?>
                                         <span class="text-xs text-on-surface-variant font-medium">—</span>
                                     <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -414,9 +411,21 @@
     const rows = document.querySelectorAll('tbody tr');
     rows.forEach(row => {
         row.addEventListener('click', (e) => {
-            if (e.target.closest('a')) return;
+            if (e.target.closest('a') || e.target.closest('button')) return;
             rows.forEach(r => r.classList.remove('bg-slate-50'));
             row.classList.add('bg-slate-50');
+        });
+    });
+
+    // Confirm Tidak Hadir Patient
+    document.querySelectorAll('.btn-tidak-hadir').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = btn.getAttribute('href');
+            const noRawat = btn.getAttribute('data-no-rawat');
+            if (confirm('Apakah Anda yakin ingin menandai pasien dengan nomor rawat ' + noRawat + ' sebagai "Tidak Hadir"?\n\nTindakan ini akan mengeluarkan pasien dari daftar antrean aktif.')) {
+                window.location.href = url;
+            }
         });
     });
 </script>

@@ -113,6 +113,45 @@ class PasienController extends BaseController
     }
 
     /**
+     * 2b. AJAX: Check limits & penalties
+     */
+    public function checkLimits()
+    {
+        if (!$this->checkPasienSession()) {
+            return $this->response->setJSON(['error' => 'Sesi berakhir.']);
+        }
+
+        $no_rm = session()->get('no_rm');
+        if (empty($no_rm)) {
+            $id_user = session()->get('id_user');
+            $pasien = $this->db->table('tbl_pasien')->where('id_user', $id_user)->get()->getRowArray();
+            $no_rm = $pasien ? $pasien['no_rm'] : null;
+        }
+
+        if ($no_rm) {
+            // SANKSI 1: Batasi No-Show (Tidak Hadir) Maksimal 3 Kali
+            $noShowBookings = $this->db->table('tbl_pendaftaran')
+                ->where('no_rm', $no_rm)
+                ->where('status_periksa', 'Tidak Hadir')
+                ->countAllResults();
+            if ($noShowBookings >= 3) {
+                return $this->response->setJSON(['error_penalty' => 'Akun Anda ditangguhkan sementara karena memiliki riwayat 3 kali Tidak Hadir (No-Show). Silakan hubungi CS Rumah Sakit untuk mengaktifkan kembali akun Anda.']);
+            }
+
+            // SANKSI 2: Batasi Booking Aktif Maksimal 3 Booking
+            $activeBookings = $this->db->table('tbl_pendaftaran')
+                ->where('no_rm', $no_rm)
+                ->whereIn('status_periksa', ['Belum Diperiksa', 'Sedang Diperiksa'])
+                ->countAllResults();
+            if ($activeBookings >= 3) {
+                return $this->response->setJSON(['error_limit' => 'Anda telah mencapai batas maksimal 3 booking aktif yang belum diselesaikan. Batalkan atau selesaikan janji temu sebelumnya terlebih dahulu.']);
+            }
+        }
+
+        return $this->response->setJSON(['status' => 'ok']);
+    }
+
+    /**
      * 3. AJAX: Get Dokter by Poli
      */
     public function getDokterByPoli()
@@ -148,6 +187,45 @@ class PasienController extends BaseController
             return $this->response->setJSON(['error' => 'Booking tidak tersedia pada hari Minggu.']);
         }
 
+        // Cek apakah pasien sudah memiliki booking aktif dengan dokter yang sama pada tanggal ini
+        $no_rm = session()->get('no_rm');
+        if (empty($no_rm)) {
+            $id_user = session()->get('id_user');
+            $pasien = $this->db->table('tbl_pasien')->where('id_user', $id_user)->get()->getRowArray();
+            $no_rm = $pasien ? $pasien['no_rm'] : null;
+        }
+
+        if ($no_rm) {
+            // SANKSI 1: Batasi No-Show (Tidak Hadir) Maksimal 3 Kali
+            $noShowBookings = $this->db->table('tbl_pendaftaran')
+                ->where('no_rm', $no_rm)
+                ->where('status_periksa', 'Tidak Hadir')
+                ->countAllResults();
+            if ($noShowBookings >= 3) {
+                return $this->response->setJSON(['error_penalty' => 'Akun Anda ditangguhkan sementara karena memiliki riwayat 3 kali Tidak Hadir (No-Show). Silakan hubungi CS Rumah Sakit untuk mengaktifkan kembali akun Anda.']);
+            }
+
+            // SANKSI 2: Batasi Booking Aktif Maksimal 3 Booking
+            $activeBookings = $this->db->table('tbl_pendaftaran')
+                ->where('no_rm', $no_rm)
+                ->whereIn('status_periksa', ['Belum Diperiksa', 'Sedang Diperiksa'])
+                ->countAllResults();
+            if ($activeBookings >= 3) {
+                return $this->response->setJSON(['error_limit' => 'Anda telah mencapai batas maksimal 3 booking aktif yang belum diselesaikan. Batalkan atau selesaikan janji temu sebelumnya terlebih dahulu.']);
+            }
+
+            $existingBooking = $this->db->table('tbl_pendaftaran')
+                ->where('no_rm', $no_rm)
+                ->where('tgl_daftar', $tanggal)
+                ->where('id_dokter', $id_dokter)
+                ->where('status_periksa !=', 'Batal')
+                ->countAllResults();
+
+            if ($existingBooking > 0) {
+                return $this->response->setJSON(['error_existing' => 'Anda sudah memiliki booking dengan dokter ini pada tanggal tersebut. Silakan pilih dokter atau tanggal lain.']);
+            }
+        }
+
         // Ambil data dokter
         $dokter = $this->db->table('tbl_dokter')
             ->where('id_dokter', $id_dokter)
@@ -181,7 +259,21 @@ class PasienController extends BaseController
             $status      = 'tersedia';
             $hampirPenuh = false;
 
-            if ($jumlahTerisi >= $kuotaPerSlot) {
+            // Cek apakah pasien sudah memiliki booking lain pada jam/slot ini di hari yang sama
+            $alreadyBookedHour = 0;
+            if ($no_rm) {
+                $alreadyBookedHour = $this->db->table('tbl_pendaftaran')
+                    ->where('no_rm', $no_rm)
+                    ->where('tgl_daftar', $tanggal)
+                    ->where('slot_waktu', $slotLabel)
+                    ->where('status_periksa !=', 'Batal')
+                    ->countAllResults();
+            }
+
+            if ($alreadyBookedHour > 0) {
+                $status = 'penuh';
+                $sisa   = 0;
+            } else if ($jumlahTerisi >= $kuotaPerSlot) {
                 $status = 'penuh';
                 $sisa   = 0;
             } else {
@@ -261,16 +353,53 @@ class PasienController extends BaseController
         // ============================
         $this->db->transStart();
 
-        // Cek apakah pasien sudah punya booking aktif di tanggal yang sama
-        $existingBooking = $this->db->table('tbl_pendaftaran')
+        // SANKSI 1: Batasi No-Show (Tidak Hadir) Maksimal 3 Kali
+        $noShowBookings = $this->db->table('tbl_pendaftaran')
+            ->where('no_rm', $no_rm)
+            ->where('status_periksa', 'Tidak Hadir')
+            ->countAllResults();
+        if ($noShowBookings >= 3) {
+            $this->db->transRollback();
+            session()->setFlashdata('error', 'Akun Anda ditangguhkan sementara karena memiliki riwayat 3 kali Tidak Hadir (No-Show). Hubungi CS untuk mengaktifkan kembali akun Anda.');
+            return redirect()->to(base_url('pasien/booking'));
+        }
+
+        // SANKSI 2: Batasi Booking Aktif Maksimal 3 Booking
+        $activeBookings = $this->db->table('tbl_pendaftaran')
+            ->where('no_rm', $no_rm)
+            ->whereIn('status_periksa', ['Belum Diperiksa', 'Sedang Diperiksa'])
+            ->countAllResults();
+        if ($activeBookings >= 3) {
+            $this->db->transRollback();
+            session()->setFlashdata('error', 'Anda telah mencapai batas maksimal 3 booking aktif yang belum diselesaikan.');
+            return redirect()->to(base_url('pasien/booking'));
+        }
+
+        // Cek apakah pasien sudah memiliki booking aktif dengan dokter yang sama pada tanggal ini
+        $existingDoctorBooking = $this->db->table('tbl_pendaftaran')
             ->where('no_rm', $no_rm)
             ->where('tgl_daftar', $tgl_daftar)
+            ->where('id_dokter', $id_dokter)
             ->where('status_periksa !=', 'Batal')
-            ->countAllResults(false);
+            ->countAllResults();
 
-        if ($existingBooking > 0) {
+        if ($existingDoctorBooking > 0) {
             $this->db->transRollback();
-            session()->setFlashdata('error', 'Anda sudah memiliki booking pada tanggal tersebut.');
+            session()->setFlashdata('error', 'Anda sudah memiliki booking dengan dokter ini pada tanggal tersebut.');
+            return redirect()->to(base_url('pasien/booking'));
+        }
+
+        // Cek apakah pasien sudah memiliki booking aktif di jam yang sama pada tanggal ini (agar tidak tabrakan)
+        $existingHourBooking = $this->db->table('tbl_pendaftaran')
+            ->where('no_rm', $no_rm)
+            ->where('tgl_daftar', $tgl_daftar)
+            ->where('slot_waktu', $slot_waktu)
+            ->where('status_periksa !=', 'Batal')
+            ->countAllResults();
+
+        if ($existingHourBooking > 0) {
+            $this->db->transRollback();
+            session()->setFlashdata('error', 'Jadwal tabrakan! Anda sudah memiliki booking lain pada jam tersebut.');
             return redirect()->to(base_url('pasien/booking'));
         }
 
@@ -446,6 +575,75 @@ class PasienController extends BaseController
 
         session()->setFlashdata('success', 'Booking ' . $no_rawat . ' berhasil dibatalkan.');
         return redirect()->to(base_url('pasien/riwayat'));
+    }
+
+    /**
+     * 8b. Pilih Obat — hanya bisa dilakukan satu kali oleh pasien
+     */
+    public function pilihObat($id_tagihan = null)
+    {
+        if (!$this->checkPasienSession()) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Sesi berakhir.']);
+        }
+
+        $no_rm  = session()->get('no_rm');
+        $pilihan = $this->request->getPost('pilihan_obat'); // 'Apotek RS' atau 'Beli di Luar'
+
+        if (!in_array($pilihan, ['Apotek RS', 'Beli di Luar'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Pilihan tidak valid.']);
+        }
+
+        // Ambil tagihan, pastikan milik pasien ini dan pilihan_obat masih NULL
+        $tagihan = $this->db->table('tbl_tagihan t')
+            ->join('tbl_pendaftaran p', 't.no_rawat = p.no_rawat')
+            ->where('t.id_tagihan', $id_tagihan)
+            ->where('p.no_rm', $no_rm)
+            ->where('t.pilihan_obat IS NULL')
+            ->get()->getRowArray();
+
+        if (!$tagihan) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Tagihan tidak ditemukan atau pilihan sudah ditentukan.']);
+        }
+
+        $biayaObat = 0;
+
+        if ($pilihan === 'Apotek RS') {
+            // Hitung biaya obat dari tbl_resep
+            $rekamMedis = $this->db->table('tbl_rekam_medis')
+                ->where('no_rawat', $tagihan['no_rawat'])
+                ->orderBy('tgl_periksa', 'DESC')
+                ->limit(1)
+                ->get()->getRowArray();
+
+            if ($rekamMedis) {
+                $reseps = $this->db->table('tbl_resep r')
+                    ->select('r.jumlah, o.harga')
+                    ->join('tbl_obat o', 'r.id_obat = o.id_obat')
+                    ->where('r.id_rm', $rekamMedis['id_rm'])
+                    ->get()->getResultArray();
+
+                foreach ($reseps as $r) {
+                    $biayaObat += (float)$r['harga'] * (int)$r['jumlah'];
+                }
+            }
+        }
+
+        $newTotal = (float)$tagihan['biaya_konsultasi'] + $biayaObat + (float)$tagihan['biaya_kamar'];
+
+        $this->db->table('tbl_tagihan')->where('id_tagihan', $id_tagihan)->update([
+            'pilihan_obat'   => $pilihan,
+            'tgl_pilih_obat' => date('Y-m-d H:i:s'),
+            'biaya_obat'     => $biayaObat,
+            'total_biaya'    => $newTotal,
+        ]);
+
+        return $this->response->setJSON([
+            'status'      => 'success',
+            'message'     => 'Pilihan obat berhasil dikonfirmasi.',
+            'pilihan'     => $pilihan,
+            'biaya_obat'  => $biayaObat,
+            'total_biaya' => $newTotal,
+        ]);
     }
 
     /**

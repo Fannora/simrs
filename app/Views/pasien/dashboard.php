@@ -226,9 +226,9 @@ if ($hour < 11) {
             <input class="bg-slate-50 border-none rounded-full py-2 pl-10 pr-4 w-64 text-body-sm focus:ring-2 focus:ring-secondary focus:outline-none" placeholder="Cari layanan, dokter..." type="text"/>
         </div>
         <div class="flex items-center gap-4">
-            <a href="<?= base_url('/#demo') ?>" class="text-on-surface-variant hover:text-secondary transition-colors p-2">
+            <div class="text-on-surface-variant p-2 select-none">
                 <span class="material-symbols-outlined">notifications</span>
-            </a>
+            </div>
             <div class="flex items-center gap-3 border-l border-outline-variant pl-4">
                 <div class="text-right">
                     <p class="font-label-md text-label-md font-bold"><?= esc($pasien['nama_pasien']) ?></p>
@@ -521,8 +521,137 @@ if ($hour < 11) {
                 </div>
             </div>
         </div>
+        <!-- ===== TAGIHAN AKTIF + PILIHAN OBAT ===== -->
+        <?php
+        // Ambil tagihan aktif pasien yang belum lunas atau belum memilih obat
+        $tagihanAktif = $db->table('tbl_tagihan t')
+            ->select('t.*, p.tgl_daftar, d.nama_dokter, po.nama_poli')
+            ->join('tbl_pendaftaran p', 't.no_rawat = p.no_rawat')
+            ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
+            ->join('tbl_poli po', 'd.id_poli = po.id_poli')
+            ->where('p.no_rm', $pasien['no_rm'])
+            ->where('t.status_bayar', 'Belum Lunas')
+            ->orderBy('t.id_tagihan', 'DESC')
+            ->get()->getResultArray();
+
+        if (!empty($tagihanAktif)):
+        ?>
+        <div class="mt-8 mb-8">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+                <h3 class="font-headline-sm text-headline-sm font-bold text-slate-800">Tagihan Aktif</h3>
+            </div>
+            <div class="space-y-4">
+            <?php foreach ($tagihanAktif as $tag):
+                // Ambil resep untuk tagihan ini
+                $resepItems = [];
+                $rm = $db->table('tbl_rekam_medis')->where('no_rawat', $tag['no_rawat'])->orderBy('tgl_periksa', 'DESC')->limit(1)->get()->getRowArray();
+                if ($rm) {
+                    $resepItems = $db->table('tbl_resep r')
+                        ->select('r.*, o.nama_obat, o.satuan')
+                        ->join('tbl_obat o', 'r.id_obat = o.id_obat')
+                        ->where('r.id_rm', $rm['id_rm'])
+                        ->get()->getResultArray();
+                }
+            ?>
+            <div class="bg-white border border-outline-variant rounded-xl p-6 shadow-sm">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <code class="text-xs bg-slate-100 px-2 py-0.5 rounded font-mono text-slate-600"><?= esc($tag['no_rawat']) ?></code>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100">Belum Lunas</span>
+                        </div>
+                        <p class="text-sm text-slate-500">dr. <?= esc($tag['nama_dokter']) ?> — <?= esc($tag['nama_poli']) ?></p>
+                        <p class="text-xs text-slate-400"><?= date('d M Y', strtotime($tag['tgl_daftar'])) ?></p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-extrabold text-slate-800">Rp <?= number_format($tag['total_biaya'], 0, ',', '.') ?></p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">
+                            <?php if ($tag['biaya_konsultasi'] > 0): ?>Konsultasi: Rp <?= number_format($tag['biaya_konsultasi'], 0, ',', '.') ?><?php endif; ?>
+                            <?php if ($tag['biaya_obat'] > 0): ?> | Obat: Rp <?= number_format($tag['biaya_obat'], 0, ',', '.') ?><?php endif; ?>
+                        </p>
+                    </div>
+                </div>
+
+                <?php if (!empty($resepItems)): ?>
+                <div class="mb-4">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Daftar Resep Obat</p>
+                    <div class="space-y-1">
+                        <?php foreach ($resepItems as $ri): ?>
+                        <div class="flex items-center justify-between bg-slate-50 rounded-lg px-3 py-2">
+                            <div>
+                                <span class="text-sm font-semibold text-slate-800"><?= esc($ri['nama_obat']) ?></span>
+                                <span class="text-xs text-slate-500 ml-2">Dosis: <?= esc($ri['dosis']) ?></span>
+                            </div>
+                            <span class="text-xs font-bold text-slate-700"><?= $ri['jumlah'] ?> <?= esc($ri['satuan']) ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- PILIHAN OBAT -->
+                <?php if ($tag['pilihan_obat'] === null): ?>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5" id="pilihanObatSection_<?= $tag['id_tagihan'] ?>">
+                    <p class="text-sm font-bold text-amber-800 mb-1">Pilih cara tebus obat</p>
+                    <p class="text-xs text-amber-700 mb-4">Pilihan ini hanya bisa dilakukan <strong>satu kali</strong> dan tidak dapat diubah setelah dikonfirmasi.</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button"
+                            onclick="konfirmasiPilihObat(<?= $tag['id_tagihan'] ?>, 'Apotek RS')"
+                            class="px-4 py-3 bg-secondary text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all shadow-sm flex flex-col items-center gap-1">
+                            <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">local_pharmacy</span>
+                            Beli di Apotek RS
+                        </button>
+                        <button type="button"
+                            onclick="konfirmasiPilihObat(<?= $tag['id_tagihan'] ?>, 'Beli di Luar')"
+                            class="px-4 py-3 bg-white border-2 border-slate-300 text-slate-700 text-sm font-bold rounded-xl hover:border-slate-400 transition-all flex flex-col items-center gap-1">
+                            <span class="material-symbols-outlined text-xl">store</span>
+                            Beli di Luar RS
+                        </button>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-emerald-600" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    <div>
+                        <p class="text-sm font-bold text-emerald-800">Kamu memilih: <strong><?= esc($tag['pilihan_obat']) ?></strong></p>
+                        <p class="text-xs text-emerald-600 mt-0.5">pada <?= $tag['tgl_pilih_obat'] ? date('d M Y, H:i', strtotime($tag['tgl_pilih_obat'])) : '-' ?> WIB</p>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <?php else: ?>
+                <!-- Tidak ada resep, tampilkan info -->
+                <div class="bg-slate-50 rounded-xl p-4 text-center">
+                    <p class="text-sm text-slate-500">Tidak ada resep obat untuk kunjungan ini.</p>
+                </div>
+                <?php endif; ?>
+            </div>
+            <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </main>
+
+<!-- Modal Konfirmasi Pilih Obat -->
+<div id="modalPilihObat" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform scale-95 transition-all duration-300">
+        <div class="bg-gradient-to-r from-secondary to-secondary-container text-white px-6 py-5">
+            <h3 class="font-bold text-lg">Konfirmasi Pilihan Obat</h3>
+            <p class="text-sm text-white/80 mt-1" id="modalPilihInfo">-</p>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <p class="text-sm text-amber-800 font-semibold">⚠ Perhatian!</p>
+                <p class="text-sm text-amber-700 mt-1">Pilihan ini <strong>tidak dapat diubah</strong> setelah dikonfirmasi. Lanjutkan?</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeModalPilihObat()" class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-all">Batal</button>
+                <button type="button" id="btnKonfirmasi" class="flex-1 px-4 py-2.5 bg-secondary text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all shadow-sm">Ya, Konfirmasi</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Floating Action Button - Booking Baru -->
 <a href="<?= base_url('pasien/booking') ?>" class="fixed bottom-8 right-8 bg-secondary text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all group z-50">
@@ -543,6 +672,55 @@ if ($hour < 11) {
             searchInput.parentElement.classList.remove('ring-2', 'ring-secondary');
         });
     }
+
+    let _pilihObatId = null;
+    let _pilihObatValue = null;
+
+    function konfirmasiPilihObat(id, pilihan) {
+        _pilihObatId = id;
+        _pilihObatValue = pilihan;
+        document.getElementById('modalPilihInfo').textContent = 'Pilihan: ' + pilihan;
+        const m = document.getElementById('modalPilihObat');
+        m.classList.remove('opacity-0', 'pointer-events-none');
+        m.querySelector('.bg-white').classList.remove('scale-95');
+        m.querySelector('.bg-white').classList.add('scale-100');
+    }
+
+    function closeModalPilihObat() {
+        const m = document.getElementById('modalPilihObat');
+        m.classList.add('opacity-0', 'pointer-events-none');
+        m.querySelector('.bg-white').classList.remove('scale-100');
+        m.querySelector('.bg-white').classList.add('scale-95');
+    }
+
+    document.getElementById('btnKonfirmasi').addEventListener('click', async function() {
+        this.disabled = true;
+        this.textContent = 'Memproses...';
+
+        const formData = new FormData();
+        formData.append('pilihan_obat', _pilihObatValue);
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+        try {
+            const res = await fetch('<?= base_url('pasien/tagihan/pilih-obat/') ?>' + _pilihObatId, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                closeModalPilihObat();
+                location.reload();
+            } else {
+                alert('Gagal: ' + data.message);
+                this.disabled = false;
+                this.textContent = 'Ya, Konfirmasi';
+            }
+        } catch(e) {
+            alert('Terjadi kesalahan jaringan.');
+            this.disabled = false;
+            this.textContent = 'Ya, Konfirmasi';
+        }
+    });
 </script>
 </body>
 </html>

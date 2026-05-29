@@ -41,5 +41,13 @@ abstract class BaseController extends Controller
 
         //Preload any models, libraries, etc, here.
         $this->session = service('session');
+
+        // Auto-cleanup past unresolved appointments to 'Tidak Hadir'
+        $db = \Config\Database::connect();
+        $today = date('Y-m-d');
+        $db->table('tbl_pendaftaran')
+            ->where('tgl_daftar <', $today)
+            ->whereIn('status_periksa', ['Belum Diperiksa', 'Sedang Diperiksa'])
+            ->update(['status_periksa' => 'Tidak Hadir']);
     }
 }

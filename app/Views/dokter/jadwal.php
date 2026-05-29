@@ -1,7 +1,7 @@
 <?php 
   date_default_timezone_set('Asia/Jakarta');
   $now = new DateTime();
-  $title = 'Riwayat Pemeriksaan Pasien'; 
+  $title = 'Agenda & Riwayat Pemeriksaan'; 
   // Get initials from doctor name (excluding "dr.")
   $cleanName = preg_replace('/^dr\.\s+/i', '', $dokter['nama_dokter']);
   $words = explode(' ', $cleanName);
@@ -135,13 +135,6 @@
         body {
             background-color: #f1f5f9;
         }
-        .bento-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .bento-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-        }
     </style>
 </head>
 <body class="font-body-md text-on-surface">
@@ -200,7 +193,7 @@
     <div class="flex items-center gap-2">
         <span class="text-on-surface-variant font-body-md text-body-sm">Pages</span>
         <span class="text-on-surface-variant opacity-40">/</span>
-        <span class="text-secondary font-bold font-body-md text-body-sm">Riwayat Pemeriksaan</span>
+        <span class="text-secondary font-bold font-body-md text-body-sm">Agenda &amp; Riwayat</span>
     </div>
     <div class="flex items-center gap-6">
         <div class="flex items-center gap-4">
@@ -271,8 +264,8 @@
         <section class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm bento-card">
             <div class="p-6 border-b border-outline-variant/60 flex justify-between items-center bg-slate-50/50">
                 <div>
-                    <h3 class="font-headline-sm text-headline-sm font-bold text-slate-800">Daftar Riwayat Pemeriksaan</h3>
-                    <p class="text-on-surface-variant text-sm mt-0.5">Berikut adalah seluruh daftar riwayat kunjungan dan hasil pemeriksaan pasien Anda.</p>
+                    <h3 class="font-headline-sm text-headline-sm font-bold text-slate-800">Agenda &amp; Riwayat Pemeriksaan</h3>
+                    <p class="text-on-surface-variant text-sm mt-0.5">Berikut adalah seluruh daftar agenda kunjungan mendatang serta riwayat pemeriksaan pasien Anda.</p>
                 </div>
             </div>
             
@@ -292,8 +285,8 @@
                         <?php if (empty($jadwal)): ?>
                             <tr>
                                 <td colspan="6" class="text-center py-12 text-on-surface-variant">
-                                    <span class="material-symbols-outlined text-4xl mb-2 text-slate-300">history</span>
-                                    <p class="font-semibold text-slate-500">Tidak ada riwayat pemeriksaan</p>
+                                    <span class="material-symbols-outlined text-4xl mb-2 text-slate-300">event_busy</span>
+                                    <p class="font-semibold text-slate-500">Tidak ada agenda atau riwayat pemeriksaan</p>
                                     <p class="text-xs text-slate-400 mt-1">Gunakan filter tanggal di atas untuk mencari jadwal lainnya.</p>
                                 </td>
                             </tr>

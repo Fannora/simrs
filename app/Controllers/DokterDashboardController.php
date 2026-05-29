@@ -324,14 +324,41 @@ class DokterDashboardController extends BaseController
             ->where('no_rawat', $no_rawat)
             ->countAllResults();
 
+        // Ambil tarif konsultasi berdasarkan poli dokter
+        $dokterInfo = $this->db->table('tbl_dokter')->where('id_user', session()->get('id_user'))->get()->getRowArray();
+        $biayaKonsultasi = 0;
+        if ($dokterInfo) {
+            $tarif = $this->db->table('tbl_tarif_konsultasi')
+                ->where('id_poli', $dokterInfo['id_poli'])
+                ->where('is_active', 1)
+                ->limit(1)
+                ->get()->getRowArray();
+            if ($tarif) {
+                $biayaKonsultasi = (float)$tarif['harga'];
+            }
+        }
+
         if ($existingTagihan === 0) {
             $this->db->table('tbl_tagihan')->insert([
-                'no_rawat'     => $no_rawat,
-                'total_biaya'  => $totalBiaya,
-                'jenis_bayar'  => 'Umum',
-                'status_bayar' => 'Belum Lunas',
-                'tgl_bayar'    => null,
+                'no_rawat'          => $no_rawat,
+                'biaya_konsultasi'  => $biayaKonsultasi,
+                'biaya_obat'        => $totalBiaya,
+                'biaya_kamar'       => 0,
+                'total_biaya'       => $biayaKonsultasi + $totalBiaya,
+                'jenis_kunjungan'   => 'Rawat Jalan',
+                'jenis_bayar'       => 'Umum',
+                'status_bayar'      => 'Belum Lunas',
+                'tgl_bayar'         => null,
             ]);
+        } else {
+            // Update biaya_konsultasi pada tagihan yang sudah ada
+            $existingTagihanRow = $this->db->table('tbl_tagihan')->where('no_rawat', $no_rawat)->get()->getRowArray();
+            if ($existingTagihanRow && $biayaKonsultasi > 0) {
+                $this->db->table('tbl_tagihan')->where('no_rawat', $no_rawat)->update([
+                    'biaya_konsultasi' => $biayaKonsultasi,
+                    'total_biaya'      => $biayaKonsultasi + (float)$existingTagihanRow['biaya_obat'] + (float)$existingTagihanRow['biaya_kamar'],
+                ]);
+            }
         }
 
         $this->db->transComplete();
@@ -343,9 +370,42 @@ class DokterDashboardController extends BaseController
 
         session()->setFlashdata('success', 'Rekam medis dan resep berhasil disimpan untuk No. Rawat: ' . $no_rawat);
         return redirect()->to(base_url('dokter/dashboard'));
-    }    /**
-     * Daftar Antrian Pasien Aktif Hari Ini
+    }
+
+    /**
+     * Rekomendasikan Rawat Inap - ubah status_periksa menjadi 'Rawat Inap'
      */
+    public function rekomendasiRawatInap($no_rawat = null)
+    {
+        if (!$this->checkDokterSession()) {
+            return redirect()->to(base_url('login'));
+        }
+
+        if (empty($no_rawat)) {
+            session()->setFlashdata('error', 'No. Rawat tidak valid.');
+            return redirect()->back();
+        }
+
+        $dokter = $this->getDokterData();
+        $pendaftaran = $this->db->table('tbl_pendaftaran')->where('no_rawat', $no_rawat)->get()->getRowArray();
+
+        if (!$pendaftaran || (int)$pendaftaran['id_dokter'] !== (int)$dokter['id_dokter']) {
+            session()->setFlashdata('error', 'Akses ditolak atau data tidak ditemukan.');
+            return redirect()->back();
+        }
+
+        if (in_array($pendaftaran['status_periksa'], ['Selesai', 'Batal', 'Rawat Inap'])) {
+            session()->setFlashdata('error', 'Status tidak dapat diubah.');
+            return redirect()->back();
+        }
+
+        $this->db->table('tbl_pendaftaran')
+            ->where('no_rawat', $no_rawat)
+            ->update(['status_periksa' => 'Rawat Inap']);
+
+        session()->setFlashdata('success', 'Pasien ' . esc($no_rawat) . ' direkomendasikan untuk rawat inap.');
+        return redirect()->to(base_url('dokter/antrian'));
+    }
     public function antrian()
     {
         if (!$this->checkDokterSession()) {
@@ -418,6 +478,45 @@ class DokterDashboardController extends BaseController
             ->update(['status_periksa' => 'Sedang Diperiksa']);
 
         session()->setFlashdata('success', 'Pasien berhasil dipanggil.');
+        return redirect()->back();
+    }
+
+    /**
+     * Pasien Tidak Hadir - Mengubah status menjadi 'Tidak Hadir'
+     */
+    public function tidakHadirPasien($no_rawat = null)
+    {
+        if (!$this->checkDokterSession()) {
+            return redirect()->to(base_url('login'));
+        }
+
+        $dokter = $this->getDokterData();
+        if (!$dokter) {
+            return redirect()->to(base_url('login'));
+        }
+
+        if (empty($no_rawat)) {
+            session()->setFlashdata('error', 'No. Rawat tidak valid.');
+            return redirect()->back();
+        }
+
+        // Pastikan pendaftaran ini memang milik dokter yang login
+        $pendaftaran = $this->db->table('tbl_pendaftaran')
+            ->where('no_rawat', $no_rawat)
+            ->get()
+            ->getRowArray();
+
+        if (!$pendaftaran || (int)$pendaftaran['id_dokter'] !== (int)$dokter['id_dokter']) {
+            session()->setFlashdata('error', 'Anda tidak memiliki akses ke data ini.');
+            return redirect()->back();
+        }
+
+        // Ubah status menjadi 'Tidak Hadir'
+        $this->db->table('tbl_pendaftaran')
+            ->where('no_rawat', $no_rawat)
+            ->update(['status_periksa' => 'Tidak Hadir']);
+
+        session()->setFlashdata('success', 'Pasien berhasil ditandai sebagai Tidak Hadir.');
         return redirect()->back();
     }
 

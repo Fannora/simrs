@@ -26,6 +26,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700;800&amp;family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 for premium notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
@@ -286,7 +288,7 @@
             </section>
             
             <!-- Sticky Action Bar -->
-            <div class="sticky bottom-8 bg-white/95 backdrop-blur-md p-4 rounded-xl border border-outline-variant shadow-lg flex items-center justify-between z-35">
+            <div class="bg-white p-4 rounded-xl border border-outline-variant flex items-center justify-between">
                 <div class="hidden md:block">
                     <p class="font-body-sm text-xs text-on-surface-variant font-semibold">Penyimpanan profil aman &amp; berstandar HIPAA</p>
                 </div>
@@ -341,13 +343,37 @@ $(document).ready(function() {
                         location.reload();
                     }, 1500);
                 } else {
-                    alert(response.message || 'Gagal menyimpan pengaturan.');
+                    Swal.fire({
+                        title: 'Gagal Menyimpan',
+                        text: response.message || 'Gagal menyimpan pengaturan.',
+                        icon: 'error',
+                        confirmButtonColor: '#0047AB',
+                        confirmButtonText: 'Kembali',
+                        background: '#ffffff',
+                        customClass: {
+                            popup: 'rounded-[24px] border border-outline-variant font-body-md shadow-2xl p-6',
+                            title: 'font-headline-sm text-black font-bold',
+                            confirmButton: 'rounded-xl px-6 py-3 text-white font-semibold'
+                        }
+                    });
                     btn.text(originalText);
                     btn.prop('disabled', false);
                 }
             },
             error: function() {
-                alert('Terjadi kesalahan jaringan, silakan coba lagi.');
+                Swal.fire({
+                    title: 'Kesalahan Jaringan',
+                    text: 'Terjadi kesalahan jaringan, silakan coba lagi.',
+                    icon: 'error',
+                    confirmButtonColor: '#0047AB',
+                    confirmButtonText: 'Kembali',
+                    background: '#ffffff',
+                    customClass: {
+                        popup: 'rounded-[24px] border border-outline-variant font-body-md shadow-2xl p-6',
+                        title: 'font-headline-sm text-black font-bold',
+                        confirmButton: 'rounded-xl px-6 py-3 text-white font-semibold'
+                    }
+                });
                 btn.text(originalText);
                 btn.prop('disabled', false);
             }

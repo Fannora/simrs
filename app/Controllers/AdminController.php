@@ -179,8 +179,32 @@ class AdminController extends BaseController
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
+        // Ambil data dokter untuk mendapatkan id_user terkait
+        $dokter = $this->db->table('tbl_dokter')->where('id_dokter', $id)->get()->getRowArray();
+        
+        if (!$dokter) {
+            session()->setFlashdata('error', 'Data dokter tidak ditemukan.');
+            return redirect()->to(base_url('admin/dokter'));
+        }
+
+        $this->db->transStart();
+
+        // 1. Hapus data dokter (Memicu ON DELETE CASCADE pada tbl_pendaftaran, tbl_rekam_medis, tbl_resep, tbl_tagihan, tbl_rawat_inap)
         $this->db->table('tbl_dokter')->where('id_dokter', $id)->delete();
-        session()->setFlashdata('success', 'Data dokter berhasil dihapus.');
+
+        // 2. Hapus akun pengguna (tbl_user) jika ada
+        if (!empty($dokter['id_user'])) {
+            $this->db->table('tbl_user')->where('id_user', $dokter['id_user'])->delete();
+        }
+
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false) {
+            session()->setFlashdata('error', 'Gagal menghapus data dokter.');
+        } else {
+            session()->setFlashdata('success', 'Data dokter dan akun pengguna berhasil dihapus.');
+        }
+
         return redirect()->to(base_url('admin/dokter'));
     }
 
@@ -303,52 +327,119 @@ class AdminController extends BaseController
     }
 
     // ============================
-    // LAPORAN
+    // LAPORAN KEUANGAN
     // ============================
     public function laporan()
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
-        $laporanBulanan = $this->db->query(
-            "SELECT MONTH(tgl_daftar) as bulan, COUNT(*) as total
-             FROM tbl_pendaftaran
-             WHERE YEAR(tgl_daftar) = YEAR(CURDATE())
-             GROUP BY MONTH(tgl_daftar)
-             ORDER BY bulan"
-        )->getResultArray();
+        // Build filter from GET params
+        $filter = [
+            'tgl_dari'        => $this->request->getGet('tgl_dari'),
+            'tgl_sampai'      => $this->request->getGet('tgl_sampai'),
+            'id_poli'         => $this->request->getGet('id_poli'),
+            'id_dokter'       => $this->request->getGet('id_dokter'),
+            'jenis_bayar'     => $this->request->getGet('jenis_bayar') ?: ['Umum', 'BPJS', 'Asuransi'],
+            'status_bayar'    => $this->request->getGet('status_bayar') ?: 'Semua',
+            'jenis_kunjungan' => $this->request->getGet('jenis_kunjungan') ?: 'Semua',
+        ];
 
-        $laporanPerPoli = $this->db->query(
-            "SELECT po.nama_poli, COUNT(p.no_rawat) as total
-             FROM tbl_pendaftaran p
-             JOIN tbl_dokter d ON p.id_dokter = d.id_dokter
-             JOIN tbl_poli po ON d.id_poli = po.id_poli
-             GROUP BY po.id_poli, po.nama_poli
-             ORDER BY total DESC"
-        )->getResultArray();
+        // Laporan keuangan dengan filter
+        $laporanModel = new \App\Models\LaporanModel();
+        $dataLaporan  = $laporanModel->getLaporan($filter);
 
-        $laporanPerDokter = $this->db->query(
-            "SELECT d.nama_dokter, po.nama_poli, COUNT(p.no_rawat) as total
-             FROM tbl_pendaftaran p
-             JOIN tbl_dokter d ON p.id_dokter = d.id_dokter
-             JOIN tbl_poli po ON d.id_poli = po.id_poli
-             GROUP BY d.id_dokter, d.nama_dokter, po.nama_poli
-             ORDER BY total DESC"
-        )->getResultArray();
+        // Ringkasan statistik (always current month, tidak difilter)
+        $totalPendapatanBulanIni = $laporanModel->getTotalPendapatanBulanIni();
+        $pasienDilayani          = $laporanModel->getPasienDilayani();
+        $tunggakan               = $laporanModel->getTunggakan();
 
-        $pendaftaranBulanIni = $this->db->table('tbl_pendaftaran')
-            ->where('MONTH(tgl_daftar)', date('m'))
-            ->where('YEAR(tgl_daftar)', date('Y'))
-            ->countAllResults();
+        // Per-poli dari data yang terfilter
+        $perPoliMap = [];
+        foreach ($dataLaporan as $row) {
+            $key = $row['nama_poli'];
+            if (!isset($perPoliMap[$key])) {
+                $perPoliMap[$key] = 0;
+            }
+            if ($row['status_bayar'] === 'Lunas') {
+                $perPoliMap[$key] += (float)$row['total_biaya'];
+            }
+        }
+        arsort($perPoliMap);
+        $laporanPerPoli = array_map(fn($k, $v) => ['nama_poli' => $k, 'total_pendapatan' => $v], array_keys($perPoliMap), $perPoliMap);
 
-        $pendaftaranBulanLalu = $this->db->table('tbl_pendaftaran')
-            ->where('MONTH(tgl_daftar)', date('m', strtotime('-1 month')))
-            ->where('YEAR(tgl_daftar)', date('Y', strtotime('-1 month')))
-            ->countAllResults();
+        // Per jenis bayar
+        $perJenisBayarMap = [];
+        foreach ($dataLaporan as $row) {
+            if ($row['status_bayar'] !== 'Lunas') continue;
+            $jb = $row['jenis_bayar'];
+            $perJenisBayarMap[$jb] = ($perJenisBayarMap[$jb] ?? 0) + (float)$row['total_biaya'];
+        }
+
+        // Dropdown poli & dokter
+        $poli   = $this->db->table('tbl_poli')->orderBy('nama_poli')->get()->getResultArray();
+        $dokter = $this->db->table('tbl_dokter d')
+            ->select('d.id_dokter, d.nama_dokter, p.nama_poli, d.id_poli')
+            ->join('tbl_poli p', 'd.id_poli = p.id_poli')
+            ->orderBy('d.nama_dokter')->get()->getResultArray();
 
         return view('admin/laporan', compact(
-            'laporanBulanan', 'laporanPerPoli', 'laporanPerDokter',
-            'pendaftaranBulanIni', 'pendaftaranBulanLalu'
+            'dataLaporan', 'filter',
+            'totalPendapatanBulanIni', 'pasienDilayani', 'tunggakan',
+            'laporanPerPoli', 'perJenisBayarMap',
+            'poli', 'dokter'
         ));
+    }
+
+    public function exportLaporan()
+    {
+        if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
+
+        $filter = [
+            'tgl_dari'        => $this->request->getGet('tgl_dari'),
+            'tgl_sampai'      => $this->request->getGet('tgl_sampai'),
+            'id_poli'         => $this->request->getGet('id_poli'),
+            'id_dokter'       => $this->request->getGet('id_dokter'),
+            'jenis_bayar'     => $this->request->getGet('jenis_bayar') ?: ['Umum', 'BPJS', 'Asuransi'],
+            'status_bayar'    => $this->request->getGet('status_bayar') ?: 'Semua',
+            'jenis_kunjungan' => $this->request->getGet('jenis_kunjungan') ?: 'Semua',
+        ];
+
+        $laporanModel = new \App\Models\LaporanModel();
+        $data = $laporanModel->getLaporan($filter);
+
+        $filename = 'laporan_keuangan_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $output = fopen('php://output', 'w');
+        // BOM for Excel
+        fwrite($output, "\xEF\xBB\xBF");
+
+        fputcsv($output, ['No', 'No. Rawat', 'Nama Pasien', 'Dokter', 'Poli', 'Jenis Kunjungan',
+            'Biaya Konsultasi', 'Biaya Obat', 'Biaya Kamar', 'Total Biaya',
+            'Jenis Bayar', 'Status Bayar', 'Tanggal Bayar']);
+
+        foreach ($data as $i => $row) {
+            fputcsv($output, [
+                $i + 1,
+                $row['no_rawat'],
+                $row['nama_pasien'],
+                $row['nama_dokter'],
+                $row['nama_poli'],
+                $row['jenis_kunjungan'] ?? 'Rawat Jalan',
+                $row['biaya_konsultasi'] ?? 0,
+                $row['biaya_obat'] ?? 0,
+                $row['biaya_kamar'] ?? 0,
+                $row['total_biaya'],
+                $row['jenis_bayar'],
+                $row['status_bayar'],
+                $row['tgl_bayar'] ? date('d/m/Y H:i', strtotime($row['tgl_bayar'])) : '-',
+            ]);
+        }
+
+        fclose($output);
+        exit;
     }
 
     // ============================

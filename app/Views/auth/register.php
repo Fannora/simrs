@@ -177,7 +177,7 @@
                         <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="nama_lengkap">Nama Lengkap</label>
                         <div class="relative group">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">person</span>
-                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="nama_lengkap" name="nama_lengkap" placeholder="John Doe" type="text" required value="<?= old('nama_lengkap') ?>"/>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="nama_lengkap" name="nama_lengkap" placeholder="cth: Brian Decon Christoffel Silaban" type="text" required value="<?= old('nama_lengkap') ?>"/>
                         </div>
                     </div>
                     
@@ -318,12 +318,6 @@
                     </button>
                 </form>
 
-                <!-- Secure HIPAA Compliant Badge -->
-                <div class="flex justify-center items-center gap-2 px-4 py-2 bg-surface-container rounded-full w-fit mx-auto border border-outline-variant/40 shadow-sm">
-                    <span class="material-symbols-outlined text-success-emerald text-[18px]" style="font-variation-settings: 'FILL' 1;">security</span>
-                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Secure &amp; HIPAA Compliant</span>
-                </div>
-
                 <!-- Footer Link -->
                 <div class="pt-6 border-t border-outline-variant text-center">
                     <p class="font-body-md text-body-md text-on-surface-variant">
@@ -357,17 +351,6 @@
         </div>
     </div>
 </footer>
-
-<!-- CSS Micro-interaction Help Lightbox -->
-<div class="fixed bottom-8 right-8 hidden xl:block z-40">
-    <div class="relative group cursor-pointer">
-        <div class="absolute -inset-1 bg-gradient-to-r from-secondary to-electric-cyan rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-        <div class="relative px-4 py-3 bg-white border border-outline-variant rounded-full flex items-center gap-3">
-            <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">medical_information</span>
-            <span class="font-label-md text-label-md text-on-background">Butuh bantuan daftar?</span>
-        </div>
-    </div>
-</div>
 
 <script>
     // NIK validation: Allow only digits

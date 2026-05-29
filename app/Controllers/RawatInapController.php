@@ -1,0 +1,168 @@
+<?php
+
+namespace App\Controllers;
+
+class RawatInapController extends BaseController
+{
+    protected $db;
+
+    public function __construct()
+    {
+        $this->db = \Config\Database::connect();
+    }
+
+    private function checkAdmin()
+    {
+        if (!session()->get('id_user') || session()->get('level_id') !== 'Admin') {
+            session()->setFlashdata('error', 'Akses ditolak.');
+            return false;
+        }
+        return true;
+    }
+
+    public function index()
+    {
+        if (!$this->checkAdmin()) return redirect()->to(base_url('login'));
+
+        // Tab 1: Pasien berstatus "Rawat Inap" belum ada di tbl_rawat_inap
+        $perluMasuk = $this->db->table('tbl_pendaftaran p')
+            ->select('p.no_rawat, p.no_rm, p.tgl_daftar, ps.nama_pasien, d.nama_dokter, po.nama_poli')
+            ->join('tbl_pasien ps', 'p.no_rm = ps.no_rm')
+            ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
+            ->join('tbl_poli po', 'd.id_poli = po.id_poli')
+            ->join('tbl_rawat_inap ri', 'ri.no_rawat = p.no_rawat', 'left')
+            ->where('p.status_periksa', 'Rawat Inap')
+            ->where('ri.id_rawatinap IS NULL')
+            ->orderBy('p.tgl_daftar', 'DESC')
+            ->get()->getResultArray();
+
+        // Tab 2: Sedang Dirawat
+        $sedangDirawat = $this->db->table('tbl_rawat_inap ri')
+            ->select('ri.*, p.no_rm, p.tgl_daftar, ps.nama_pasien, d.nama_dokter, po.nama_poli, k.nama_kamar, k.kelas, k.harga_per_malam, DATEDIFF(CURDATE(), ri.tgl_masuk) as hari_dirawat')
+            ->join('tbl_pendaftaran p', 'ri.no_rawat = p.no_rawat')
+            ->join('tbl_pasien ps', 'p.no_rm = ps.no_rm')
+            ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
+            ->join('tbl_poli po', 'd.id_poli = po.id_poli')
+            ->join('tbl_kamar k', 'ri.id_kamar = k.id_kamar')
+            ->where('ri.status_inap', 'Dirawat')
+            ->orderBy('ri.tgl_masuk', 'ASC')
+            ->get()->getResultArray();
+
+        // Tab 3: Riwayat (sudah pulang)
+        $riwayat = $this->db->table('tbl_rawat_inap ri')
+            ->select('ri.*, p.no_rm, p.tgl_daftar, ps.nama_pasien, d.nama_dokter, k.nama_kamar, k.kelas, t.total_biaya, t.biaya_kamar')
+            ->join('tbl_pendaftaran p', 'ri.no_rawat = p.no_rawat')
+            ->join('tbl_pasien ps', 'p.no_rm = ps.no_rm')
+            ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
+            ->join('tbl_kamar k', 'ri.id_kamar = k.id_kamar')
+            ->join('tbl_tagihan t', 't.no_rawat = ri.no_rawat', 'left')
+            ->where('ri.status_inap', 'Sudah Pulang')
+            ->orderBy('ri.tgl_keluar', 'DESC')
+            ->get()->getResultArray();
+
+        // Kamar tersedia (untuk dropdown)
+        $kamarTersedia = $this->db->table('tbl_kamar')
+            ->where('status', 'Tersedia')
+            ->orderBy('kelas', 'ASC')
+            ->get()->getResultArray();
+
+        return view('admin/kelola_rawat_inap', compact(
+            'perluMasuk', 'sedangDirawat', 'riwayat', 'kamarTersedia'
+        ));
+    }
+
+    public function masuk()
+    {
+        if (!$this->checkAdmin()) return redirect()->to(base_url('login'));
+
+        $no_rawat = $this->request->getPost('no_rawat');
+        $id_kamar = $this->request->getPost('id_kamar');
+        $catatan  = $this->request->getPost('catatan');
+
+        if (empty($no_rawat) || empty($id_kamar)) {
+            session()->setFlashdata('error', 'Data tidak lengkap.');
+            return redirect()->to(base_url('admin/rawat-inap'));
+        }
+
+        // Validasi kamar masih tersedia
+        $kamar = $this->db->table('tbl_kamar')->where('id_kamar', $id_kamar)->get()->getRowArray();
+        if (!$kamar || $kamar['status'] !== 'Tersedia') {
+            session()->setFlashdata('error', 'Kamar tidak tersedia atau sudah terisi.');
+            return redirect()->to(base_url('admin/rawat-inap'));
+        }
+
+        $this->db->transStart();
+
+        // Insert tbl_rawat_inap
+        $this->db->table('tbl_rawat_inap')->insert([
+            'no_rawat'   => $no_rawat,
+            'id_kamar'   => $id_kamar,
+            'tgl_masuk'  => date('Y-m-d'),
+            'status_inap'=> 'Dirawat',
+            'catatan'    => $catatan ?: null,
+        ]);
+
+        // Update status kamar jadi Terisi
+        $this->db->table('tbl_kamar')->where('id_kamar', $id_kamar)->update(['status' => 'Terisi']);
+
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false) {
+            session()->setFlashdata('error', 'Gagal memproses rawat inap.');
+        } else {
+            session()->setFlashdata('success', 'Pasien berhasil dimasukkan ke kamar rawat inap.');
+        }
+
+        return redirect()->to(base_url('admin/rawat-inap'));
+    }
+
+    public function pulang($id = null)
+    {
+        if (!$this->checkAdmin()) return redirect()->to(base_url('login'));
+
+        $tgl_keluar = $this->request->getPost('tgl_keluar') ?: date('Y-m-d');
+
+        $rawat = $this->db->table('tbl_rawat_inap')->where('id_rawatinap', $id)->get()->getRowArray();
+        if (!$rawat || $rawat['status_inap'] !== 'Dirawat') {
+            session()->setFlashdata('error', 'Data rawat inap tidak valid.');
+            return redirect()->to(base_url('admin/rawat-inap'));
+        }
+
+        $kamar = $this->db->table('tbl_kamar')->where('id_kamar', $rawat['id_kamar'])->get()->getRowArray();
+        $total_hari   = max(1, (int)((strtotime($tgl_keluar) - strtotime($rawat['tgl_masuk'])) / 86400));
+        $biaya_kamar  = $total_hari * (float)$kamar['harga_per_malam'];
+
+        $this->db->transStart();
+
+        // Update tbl_rawat_inap
+        $this->db->table('tbl_rawat_inap')->where('id_rawatinap', $id)->update([
+            'tgl_keluar'  => $tgl_keluar,
+            'total_hari'  => $total_hari,
+            'status_inap' => 'Sudah Pulang',
+        ]);
+
+        // Update status kamar jadi Tersedia
+        $this->db->table('tbl_kamar')->where('id_kamar', $rawat['id_kamar'])->update(['status' => 'Tersedia']);
+
+        // Update tbl_tagihan: biaya_kamar, jenis_kunjungan, total_biaya
+        $tagihan = $this->db->table('tbl_tagihan')->where('no_rawat', $rawat['no_rawat'])->get()->getRowArray();
+        if ($tagihan) {
+            $newTotal = (float)$tagihan['biaya_konsultasi'] + (float)$tagihan['biaya_obat'] + $biaya_kamar;
+            $this->db->table('tbl_tagihan')->where('no_rawat', $rawat['no_rawat'])->update([
+                'biaya_kamar'     => $biaya_kamar,
+                'jenis_kunjungan' => 'Rawat Inap',
+                'total_biaya'     => $newTotal,
+            ]);
+        }
+
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false) {
+            session()->setFlashdata('error', 'Gagal memproses kepulangan pasien.');
+        } else {
+            session()->setFlashdata('success', "Pasien pulang berhasil dicatat. Biaya kamar: Rp " . number_format($biaya_kamar, 0, ',', '.'));
+        }
+
+        return redirect()->to(base_url('admin/rawat-inap'));
+    }
+}

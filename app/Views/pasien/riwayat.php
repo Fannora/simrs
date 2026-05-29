@@ -34,6 +34,8 @@ if ($hour < 11) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700;800&amp;family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 for premium notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script id="tailwind-config">
         tailwind.config = {
@@ -207,9 +209,9 @@ if ($hour < 11) {
             <input id="searchInput" class="bg-slate-50 border-none rounded-full py-2 pl-10 pr-4 w-64 text-body-sm focus:ring-2 focus:ring-secondary focus:outline-none" placeholder="Cari dokter atau keluhan..." type="text"/>
         </div>
         <div class="flex items-center gap-4">
-            <a href="<?= base_url('/#demo') ?>" class="text-on-surface-variant hover:text-secondary transition-colors p-2">
+            <div class="text-on-surface-variant p-2 select-none">
                 <span class="material-symbols-outlined">notifications</span>
-            </a>
+            </div>
             <div class="flex items-center gap-3 border-l border-outline-variant pl-4">
                 <div class="text-right">
                     <p class="font-label-md text-label-md font-bold"><?= esc($pasien['nama_pasien']) ?></p>
@@ -245,8 +247,18 @@ if ($hour < 11) {
                 <p class="font-body-md text-on-surface-variant">Pantau Riwayat dan akses laporan medis digital Anda di sini.</p>
             </div>
             
-            <!-- Quick Filter Chips -->
-            <div class="flex flex-wrap items-center gap-2" id="filterTab">
+            <!-- Quick Filter Chips & Date Picker -->
+            <div class="flex flex-wrap items-center gap-3" id="filterTab">
+                <!-- Date Filter Input -->
+                <div class="relative flex items-center bg-white border border-outline-variant rounded-full px-4 py-2 shadow-sm hover:border-secondary transition-all">
+                    <span class="material-symbols-outlined text-sm text-slate-400 mr-2 select-none">calendar_month</span>
+                    <input id="dateFilterInput" type="date" class="bg-transparent border-none p-0 text-xs font-semibold text-slate-700 focus:ring-0 focus:outline-none w-28 cursor-pointer" title="Filter berdasarkan tanggal"/>
+                    <!-- Reset Date Button -->
+                    <button id="btnResetDate" type="button" class="hidden ml-2 text-slate-400 hover:text-red-500 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-sm font-bold">close</span>
+                    </button>
+                </div>
+
                 <button data-filter="semua" class="filter-chip active bg-secondary text-white px-4 py-2 rounded-full font-label-md text-xs transition-all shadow-sm font-semibold">
                     Semua Kunjungan (<?= count($kunjungan) ?>)
                 </button>
@@ -326,7 +338,7 @@ if ($hour < 11) {
                             };
                         ?>
                         
-                        <article class="bg-white border border-outline-variant rounded-2xl p-6 transition-all duration-250 hover:shadow-md hover:shadow-secondary/5 group kunjungan-card" data-status="<?= $k['status_periksa'] ?>" data-search="<?= strtolower($k['nama_dokter'] . ' ' . $k['keluhan_awal'] . ' ' . $k['nama_poli']) ?>">
+                        <article class="bg-white border border-outline-variant rounded-2xl p-6 transition-all duration-250 hover:shadow-md hover:shadow-secondary/5 group kunjungan-card" data-status="<?= $k['status_periksa'] ?>" data-date="<?= $k['tgl_daftar'] ?>" data-search="<?= strtolower($k['nama_dokter'] . ' ' . $k['keluhan_awal'] . ' ' . $k['nama_poli']) ?>">
                             <div class="flex flex-col sm:flex-row gap-6">
                                 <!-- Date Badge Left -->
                                 <div class="flex-shrink-0 flex flex-col items-center justify-center w-20 h-20 rounded-2xl font-bold <?= $dateBoxStyle ?> select-none">
@@ -506,64 +518,176 @@ if ($hour < 11) {
 $(document).ready(function() {
 
     // ============================
+    // UNIFIED SEARCH & FILTER LOGIC WITH PAGINATION
+    // ============================
+    let currentPage = 1;
+    const itemsPerPage = 3; // Maximum 3 cards per page for perfect layout balance
+
+    function applyFilters() {
+        const selectedStatus = $('.filter-chip.active').data('filter');
+        const searchQuery = $('#searchInput').val().toLowerCase().trim();
+        const selectedDate = $('#dateFilterInput').val();
+
+        // 1. Gather all matching cards first
+        let matchingCards = [];
+
+        $('.kunjungan-card').each(function() {
+            const cardStatus = $(this).data('status');
+            const cardDate = $(this).data('date');
+            const cardSearchText = $(this).data('search');
+
+            const matchesStatus = (selectedStatus === 'semua' || cardStatus === selectedStatus);
+            const matchesSearch = (searchQuery === '' || cardSearchText.includes(searchQuery));
+            const matchesDate = (selectedDate === '' || cardDate === selectedDate);
+
+            if (matchesStatus && matchesSearch && matchesDate) {
+                matchingCards.push($(this));
+            } else {
+                $(this).hide(); // Hide non-matching immediately
+            }
+        });
+
+        // 2. Clear previous error state warnings and pagination controls
+        $('#noFilterResult').remove();
+        $('#noSearchResult').remove();
+        $('#paginationContainer').remove();
+
+        const totalItems = matchingCards.length;
+
+        if (totalItems === 0) {
+            let message = 'Tidak ditemukan kunjungan yang cocok.';
+            if (selectedDate !== '' && searchQuery !== '') {
+                message = `Tidak ditemukan kunjungan pada tanggal <strong>${formatDateIndo(selectedDate)}</strong> dengan kata kunci "<strong>${searchQuery}</strong>".`;
+            } else if (selectedDate !== '') {
+                message = `Tidak ditemukan kunjungan pada tanggal <strong>${formatDateIndo(selectedDate)}</strong>.`;
+            } else if (searchQuery !== '') {
+                message = `Tidak ditemukan dokter atau keluhan yang cocok dengan "<strong>${searchQuery}</strong>".`;
+            } else if (selectedStatus !== 'semua') {
+                message = `Tidak ditemukan kunjungan dengan status "<strong>${selectedStatus}</strong>".`;
+            }
+
+            $('#kunjunganContainer').append(`
+                <div id="noFilterResult" class="py-12 text-center bg-white border border-outline-variant rounded-2xl shadow-sm">
+                    <span class="material-symbols-outlined text-4xl text-slate-350">search_off</span>
+                    <p class="text-sm text-slate-500 mt-2">${message}</p>
+                </div>
+            `);
+            return;
+        }
+
+        // 3. Apply Pagination on matching items
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        
+        // Reset current page if it exceeds total pages
+        if (currentPage > totalPages) {
+            currentPage = 1;
+        }
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+
+        // Show only matching cards in current page range, hide the rest
+        matchingCards.forEach(function(card, index) {
+            if (index >= startIndex && index < endIndex) {
+                card.show();
+            } else {
+                card.hide();
+            }
+        });
+
+        // 4. Render Pagination Controls if total pages > 1
+        if (totalPages > 1) {
+            $('#kunjunganContainer').append(`
+                <div id="paginationContainer" class="flex justify-between items-center bg-white border border-outline-variant rounded-2xl p-4 shadow-sm mt-6 select-none font-semibold text-xs animate-in fade-in duration-200">
+                    <button id="btnPrevPage" type="button" class="flex items-center gap-1 text-slate-500 hover:text-secondary disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span class="material-symbols-outlined text-sm">arrow_back_ios</span> Sebelum
+                    </button>
+                    <div id="pageIndicator" class="text-slate-600">
+                        Halaman <span id="currentPageNum" class="font-bold text-secondary text-sm">${currentPage}</span> dari <span id="totalPageNum" class="font-bold">${totalPages}</span>
+                    </div>
+                    <button id="btnNextPage" type="button" class="flex items-center gap-1 text-slate-500 hover:text-secondary disabled:opacity-50 disabled:cursor-not-allowed">
+                        Berikut <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                    </button>
+                </div>
+            `);
+
+            // Disable buttons if at ends
+            $('#btnPrevPage').prop('disabled', currentPage === 1);
+            $('#btnNextPage').prop('disabled', currentPage === totalPages);
+
+            // Click handlers
+            $('#btnPrevPage').on('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    applyFilters();
+                    scrollToTimelineTop();
+                }
+            });
+
+            $('#btnNextPage').on('click', function() {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    applyFilters();
+                    scrollToTimelineTop();
+                }
+            });
+        }
+    }
+
+    function scrollToTimelineTop() {
+        $('html, body').animate({
+            scrollTop: $('#filterTab').offset().top - 100
+        }, 300);
+    }
+
+    function formatDateIndo(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr + 'T00:00:00');
+        const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        return d.getDate() + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    // Initialize pagination run
+    applyFilters();
+
+    // ============================
     // FILTER CHIPS TIMELINE
     // ============================
     $('.filter-chip').on('click', function() {
         // Reset states of filter chips
         $('.filter-chip').removeClass('active bg-secondary text-white shadow-sm').addClass('bg-white border border-outline-variant text-slate-700');
         $(this).addClass('active bg-secondary text-white shadow-sm').removeClass('bg-white border border-outline-variant text-slate-700');
-
-        const filter = $(this).data('filter');
-
-        $('.kunjungan-card').each(function() {
-            if (filter === 'semua' || $(this).data('status') === filter) {
-                $(this).fadeIn(250);
-            } else {
-                $(this).fadeOut(150);
-            }
-        });
-
-        // Toggle empty search warning if filtered results count becomes zero
-        setTimeout(() => {
-            const visibleCards = $('.kunjungan-card:visible').length;
-            $('#noFilterResult').remove();
-            
-            if (visibleCards === 0 && filter !== 'semua') {
-                $('#kunjunganContainer').append(`
-                    <div id="noFilterResult" class="py-8 text-center bg-white border border-outline-variant rounded-2xl shadow-sm">
-                        <span class="material-symbols-outlined text-4xl text-slate-350">filter_alt_off</span>
-                        <p class="text-sm text-slate-500 mt-2">Tidak ditemukan kunjungan dengan status "<strong>${filter}</strong>".</p>
-                    </div>
-                `);
-            }
-        }, 260);
+        currentPage = 1;
+        applyFilters();
     });
 
     // ============================
     // SEARCH BAR DYNAMIC FILTER
     // ============================
     $('#searchInput').on('input', function() {
-        const query = $(this).val().toLowerCase().trim();
-        
-        $('.kunjungan-card').each(function() {
-            const cardText = $(this).data('search');
-            if (cardText.includes(query)) {
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
-        });
-        
-        const visibleSearch = $('.kunjungan-card:visible').length;
-        $('#noSearchResult').remove();
-        if(visibleSearch === 0 && query !== '') {
-            $('#kunjunganContainer').append(`
-                <div id="noSearchResult" class="py-8 text-center bg-white border border-outline-variant rounded-2xl shadow-sm">
-                    <span class="material-symbols-outlined text-4xl text-slate-350">search_off</span>
-                    <p class="text-sm text-slate-500 mt-2">Tidak ditemukan dokter atau keluhan yang cocok dengan "<strong>${query}</strong>".</p>
-                </div>
-            `);
+        currentPage = 1;
+        applyFilters();
+    });
+
+    // ============================
+    // DATE PICKER FILTER
+    // ============================
+    $('#dateFilterInput').on('change', function() {
+        const val = $(this).val();
+        if (val !== '') {
+            $('#btnResetDate').removeClass('hidden');
+        } else {
+            $('#btnResetDate').addClass('hidden');
         }
+        currentPage = 1;
+        applyFilters();
+    });
+
+    $('#btnResetDate').on('click', function() {
+        $('#dateFilterInput').val('');
+        $(this).addClass('hidden');
+        currentPage = 1;
+        applyFilters();
     });
 
     // ============================
@@ -574,9 +698,27 @@ $(document).ready(function() {
         const url = $(this).attr('href');
         const noRawat = $(this).data('no-rawat');
         
-        if (confirm('Apakah Anda yakin ingin membatalkan jadwal kunjungan ' + noRawat + '?\n\nTindakan pembatalan ini tidak dapat diurungkan.')) {
-            window.location.href = url;
-        }
+        Swal.fire({
+            title: 'Batalkan Kunjungan?',
+            html: `Apakah Anda yakin ingin membatalkan jadwal kunjungan <strong class="text-black font-bold">${noRawat}</strong>?<br><br><span class="text-rose-600 font-medium">Tindakan pembatalan ini tidak dapat diurungkan.</span>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#E11D48', // alert-crimson
+            cancelButtonColor: '#64748B', // Slate gray
+            confirmButtonText: 'Ya, Batalkan',
+            cancelButtonText: 'Kembali',
+            background: '#ffffff',
+            customClass: {
+                popup: 'rounded-[24px] border border-outline-variant font-body-md shadow-2xl p-6',
+                title: 'font-headline-sm text-black font-bold',
+                confirmButton: 'rounded-xl px-5 py-3 text-white font-semibold',
+                cancelButton: 'rounded-xl px-5 py-3 text-white font-semibold'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
     });
 
 });

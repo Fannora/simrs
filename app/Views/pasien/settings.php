@@ -26,6 +26,8 @@ if ($hour < 11) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700;800&amp;family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 for premium notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script id="tailwind-config">
         tailwind.config = {
@@ -327,7 +329,7 @@ if ($hour < 11) {
             </section>
             
             <!-- Sticky Action Bar -->
-            <div class="sticky bottom-8 bg-white/95 backdrop-blur-md p-4 rounded-xl border border-outline-variant shadow-lg flex items-center justify-between z-35">
+            <div class="bg-white p-4 rounded-xl border border-outline-variant flex items-center justify-between">
                 <div class="hidden md:block">
                     <p class="font-body-sm text-xs text-on-surface-variant font-semibold">Penyimpanan profil aman &amp; berstandar HIPAA</p>
                 </div>
@@ -349,7 +351,7 @@ if ($hour < 11) {
                     <h4 class="font-label-md text-sm font-bold text-slate-800">Zona Bahaya</h4>
                     <p class="font-body-sm text-xs text-on-surface-variant mt-1">Penghapusan akun portal akan menghilangkan akses medis digital Anda.</p>
                 </div>
-                <button onclick="alert('Permintaan penghapusan akun portal Anda harus melalui Meja Registrasi Administrasi Rumah Sakit secara langsung.');" class="px-6 py-2.5 border border-red-500 text-red-500 rounded-xl font-semibold hover:bg-red-50 transition-colors text-sm">
+                <button id="btnHapusAkun" class="px-6 py-2.5 border border-red-500 text-red-500 rounded-xl font-semibold hover:bg-red-50 transition-colors text-sm">
                     Hapus Akun
                 </button>
             </div>
@@ -397,15 +399,56 @@ $(document).ready(function() {
                         location.reload();
                     }, 1500);
                 } else {
-                    alert(response.message || 'Gagal menyimpan pengaturan.');
+                    Swal.fire({
+                        title: 'Gagal Menyimpan',
+                        text: response.message || 'Gagal menyimpan pengaturan.',
+                        icon: 'error',
+                        confirmButtonColor: '#0047AB',
+                        confirmButtonText: 'Kembali',
+                        background: '#ffffff',
+                        customClass: {
+                            popup: 'rounded-[24px] border border-outline-variant font-body-md shadow-2xl p-6',
+                            title: 'font-headline-sm text-black font-bold',
+                            confirmButton: 'rounded-xl px-6 py-3 text-white font-semibold'
+                        }
+                    });
                     btn.text(originalText);
                     btn.prop('disabled', false);
                 }
             },
             error: function() {
-                alert('Terjadi kesalahan jaringan, silakan coba lagi.');
+                Swal.fire({
+                    title: 'Kesalahan Jaringan',
+                    text: 'Terjadi kesalahan jaringan, silakan coba lagi.',
+                    icon: 'error',
+                    confirmButtonColor: '#0047AB',
+                    confirmButtonText: 'Kembali',
+                    background: '#ffffff',
+                    customClass: {
+                        popup: 'rounded-[24px] border border-outline-variant font-body-md shadow-2xl p-6',
+                        title: 'font-headline-sm text-black font-bold',
+                        confirmButton: 'rounded-xl px-6 py-3 text-white font-semibold'
+                    }
+                });
                 btn.text(originalText);
                 btn.prop('disabled', false);
+            }
+        });
+    });
+
+    // Hapus Akun handler
+    $('#btnHapusAkun').on('click', function() {
+        Swal.fire({
+            title: 'Penghapusan Akun',
+            html: 'Permintaan penghapusan akun portal Anda harus melalui <strong class="text-black">Meja Registrasi Administrasi Rumah Sakit</strong> secara langsung.',
+            icon: 'info',
+            confirmButtonColor: '#0047AB', // Deep Trust Blue
+            confirmButtonText: 'Mengerti',
+            background: '#ffffff',
+            customClass: {
+                popup: 'rounded-[24px] border border-outline-variant font-body-md shadow-2xl p-6',
+                title: 'font-headline-sm text-black font-bold',
+                confirmButton: 'rounded-xl px-6 py-3 text-white font-semibold'
             }
         });
     });

@@ -176,7 +176,7 @@
                         <label class="font-label-md text-label-md text-on-surface block" for="username" id="idLabel">Username</label>
                         <div class="relative group">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">person</span>
-                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="username" name="username" placeholder="contoh: budi_santoso atau dr_rusdi" type="text" required autocomplete="username"/>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="username" name="username" placeholder="contoh: brian_silaban" type="text" required autocomplete="username"/>
                         </div>
                     </div>
                     

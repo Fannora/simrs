@@ -38,14 +38,32 @@
     </a>
 
     <div class="pt-4 pb-2 px-3">
+        <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Rawat Inap</p>
+    </div>
+
+    <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'admin/tarif-konsultasi') ? 'bg-secondary text-white font-bold' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('admin/tarif-konsultasi') ?>">
+        <span class="material-symbols-outlined">payments</span>
+        <span class="font-label-md text-label-md">Tarif Konsultasi</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'admin/kamar') ? 'bg-secondary text-white font-bold' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('admin/kamar') ?>">
+        <span class="material-symbols-outlined">meeting_room</span>
+        <span class="font-label-md text-label-md">Kelola Kamar</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'admin/rawat-inap') ? 'bg-secondary text-white font-bold' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('admin/rawat-inap') ?>">
+        <span class="material-symbols-outlined">hotel</span>
+        <span class="font-label-md text-label-md">Rawat Inap</span>
+    </a>
+
+    <div class="pt-4 pb-2 px-3">
         <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider">Laporan</p>
     </div>
 
     <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'admin/laporan') ? 'bg-secondary text-white font-bold' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('admin/laporan') ?>">
         <span class="material-symbols-outlined">bar_chart</span>
-        <span class="font-label-md text-label-md">Laporan</span>
+        <span class="font-label-md text-label-md">Laporan Keuangan</span>
     </a>
 <?= $this->endSection() ?>
+
 
 <?= $this->section('topbar_left') ?>
     <h2 class="font-headline-sm text-headline-sm font-bold text-secondary"><?= $title ?? 'Dashboard Admin' ?></h2>

@@ -134,10 +134,9 @@
             background-color: #f1f5f9;
         }
         .bento-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: box-shadow 0.2s ease;
         }
         .bento-card:hover {
-            transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
         }
     </style>
@@ -407,6 +406,21 @@
                     </a>
                     
                     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <!-- Tombol Rekomendasikan Rawat Inap -->
+                        <?php if (!in_array($data['status_periksa'], ['Selesai', 'Batal', 'Rawat Inap'])): ?>
+                        <form method="POST" action="<?= base_url('dokter/rekam-medis/rawat-inap/' . $data['no_rawat']) ?>" onsubmit="return confirm('Rekomendasikan pasien ini untuk rawat inap? Status akan berubah menjadi Rawat Inap dan admin akan menentukan kamar.')">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm w-full sm:w-auto">
+                                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">hotel</span>
+                                Rekomendasikan Rawat Inap
+                            </button>
+                        </form>
+                        <?php elseif ($data['status_periksa'] === 'Rawat Inap'): ?>
+                        <div class="px-5 py-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl text-sm font-bold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">hotel</span>
+                            Pasien sudah direkomendasikan rawat inap
+                        </div>
+                        <?php endif; ?>
                         <a href="<?= base_url('dokter/antrian') ?>" class="px-6 py-3 border border-outline-variant hover:bg-slate-50 text-slate-700 rounded-2xl text-sm font-bold flex items-center justify-center transition-all shadow-sm bg-white">
                             Batal
                         </a>

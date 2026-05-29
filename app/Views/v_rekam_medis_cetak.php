@@ -504,12 +504,11 @@
     <div class="lh-info">
       <div class="lh-rs-name">RS MiraCare</div>
       <div class="lh-rs-sub">Sistem Informasi Manajemen Rumah Sakit</div>
-      <div class="lh-rs-addr">Jl. Kesehatan No. 1, Indonesia &nbsp;·&nbsp; (021) 000-0000 &nbsp;·&nbsp; simrs@miracare.id</div>
+      <div class="lh-rs-addr">Jl. Selambo IV No. 4a, Amplas, Medan, Sumatera Utara &nbsp; &nbsp; &nbsp; &nbsp; (+62) 813-9688-4263 &nbsp;·&nbsp; info@miracare.id</div>
     </div>
     <div class="lh-doctype">
       <div class="lh-doc-label">Dokumen Resmi</div>
       <div class="lh-doc-title">Rekam Medis<br>Rawat Jalan</div>
-      <div class="lh-doc-no"><?= esc($rm['no_rawat']) ?></div>
     </div>
   </div>
   <div class="accent-stripe"></div>
@@ -518,7 +517,7 @@
   <div class="id-banner">
     <div class="id-cell">
       <div class="id-label">No. Rekam Medis</div>
-      <div class="id-value mono"><?= esc($rm['no_rm']) ?></div>
+      <div class="vm-value"><?= esc($rm['no_rm']) ?></div>
     </div>
     <div class="id-cell">
       <div class="id-label">Nama Pasien</div>
@@ -526,11 +525,11 @@
     </div>
     <div class="id-cell">
       <div class="id-label">Jenis Kelamin &amp; Umur</div>
-      <div class="id-value normal"><?= $jkLabel ?><?= $umur ? ' · ' . $umur : '' ?></div>
+      <div class="vm-value"><?= $jkLabel ?><?= $umur ? ' · ' . $umur : '' ?></div>
     </div>
     <div class="id-cell">
       <div class="id-label">NIK</div>
-      <div class="id-value mono"><?= $rm['nik'] ? esc($rm['nik']) : '—' ?></div>
+      <div class="vm-value"><?= $rm['nik'] ? esc($rm['nik']) : '—' ?></div>
     </div>
   </div>
 
@@ -542,7 +541,7 @@
     </div>
     <div class="vm-cell">
       <div class="vm-label">Jam Periksa</div>
-      <div class="vm-value blue"><?= date('H:i', strtotime($rm['tgl_periksa'])) ?> WIB</div>
+      <div class="vm-value"><?= date('H:i', strtotime($rm['tgl_periksa'])) ?> WIB</div>
     </div>
     <div class="vm-cell">
       <div class="vm-label">Tgl. Pendaftaran</div>
@@ -550,7 +549,7 @@
     </div>
     <div class="vm-cell">
       <div class="vm-label">Dokter Pemeriksa</div>
-      <div class="vm-value teal">dr. <?= esc($rm['nama_dokter']) ?></div>
+      <div class="id-value">dr. <?= esc($rm['nama_dokter']) ?></div>
     </div>
     <div class="vm-cell">
       <div class="vm-label">Poliklinik</div>
