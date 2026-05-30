@@ -136,6 +136,8 @@
         }
     </style>
     <?= $this->renderSection('css') ?>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="font-body-md bg-background text-on-surface">
 
@@ -202,5 +204,103 @@
 </main>
 
 <?= $this->renderSection('js') ?>
+<!-- Global SweetAlert2 Interceptors -->
+<script>
+window.alert = function(message) {
+    Swal.fire({
+        title: 'Informasi',
+        text: message,
+        icon: 'info',
+        confirmButtonColor: '#0047AB',
+        confirmButtonText: 'OK',
+        customClass: {
+            popup: 'rounded-[16px]'
+        }
+    });
+};
+
+document.addEventListener("DOMContentLoaded", function() {
+    function decodeJsEscapes(str) {
+        return str
+            .replace(/\\x([0-9A-Fa-f]{2})/g, (match, grp) => String.fromCharCode(parseInt(grp, 16)))
+            .replace(/\\'/g, "'")
+            .replace(/\\"/g, '"');
+    }
+
+    // 1. Intercept elements with onclick confirm
+    document.querySelectorAll('[onclick*="confirm"]').forEach(element => {
+        const originalOnClick = element.getAttribute('onclick');
+        const match = originalOnClick.match(/confirm\(['"](.*?)['"]\)/);
+        if (match) {
+            const message = decodeJsEscapes(match[1]);
+            element.removeAttribute('onclick');
+            
+            element.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                Swal.fire({
+                    title: 'Konfirmasi Tindakan',
+                    text: message,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0047AB',
+                    cancelButtonColor: '#76777d',
+                    confirmButtonText: 'Ya, Konfirmasi',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        popup: 'rounded-[16px]',
+                        confirmButton: 'rounded-xl px-5 py-2.5 font-bold',
+                        cancelButton: 'rounded-xl px-5 py-2.5 font-bold'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (element.tagName === 'A' && element.getAttribute('href')) {
+                            window.location.href = element.getAttribute('href');
+                        } else if (element.closest('form')) {
+                            element.closest('form').submit();
+                        } else {
+                            element.click();
+                        }
+                    }
+                });
+            });
+        }
+    });
+
+    // 2. Intercept forms with onsubmit confirm
+    document.querySelectorAll('form[onsubmit*="confirm"]').forEach(form => {
+        const originalOnSubmit = form.getAttribute('onsubmit');
+        const match = originalOnSubmit.match(/confirm\(['"](.*?)['"]\)/);
+        if (match) {
+            const message = decodeJsEscapes(match[1]);
+            form.removeAttribute('onsubmit');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                Swal.fire({
+                    title: 'Konfirmasi Tindakan',
+                    text: message,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0047AB',
+                    cancelButtonColor: '#76777d',
+                    confirmButtonText: 'Ya, Konfirmasi',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        popup: 'rounded-[16px]',
+                        confirmButton: 'rounded-xl px-5 py-2.5 font-bold',
+                        cancelButton: 'rounded-xl px-5 py-2.5 font-bold'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        }
+    });
+});
+</script>
 </body>
 </html>

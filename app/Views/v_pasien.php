@@ -97,7 +97,7 @@
                             </div>
                             <div class="form-group">
                               <label>No BPJS</label>
-                              <input type="text" name="no_bpjs" class="form-control" value="<?= $row['no_bpjs'] ?>">
+                              <input type="text" name="no_bpjs" class="form-control" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="<?= $row['no_bpjs'] ?>">
                             </div>
                           </div>
                           <div class="modal-footer justify-content-between">
@@ -160,7 +160,7 @@
           </div>
           <div class="form-group">
             <label>No BPJS</label>
-            <input type="text" name="no_bpjs" class="form-control">
+            <input type="text" name="no_bpjs" class="form-control" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
           </div>
         </div>
         <div class="modal-footer justify-content-between">

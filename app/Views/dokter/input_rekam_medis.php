@@ -140,6 +140,8 @@
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
         }
     </style>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="font-body-md text-on-surface">
 
@@ -325,6 +327,7 @@
             <form method="POST" action="<?= base_url('dokter/rekam-medis/simpan') ?>" id="rekamMedisForm" class="space-y-6">
                 <?= csrf_field() ?>
                 <input type="hidden" name="no_rawat" value="<?= esc($data['no_rawat']) ?>">
+                <input type="hidden" name="is_rawat_inap" id="is_rawat_inap" value="0">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
                     
@@ -408,13 +411,10 @@
                     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                         <!-- Tombol Rekomendasikan Rawat Inap -->
                         <?php if (!in_array($data['status_periksa'], ['Selesai', 'Batal', 'Rawat Inap'])): ?>
-                        <form method="POST" action="<?= base_url('dokter/rekam-medis/rawat-inap/' . $data['no_rawat']) ?>" onsubmit="return confirm('Rekomendasikan pasien ini untuk rawat inap? Status akan berubah menjadi Rawat Inap dan admin akan menentukan kamar.')">
-                            <?= csrf_field() ?>
-                            <button type="submit" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm w-full sm:w-auto">
-                                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">hotel</span>
-                                Rekomendasikan Rawat Inap
-                            </button>
-                        </form>
+                        <button type="button" id="btnRawatInap" data-url="<?= base_url('dokter/rekam-medis/rawat-inap/' . $data['no_rawat']) ?>" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm w-full sm:w-auto">
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">hotel</span>
+                            Rekomendasikan Rawat Inap
+                        </button>
                         <?php elseif ($data['status_periksa'] === 'Rawat Inap'): ?>
                         <div class="px-5 py-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl text-sm font-bold flex items-center gap-2">
                             <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">hotel</span>
@@ -470,31 +470,31 @@
         const rowHtml = `
         <div class="prescription-row bg-slate-50 border border-outline-variant/65 rounded-2xl p-4 space-y-3 relative animate-in fade-in zoom-in-95 duration-200">
             <div class="flex justify-between items-center border-b border-outline-variant/35 pb-2">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Item Obat #${index + 1}</span>
-                <button type="button" onclick="removePrescriptionRow(this)" class="text-rose-600 hover:text-rose-700 text-xs font-bold flex items-center gap-1 transition-colors">
-                    <span class="material-symbols-outlined text-[16px]">close</span> Hapus
+                <span class="text-sm font-bold text-slate-500 uppercase tracking-wider">Item Obat #${index + 1}</span>
+                <button type="button" onclick="removePrescriptionRow(this)" class="text-rose-600 hover:text-rose-700 text-sm font-bold flex items-center gap-1 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">close</span> Hapus
                 </button>
             </div>
             <div class="space-y-2.5">
                 <div class="space-y-1">
-                    <label class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Pilih Obat <span class="text-rose-500">*</span></label>
-                    <select name="resep_obat_ids[]" required class="w-full rounded-xl border-slate-200 text-xs py-2 bg-white focus:ring-secondary focus:border-secondary">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Pilih Obat <span class="text-rose-500">*</span></label>
+                    <select name="resep_obat_ids[]" required class="w-full rounded-xl border-slate-200 text-sm py-2.5 bg-white focus:ring-secondary focus:border-secondary">
                         ${selectOptions}
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1">
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Dosis / Aturan <span class="text-rose-500">*</span></label>
-                        <input type="text" name="resep_dosis[]" required placeholder="e.g. 3x1 tablet" class="w-full rounded-xl border-slate-200 text-xs py-2 focus:ring-secondary focus:border-secondary">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Dosis / Aturan <span class="text-rose-500">*</span></label>
+                        <input type="text" name="resep_dosis[]" required placeholder="e.g. 3×1 tablet" class="w-full rounded-xl border-slate-200 text-sm py-2.5 focus:ring-secondary focus:border-secondary">
                     </div>
                     <div class="space-y-1">
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Jumlah <span class="text-rose-500">*</span></label>
-                        <input type="number" name="resep_jumlah[]" required min="1" placeholder="Jumlah" class="w-full rounded-xl border-slate-200 text-xs py-2 focus:ring-secondary focus:border-secondary">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Jumlah <span class="text-rose-500">*</span></label>
+                        <input type="number" name="resep_jumlah[]" required min="1" placeholder="Jumlah" class="w-full rounded-xl border-slate-200 text-sm py-2.5 focus:ring-secondary focus:border-secondary">
                     </div>
                 </div>
                 <div class="space-y-1">
-                    <label class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Keterangan Tambahan</label>
-                    <input type="text" name="resep_keterangan[]" placeholder="e.g. Diminum sesudah makan (opsional)" class="w-full rounded-xl border-slate-200 text-xs py-2 focus:ring-secondary focus:border-secondary">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Keterangan Tambahan</label>
+                    <input type="text" name="resep_keterangan[]" placeholder="e.g. Diminum sesudah makan (opsional)" class="w-full rounded-xl border-slate-200 text-sm py-2.5 focus:ring-secondary focus:border-secondary">
                 </div>
             </div>
         </div>`;
@@ -524,6 +524,43 @@
     // Insert 1st row automatically on page load
     document.addEventListener('DOMContentLoaded', () => {
         addPrescriptionRow();
+        
+        // SweetAlert2 for Rawat Inap Recommendation
+        const btnRawatInap = document.getElementById('btnRawatInap');
+        if (btnRawatInap) {
+            btnRawatInap.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = btnRawatInap.getAttribute('data-url');
+                Swal.fire({
+                    title: 'Rekomendasi Rawat Inap',
+                    html: `<div class="text-left font-body-md">
+                        <p class="text-sm text-slate-600 mb-3">Apakah Anda yakin ingin merekomendasikan pasien ini untuk rawat inap?</p>
+                        <p class="text-xs text-slate-500 bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-start gap-2 leading-relaxed">
+                            <span class="material-symbols-outlined text-amber-500 text-lg flex-shrink-0" style="font-variation-settings: 'FILL' 1;">info</span>
+                            <span>Status periksa pasien akan berubah menjadi <strong>"Rawat Inap"</strong> dan petugas admin akan menentukan ruangan/kamar pasien.</span>
+                        </p>
+                    </div>`,
+                    icon: 'question',
+                    iconColor: '#f59e0b',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d97706',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Ya, Rekomendasikan',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        popup: 'rounded-2xl border border-outline-variant/40 shadow-xl font-body-md text-slate-800 p-6',
+                        confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 mr-2',
+                        cancelButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500'
+                    },
+                    buttonsStyling: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('is_rawat_inap').value = '1';
+                        document.getElementById('rekamMedisForm').submit();
+                    }
+                });
+            });
+        }
     });
 </script>
 </body>

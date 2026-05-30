@@ -329,13 +329,14 @@ if ($hour < 11) {
                             }
 
                             // Status tags colors
-                            $statusClass = match($k['status_periksa']) {
-                                'Belum Diperiksa' => 'bg-cyan-50 text-cyan-700 border-cyan-200/50',
-                                'Sedang Diperiksa' => 'bg-amber-50 text-amber-700 border-amber-200/50',
-                                'Selesai' => 'bg-emerald-50 text-emerald-700 border-emerald-200/50',
-                                'Batal' => 'bg-rose-50 text-rose-700 border-rose-200/50',
-                                default => 'bg-slate-50 text-slate-700 border-slate-200/55'
-                            };
+                             $statusClass = match($k['status_periksa']) {
+                                 'Belum Diperiksa' => 'bg-cyan-50 text-cyan-700 border-cyan-200/50',
+                                 'Sedang Diperiksa' => 'bg-amber-50 text-amber-700 border-amber-200/50',
+                                 'Selesai' => 'bg-emerald-50 text-emerald-700 border-emerald-200/50',
+                                 'Rawat Inap' => 'bg-purple-50 text-purple-700 border-purple-200/50',
+                                 'Batal' => 'bg-rose-50 text-rose-700 border-rose-200/50',
+                                 default => 'bg-slate-50 text-slate-700 border-slate-200/55'
+                             };
                         ?>
                         
                         <article class="bg-white border border-outline-variant rounded-2xl p-6 transition-all duration-250 hover:shadow-md hover:shadow-secondary/5 group kunjungan-card" data-status="<?= $k['status_periksa'] ?>" data-date="<?= $k['tgl_daftar'] ?>" data-search="<?= strtolower($k['nama_dokter'] . ' ' . $k['keluhan_awal'] . ' ' . $k['nama_poli']) ?>">
@@ -379,7 +380,7 @@ if ($hour < 11) {
                             
                             <!-- Action Bottom -->
                             <div class="mt-5 pt-5 border-t border-slate-100 flex items-center justify-end gap-3">
-                                <?php if ($k['status_periksa'] === 'Selesai'): ?>
+                                <?php if (in_array($k['status_periksa'], ['Selesai', 'Rawat Inap'])): ?>
                                     <button type="button" onclick="showRmModal('<?= $k['no_rawat'] ?>')" class="text-secondary hover:underline text-xs font-bold flex items-center gap-1.5 mr-auto">
                                         <span class="material-symbols-outlined text-sm">visibility</span> Lihat Rekam Medis
                                     </button>
@@ -390,10 +391,16 @@ if ($hour < 11) {
                                     </a>
                                 <?php endif; ?>
                                 
-                                <?php if ($k['status_periksa'] === 'Selesai'): ?>
-                                    <a href="<?= base_url('rekammedis/cetak?no_rawat=' . $k['no_rawat']) ?>" target="_blank" class="bg-secondary text-white hover:bg-opacity-95 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
-                                        <span class="material-symbols-outlined text-sm">download</span> Unduh Rekam Medis
-                                    </a>
+                                <?php if (in_array($k['status_periksa'], ['Selesai', 'Rawat Inap'])): ?>
+                                    <?php if (($k['status_bayar'] ?? '') === 'Lunas'): ?>
+                                        <a href="<?= base_url('rekammedis/cetak?no_rawat=' . $k['no_rawat']) ?>" target="_blank" class="bg-secondary text-white hover:bg-opacity-95 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                                            <span class="material-symbols-outlined text-sm">download</span> Unduh Rekam Medis
+                                        </a>
+                                    <?php else: ?>
+                                        <button type="button" class="bg-slate-100 text-slate-400 border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 opacity-60 cursor-not-allowed select-none" title="Harap selesaikan administrasi/konfirmasi obat di Kasir terlebih dahulu untuk mengunduh laporan resmi.">
+                                            <span class="material-symbols-outlined text-sm">download</span> Unduh Rekam Medis
+                                        </button>
+                                    <?php endif; ?>
                                 <?php else: ?>
                                     <a href="#" onclick="return false;" class="bg-slate-100 text-slate-400 border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 opacity-50 cursor-not-allowed pointer-events-none" title="Pemeriksaan belum selesai">
                                         <span class="material-symbols-outlined text-sm">download</span> Unduh Rekam Medis
@@ -447,18 +454,24 @@ if ($hour < 11) {
                     <?php else: ?>
                         <ul class="space-y-4 max-h-[400px] overflow-y-auto pr-1">
                             <?php foreach ($rekamMedis as $rm): ?>
-                                <li class="flex items-start gap-3 p-3 rounded-xl border border-slate-50 hover:bg-slate-50 transition-colors">
+                                <li class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-50 hover:bg-slate-50 transition-colors">
                                     <div class="mt-0.5 p-2 bg-secondary/10 rounded-lg text-secondary flex items-center justify-center">
                                         <span class="material-symbols-outlined text-xl">description</span>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="font-bold text-xs text-slate-800 truncate" title="<?= esc($rm['diagnosa']) ?>"><?= esc($rm['diagnosa']) ?></p>
-                                        <p class="text-[10px] text-on-surface-variant mt-0.5 font-semibold">dr. <?= esc($rm['nama_dokter']) ?></p>
-                                        <p class="text-[9px] text-slate-400 mt-1"><?= date('d M Y', strtotime($rm['tgl_periksa'])) ?></p>
+                                        <p class="font-bold text-sm text-slate-800 truncate" title="<?= esc($rm['diagnosa']) ?>"><?= esc($rm['diagnosa']) ?></p>
+                                        <p class="text-xs text-on-surface-variant mt-1 font-semibold">dr. <?= esc($rm['nama_dokter']) ?></p>
+                                        <p class="text-[11px] text-slate-400 mt-1"><?= date('d M Y', strtotime($rm['tgl_periksa'])) ?></p>
                                     </div>
-                                    <a class="p-1 text-secondary hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center" href="<?= base_url('rekammedis/cetak?no_rawat=' . $rm['no_rawat']) ?>" target="_blank" title="Unduh Kuitansi / Laporan">
-                                        <span class="material-symbols-outlined text-lg">download</span>
-                                    </a>
+                                    <?php if (($rm['status_bayar'] ?? '') === 'Lunas'): ?>
+                                        <a class="p-1 text-secondary hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center" href="<?= base_url('rekammedis/cetak?no_rawat=' . $rm['no_rawat']) ?>" target="_blank" title="Unduh Rekam Medis">
+                                            <span class="material-symbols-outlined text-lg">download</span>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="p-1 text-slate-300 flex items-center justify-center cursor-not-allowed select-none" title="Harap selesaikan administrasi di Kasir terlebih dahulu untuk mengunduh.">
+                                            <span class="material-symbols-outlined text-lg">download</span>
+                                        </span>
+                                    <?php endif; ?>
                                 </li>
                             <?php endforeach; ?>
                         </ul>
@@ -479,22 +492,22 @@ if ($hour < 11) {
                     <?php else: ?>
                         <ul class="space-y-4 max-h-[380px] overflow-y-auto pr-1">
                             <?php foreach ($tagihan as $t): ?>
-                                <li class="p-3.5 rounded-xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all">
-                                    <div class="flex justify-between items-start mb-2">
+                                <li class="p-4 rounded-xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all">
+                                    <div class="flex justify-between items-start mb-2.5">
                                         <div class="min-w-0">
-                                            <p class="font-bold text-xs text-slate-850 truncate"><?= esc($t['no_rawat']) ?></p>
-                                            <p class="text-[10px] text-slate-400 font-semibold mt-0.5"><?= date('d M Y', strtotime($t['tgl_daftar'])) ?> • dr. <?= esc($t['nama_dokter']) ?></p>
+                                            <p class="font-bold text-sm text-slate-800 truncate"><?= esc($t['no_rawat']) ?></p>
+                                            <p class="text-xs text-slate-400 font-semibold mt-1"><?= date('d M Y', strtotime($t['tgl_daftar'])) ?> • dr. <?= esc($t['nama_dokter']) ?></p>
                                         </div>
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full <?= $t['status_bayar'] === 'Lunas' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100' ?>">
+                                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full <?= $t['status_bayar'] === 'Lunas' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100' ?>">
                                             <?= esc($t['status_bayar']) ?>
                                         </span>
                                     </div>
-                                    <div class="flex justify-between items-center pt-1.5 border-t border-slate-150/45">
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Metode: <strong class="text-slate-600"><?= esc($t['jenis_bayar']) ?></strong></span>
-                                        <span class="font-bold text-xs text-slate-800">Rp <?= number_format($t['total_biaya'], 0, ',', '.') ?></span>
+                                    <div class="flex justify-between items-center pt-2 border-t border-slate-150/45">
+                                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Metode: <strong class="text-slate-600"><?= esc($t['jenis_bayar']) ?></strong></span>
+                                        <span class="font-extrabold text-sm text-slate-800">Rp <?= number_format($t['total_biaya'], 0, ',', '.') ?></span>
                                     </div>
                                     <?php if ($t['status_bayar'] === 'Lunas' && $t['tgl_bayar']): ?>
-                                        <p class="text-[9px] text-slate-400 mt-2 text-right">Lunas pada: <?= date('d M Y, H:i', strtotime($t['tgl_bayar'])) ?> WIB</p>
+                                        <p class="text-[10px] text-slate-400 mt-2 text-right">Lunas pada: <?= date('d M Y, H:i', strtotime($t['tgl_bayar'])) ?> WIB</p>
                                     <?php endif; ?>
                                 </li>
                             <?php endforeach; ?>
@@ -774,7 +787,20 @@ function showRmModal(noRawat) {
         resepContainer.innerHTML = listHtml;
     }
     
-    document.getElementById('rm_btn_cetak').href = `<?= base_url('rekammedis/cetak?no_rawat=') ?>${rm.no_rawat}`;
+    const btnCetak = document.getElementById('rm_btn_cetak');
+    if (rm.status_bayar === 'Lunas') {
+        btnCetak.href = `<?= base_url('rekammedis/cetak?no_rawat=') ?>${rm.no_rawat}`;
+        btnCetak.className = "px-6 py-2.5 bg-secondary text-white hover:opacity-90 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-1.5";
+        btnCetak.removeAttribute('onclick');
+        btnCetak.innerHTML = '<span class="material-symbols-outlined text-sm">print</span> Cetak Laporan';
+        btnCetak.title = "Cetak Rekam Medis";
+    } else {
+        btnCetak.href = '#';
+        btnCetak.className = "px-6 py-2.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 opacity-60 cursor-not-allowed select-none pointer-events-none";
+        btnCetak.setAttribute('onclick', 'return false;');
+        btnCetak.innerHTML = '<span class="material-symbols-outlined text-sm">print</span> Cetak Laporan (Menunggu Kasir)';
+        btnCetak.title = "Harap selesaikan administrasi/konfirmasi obat di Kasir terlebih dahulu.";
+    }
     
     openModal('modalDetailRm');
 }
@@ -802,7 +828,7 @@ function closeModal(modalId) {
 <!-- Modal Detail Rekam Medis -->
 <div id="modalDetailRm" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-all duration-300">
-        <div class="bg-gradient-to-r from-secondary to-secondary-container text-white px-6 py-5 flex justify-between items-center">
+        <div class="bg-secondary text-white px-6 py-5 flex justify-between items-center">
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">medical_information</span>
                 <h3 class="font-headline-sm text-lg font-bold text-white">Detail Rekam Medis</h3>

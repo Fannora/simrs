@@ -24,10 +24,20 @@ class TarifKonsultasiController extends BaseController
     {
         if (!$this->checkAdmin()) return redirect()->to(base_url('login'));
 
-        $tarif = $this->db->table('tbl_tarif_konsultasi tk')
+        $cari = $this->request->getGet('cari');
+
+        $builder = $this->db->table('tbl_tarif_konsultasi tk')
             ->select('tk.*, p.nama_poli')
-            ->join('tbl_poli p', 'tk.id_poli = p.id_poli')
-            ->orderBy('p.nama_poli', 'ASC')
+            ->join('tbl_poli p', 'tk.id_poli = p.id_poli');
+
+        if (!empty($cari)) {
+            $builder->groupStart()
+                ->like('tk.nama_tarif', $cari)
+                ->orLike('p.nama_poli', $cari)
+                ->groupEnd();
+        }
+
+        $tarif = $builder->orderBy('p.nama_poli', 'ASC')
             ->get()->getResultArray();
 
         $poli = $this->db->table('tbl_poli')->orderBy('nama_poli', 'ASC')->get()->getResultArray();
@@ -35,6 +45,7 @@ class TarifKonsultasiController extends BaseController
         return view('admin/kelola_tarif_konsultasi', [
             'tarif' => $tarif,
             'poli'  => $poli,
+            'cari'  => $cari
         ]);
     }
 

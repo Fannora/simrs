@@ -1,6 +1,28 @@
 <?php $title = 'Dashboard Admin'; ?>
 <?= $this->extend('admin/layout') ?>
 <?= $this->section('content') ?>
+<?php
+function formatTanggalIndo($dateStr) {
+    if (empty($dateStr)) return '-';
+    $bulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    $timestamp = strtotime($dateStr);
+    $d = date('j', $timestamp);
+    $m = $bulan[(int)date('n', $timestamp)];
+    $y = date('Y', $timestamp);
+    return "$d $m $y";
+}
+
+function formatTanggalWaktuIndo($dateStr) {
+    if (empty($dateStr)) return '-';
+    $bulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    $timestamp = strtotime($dateStr);
+    $d = date('j', $timestamp);
+    $m = $bulan[(int)date('n', $timestamp)];
+    $y = date('Y', $timestamp);
+    $time = date('H:i', $timestamp);
+    return "$d $m $y, $time WIB";
+}
+?>
 
 <!-- Stat Cards Bento Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -37,14 +59,14 @@
         </div>
     </div>
     
-    <!-- Pendaftaran Hari Ini -->
+    <!-- Kamar Tersedia -->
     <div class="bg-white border border-outline-variant/65 rounded-2xl p-6 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
         <div class="space-y-1">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pendaftaran Hari Ini</p>
-            <h3 class="text-3xl font-extrabold text-slate-800"><?= $pendaftaranHariIni ?></h3>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Kamar Tersedia</p>
+            <h3 class="text-3xl font-extrabold text-slate-800"><?= $kamarTersedia ?></h3>
         </div>
         <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-success-emerald border border-emerald-100">
-            <span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">event_available</span>
+            <span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">meeting_room</span>
         </div>
     </div>
 </div>
@@ -58,7 +80,7 @@
                 <span class="material-symbols-outlined text-secondary">calendar_today</span>
                 <h3 class="font-headline-sm text-lg font-bold text-slate-800">Jadwal Antrian & Kunjungan Hari Ini</h3>
             </div>
-            <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-3 py-1 rounded-full"><?= date('d M Y') ?></span>
+            <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-3 py-1 rounded-full"><?= formatTanggalIndo(date('Y-m-d')) ?></span>
         </div>
         
         <div class="overflow-x-auto">
@@ -154,7 +176,7 @@
                     <?php foreach ($rekamMedisTerbaru as $rm): ?>
                     <tr class="hover:bg-slate-50/45 transition-colors">
                         <td class="py-5 px-6 font-semibold text-slate-600">
-                            <?= date('d M Y, H:i', strtotime($rm['tgl_periksa'])) ?>
+                            <?= formatTanggalWaktuIndo($rm['tgl_periksa']) ?>
                         </td>
                         <td class="py-5 px-6 font-bold text-slate-800">
                             <?= esc($rm['nama_pasien']) ?>

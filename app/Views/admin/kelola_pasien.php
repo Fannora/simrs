@@ -3,11 +3,27 @@
 <?= $this->section('content') ?>
 
 <!-- Header Area -->
-<div class="flex justify-between items-center mb-6 animate-in fade-in duration-300">
-    <button type="button" onclick="openModal('modalTambahPasien')" class="bg-secondary text-white hover:opacity-90 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 animate-in fade-in duration-300">
+    <button type="button" onclick="openModal('modalTambahPasien')" class="bg-secondary text-white hover:opacity-90 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all whitespace-nowrap">
         <span class="material-symbols-outlined">person_add</span>
         Tambah Pasien Baru
     </button>
+    
+    <!-- Search Filter Form -->
+    <form method="GET" action="<?= base_url('admin/pasien') ?>" class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="relative w-full sm:w-64">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+            <input type="text" name="cari" value="<?= esc($cari ?? '') ?>" placeholder="Cari nama pasien..." class="w-full pl-9 pr-4 py-2 border border-outline-variant/65 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all bg-white text-slate-700">
+        </div>
+        <button type="submit" class="bg-secondary text-white hover:opacity-90 px-5 py-2 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-1.5 h-[38px]">
+            Cari
+        </button>
+        <?php if (!empty($cari)): ?>
+            <a href="<?= base_url('admin/pasien') ?>" class="border border-outline-variant/60 hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-1 h-[38px] whitespace-nowrap">
+                Reset
+            </a>
+        <?php endif; ?>
+    </form>
 </div>
 
 <!-- Table Card -->
@@ -29,8 +45,8 @@
                 <?php if (empty($pasien)): ?>
                 <tr>
                     <td colspan="7" class="text-center text-slate-400 py-12">
-                        <span class="material-symbols-outlined text-[48px] text-slate-300 block mb-2">no_accounts</span>
-                        Belum ada data pasien terdaftar di database RS.
+                        <span class="material-symbols-outlined text-[48px] text-slate-300 block mb-2"><?= !empty($cari) ? 'search_off' : 'no_accounts' ?></span>
+                        <?= !empty($cari) ? 'Tidak ditemukan pasien dengan nama "' . esc($cari) . '".' : 'Belum ada data pasien terdaftar di database RS.' ?>
                     </td>
                 </tr>
                 <?php else: ?>
@@ -42,11 +58,9 @@
                 ?>
                 <tr class="hover:bg-slate-50/45 transition-colors">
                     <td class="py-5 px-6">
-                        <span class="font-mono text-xs font-bold text-secondary bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg">
-                            <?= esc($p['no_rm']) ?>
-                        </span>
+                        <strong class="font-mono text-sm text-red-800 font-bold"><?= esc($p['no_rm']) ?></strong>
                     </td>
-                    <td class="py-5 px-6 font-semibold text-slate-600 font-mono text-xs">
+                    <td class="py-5 px-6 font-semibold text-slate-600 font-mono text-sm">
                         <?= esc($p['nik']) ?>
                     </td>
                     <td class="py-5 px-6">
@@ -56,15 +70,13 @@
                         <?= $tglFmt ?>
                     </td>
                     <td class="py-5 px-6">
-                        <span class="text-xs px-2.5 py-1 rounded-full font-bold border <?= $p['jk'] == 'L' ? 'bg-indigo-50 border-indigo-100 text-indigo-700' : 'bg-pink-50 border-pink-100 text-pink-700' ?>">
-                            <?= $p['jk'] == 'L' ? 'Laki-laki' : 'Perempuan' ?>
-                        </span>
+                        <strong class="text-sm font-bold <?= $p['jk'] == 'L' ? 'text-blue-900' : 'text-pink-500' ?>"><?= $p['jk'] == 'L' ? 'Laki-laki' : 'Perempuan' ?></strong>
                     </td>
-                    <td class="py-5 px-6 font-semibold text-slate-600">
+                    <td class="py-5 px-6 font-bold text-slate-800 font-mono text-sm">
                         <?php if(!empty($p['no_bpjs'])): ?>
-                            <span class="text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md text-xs font-mono"><?= esc($p['no_bpjs']) ?></span>
+                            <strong><?= esc($p['no_bpjs']) ?></strong>
                         <?php else: ?>
-                            <span class="text-slate-400">-</span>
+                            <span class="text-slate-400 font-normal">-</span>
                         <?php endif; ?>
                     </td>
                     <td class="py-5 px-6 text-center">
@@ -91,7 +103,7 @@
 <div id="modalTambahPasien" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-all duration-300">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-secondary to-secondary-container text-white px-6 py-5 flex justify-between items-center">
+        <div class="bg-secondary text-white px-6 py-5 flex justify-between items-center">
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">person_add</span>
                 <h3 class="font-headline-sm text-lg font-bold text-white">Tambah Pasien Baru</h3>
@@ -136,7 +148,7 @@
             
             <div class="space-y-1">
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor BPJS (Opsional)</label>
-                <input type="text" name="no_bpjs" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm" placeholder="Contoh: 0001XXXXXXXXX">
+                <input type="text" name="no_bpjs" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm" placeholder="Contoh: 0001XXXXXXXXX">
             </div>
             
             <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl flex items-start gap-2 text-xs text-slate-600">
@@ -161,7 +173,7 @@
 <div id="modalEditPasien" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-all duration-300">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-5 flex justify-between items-center">
+        <div class="bg-amber-500 text-white px-6 py-5 flex justify-between items-center">
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">edit_square</span>
                 <h3 class="font-headline-sm text-lg font-bold text-white">Edit Data Pasien</h3>
@@ -207,7 +219,7 @@
             
             <div class="space-y-1">
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor BPJS</label>
-                <input type="text" name="no_bpjs" id="edit_no_bpjs" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
+                <input type="text" name="no_bpjs" id="edit_no_bpjs" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
             </div>
             
             <!-- Actions -->

@@ -24,12 +24,22 @@ class KamarController extends BaseController
     {
         if (!$this->checkAdmin()) return redirect()->to(base_url('login'));
 
-        $kamar = $this->db->table('tbl_kamar')
-            ->orderBy('kelas', 'ASC')
+        $cari = $this->request->getGet('cari');
+
+        $builder = $this->db->table('tbl_kamar');
+
+        if (!empty($cari)) {
+            $builder->like('nama_kamar', $cari);
+        }
+
+        $kamar = $builder->orderBy('kelas', 'ASC')
             ->orderBy('nama_kamar', 'ASC')
             ->get()->getResultArray();
 
-        return view('admin/kelola_kamar', ['kamar' => $kamar]);
+        return view('admin/kelola_kamar', [
+            'kamar' => $kamar,
+            'cari' => $cari
+        ]);
     }
 
     public function store()

@@ -118,6 +118,8 @@
             background-size: 24px 24px;
         }
     </style>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-background font-body-md text-on-surface min-h-screen flex flex-col">
 
@@ -177,7 +179,7 @@
                         <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="nama_lengkap">Nama Lengkap</label>
                         <div class="relative group">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">person</span>
-                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="nama_lengkap" name="nama_lengkap" placeholder="cth: Brian Decon Christoffel Silaban" type="text" required value="<?= old('nama_lengkap') ?>"/>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="nama_lengkap" name="nama_lengkap" placeholder="cth: Vnora Ananda Putri" type="text" required value="<?= old('nama_lengkap') ?>"/>
                         </div>
                     </div>
                     
@@ -203,22 +205,14 @@
 
                         <!-- Jenis Kelamin -->
                         <div class="space-y-2">
-                            <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider">Jenis Kelamin</label>
-                            <div class="flex flex-col gap-2">
-                                <label class="cursor-pointer block relative">
-                                    <input type="radio" name="jk" value="L" class="sr-only peer" required <?= old('jk') === 'L' ? 'checked' : '' ?>/>
-                                    <div class="flex items-center justify-center gap-1.5 px-3 py-3 bg-white border border-outline-variant rounded-lg transition-all peer-checked:border-secondary peer-checked:bg-secondary/5 peer-checked:text-secondary hover:bg-surface-container-low">
-                                        <span class="material-symbols-outlined text-[18px]">male</span>
-                                        <span class="font-body-sm">Laki-laki</span>
-                                    </div>
-                                </label>
-                                <label class="cursor-pointer block relative">
-                                    <input type="radio" name="jk" value="P" class="sr-only peer" <?= old('jk') === 'P' ? 'checked' : '' ?>/>
-                                    <div class="flex items-center justify-center gap-1.5 px-3 py-3 bg-white border border-outline-variant rounded-lg transition-all peer-checked:border-secondary peer-checked:bg-secondary/5 peer-checked:text-secondary hover:bg-surface-container-low">
-                                        <span class="material-symbols-outlined text-[18px]">female</span>
-                                        <span class="font-body-sm">Perempuan</span>
-                                    </div>
-                                </label>
+                            <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="jk">Jenis Kelamin</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">wc</span>
+                                <select class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all bg-white" id="jk" name="jk" required>
+                                    <option value="" disabled <?= old('jk') === null ? 'selected' : '' ?>>- Pilih Jenis Kelamin -</option>
+                                    <option value="L" <?= old('jk') === 'L' ? 'selected' : '' ?>>Laki-laki</option>
+                                    <option value="P" <?= old('jk') === 'P' ? 'selected' : '' ?>>Perempuan</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -236,7 +230,7 @@
                         <label class="font-label-md text-label-md text-on-surface-variant block uppercase tracking-wider" for="no_bpjs">Nomor BPJS <span class="text-outline text-xs lowercase italic">(opsional)</span></label>
                         <div class="relative group">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors">medical_services</span>
-                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="no_bpjs" name="no_bpjs" placeholder="Nomor Kartu BPJS Kesehatan" type="text" value="<?= old('no_bpjs') ?>"/>
+                            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" id="no_bpjs" name="no_bpjs" placeholder="Nomor Kartu BPJS Kesehatan" type="text" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="<?= old('no_bpjs') ?>"/>
                         </div>
                     </div>
 
@@ -353,6 +347,20 @@
 </footer>
 
 <script>
+    // Override native alert globally with SweetAlert2
+    window.alert = function(message) {
+        Swal.fire({
+            title: 'Peringatan',
+            text: message,
+            icon: 'warning',
+            confirmButtonColor: '#0047AB',
+            confirmButtonText: 'OK',
+            customClass: {
+                popup: 'rounded-[16px]'
+            }
+        });
+    };
+
     // NIK validation: Allow only digits
     document.getElementById('nik').addEventListener('input', function() {
         this.value = this.value.replace(/\D/g, '');

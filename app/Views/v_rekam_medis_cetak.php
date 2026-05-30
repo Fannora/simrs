@@ -4,734 +4,495 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekam Medis — <?= isset($rekam_medis[0]) ? esc($rekam_medis[0]['nama_pasien']) . ' / ' . esc($rekam_medis[0]['no_rawat']) : 'Cetak' ?></title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --navy:        #0D2B5E;
-      --navy-mid:    #163A7A;
-      --blue:        #1A5CB8;
-      --teal:        #0A7566;
-      --red:         #B91C1C;
-      --amber:       #B45309;
-      --border:      #CBD5E1;
-      --border-lt:   #E8EDF5;
-      --bg-section:  #F1F5FB;
-      --bg-warn:     #FFFBEB;
-      --bg-diag:     #FFF5F5;
-      --text:        #0F172A;
-      --text-mid:    #334155;
-      --text-muted:  #64748B;
-      --text-label:  #475569;
-      --white:       #FFFFFF;
-    }
-
+    /* CSS Standard Reset & Base Settings */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+    
     body {
-      font-family: 'Inter', sans-serif;
-      background: #DCE3EF;
-      color: var(--text);
-      font-size: 12.5px;
-      line-height: 1.55;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px; /* Diperbesar dari 12px */
+      line-height: 1.5;
+      color: #000;     /* Hitam pekat untuk cetakan */
+      background: #f4f4f4;
     }
 
-    /* ─── PRINT CONTROLS (screen only) ─── */
+    /* Print Bar (Hanya tampil di layar) */
     .print-bar {
-      background: var(--navy);
-      padding: 12px 24px;
+      background-color: #333;
+      color: #fff;
+      padding: 10px 20px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 12px;
-    }
-    .print-bar-title {
-      color: rgba(255,255,255,0.75);
-      font-size: 13px;
-      letter-spacing: 0.03em;
+      align-items: center;
+      font-family: Arial, sans-serif;
     }
     .btn-print {
       background: #fff;
-      color: var(--navy);
-      border: none;
-      border-radius: 6px;
-      padding: 9px 28px;
-      font-size: 13.5px;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 0.02em;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: opacity .15s;
-    }
-    .btn-print:hover { opacity: .88; }
-
-    /* ─── PAGE WRAPPER ─── */
-    .page-wrapper {
-      width: 820px;
-      margin: 20px auto;
-      background: var(--white);
-      box-shadow: 0 6px 40px rgba(0,0,0,.22);
-    }
-
-    /* ─── LETTERHEAD ─── */
-    .letterhead {
-      display: flex;
-      align-items: center;
-      padding: 18px 28px 14px;
-      border-bottom: 3px solid var(--navy);
-      gap: 20px;
-    }
-    .lh-logo {
-      flex-shrink: 0;
-    }
-    .lh-logo img {
-      height: 62px;
-      width: auto;
-      display: block;
-      object-fit: contain;
-    }
-    .lh-divider {
-      width: 2px;
-      height: 56px;
-      background: var(--border);
-      flex-shrink: 0;
-    }
-    .lh-info {
-      flex: 1;
-    }
-    .lh-rs-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 21px;
-      font-weight: 700;
-      color: var(--navy);
-      letter-spacing: 0.01em;
-      line-height: 1.2;
-    }
-    .lh-rs-sub {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-top: 3px;
-    }
-    .lh-rs-addr {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 5px;
-    }
-    .lh-doctype {
-      text-align: right;
-      flex-shrink: 0;
-    }
-    .lh-doc-label {
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-    .lh-doc-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--navy);
-      line-height: 1.25;
-    }
-    .lh-doc-no {
-      font-size: 11px;
-      color: var(--blue);
-      font-weight: 600;
-      margin-top: 5px;
-      font-family: 'Inter', monospace;
-    }
-
-    /* colour accent stripe */
-    .accent-stripe {
-      height: 5px;
-      background: linear-gradient(90deg, var(--navy) 0%, var(--blue) 50%, #06B6D4 100%);
-    }
-
-    /* ─── PATIENT IDENTITY BANNER ─── */
-    .id-banner {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      background: var(--bg-section);
-      border-bottom: 1px solid var(--border);
-    }
-    .id-cell {
-      padding: 11px 16px;
-      border-right: 1px solid var(--border);
-    }
-    .id-cell:last-child { border-right: none; }
-    .id-label {
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      margin-bottom: 3px;
-      font-weight: 600;
-    }
-    .id-value {
+      color: #333;
+      border: 1px solid #ccc;
+      padding: 6px 16px;
       font-size: 13px;
-      font-weight: 700;
-      color: var(--navy);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
     }
-    .id-value.mono {
-      font-family: 'Inter', monospace;
-      color: var(--blue);
-      font-size: 12px;
-    }
-    .id-value.normal { font-weight: 500; color: var(--text); font-size: 12px; }
+    .btn-print:hover { background: #eee; }
 
-    /* ─── VISIT META ROW ─── */
-    .visit-meta {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      border-bottom: 1px solid var(--border);
-    }
-    .vm-cell {
-      padding: 9px 14px;
-      border-right: 1px solid var(--border-lt);
-    }
-    .vm-cell:last-child { border-right: none; }
-    .vm-label {
-      font-size: 8.5px;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      color: var(--text-muted);
-      margin-bottom: 3px;
-    }
-    .vm-value {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-mid);
-    }
-    .vm-value.blue { color: var(--blue); }
-    .vm-value.teal { color: var(--teal); }
-
-    /* ─── BODY ─── */
-    .doc-body {
-      padding: 18px 24px;
+    /* Page Wrapper */
+    .page-wrapper {
+      width: 210mm; /* Standar A4 */
+      min-height: 297mm;
+      margin: 20px auto;
+      background: #fff;
+      padding: 15mm 15mm;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
-    /* section card */
-    .sec {
-      margin-bottom: 14px;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      overflow: hidden;
-    }
-    .sec-head {
+    /* Kop Surat Resmi */
+    .kop-surat {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 7px 14px;
-      background: var(--navy-mid);
-      color: var(--white);
+      margin-bottom: 10px;
     }
-    .sec-head.teal-bg   { background: var(--teal); }
-    .sec-head.red-bg    { background: var(--red); }
-    .sec-head.amber-bg  { background: var(--amber); }
-    .sec-icon {
-      width: 15px;
-      height: 15px;
-      flex-shrink: 0;
-      opacity: .85;
+    .kop-logo {
+      width: 70px;
+      margin-right: 20px;
     }
-    .sec-title {
-      font-size: 9.5px;
-      text-transform: uppercase;
-      letter-spacing: 0.13em;
-      font-weight: 700;
-    }
-    .sec-body {
-      padding: 12px 16px;
-      background: var(--white);
-      font-size: 12.5px;
-      color: var(--text);
-      line-height: 1.7;
-      white-space: pre-wrap;
-      min-height: 42px;
-    }
-    .sec-body.keluhan {
-      background: var(--bg-warn);
-      border-top: 2px solid #FCD34D;
-      font-style: italic;
-      color: #78350F;
-    }
-    .sec-body.diagnosa {
-      background: var(--bg-diag);
-      font-weight: 600;
-      font-size: 13.5px;
-      color: var(--red);
-    }
-
-    /* ─── PRESCRIPTION TABLE ─── */
-    .rx-table {
+    .kop-logo img {
       width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
+      height: auto;
     }
-    .rx-table thead tr {
-      background: #E8EDF5;
-    }
-    .rx-table th {
-      padding: 7px 12px;
-      text-align: left;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      color: var(--text-label);
-      font-weight: 700;
-      border-bottom: 1px solid var(--border);
-    }
-    .rx-table th.center, .rx-table td.center { text-align: center; }
-    .rx-table th.right, .rx-table td.right   { text-align: right; }
-    .rx-table td {
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--border-lt);
-      vertical-align: middle;
-    }
-    .rx-table tbody tr:last-child td { border-bottom: none; }
-    .rx-table tbody tr:nth-child(even) { background: #F8FAFC; }
-    .rx-num    { font-weight: 700; color: var(--navy); width: 30px; font-size: 11px; }
-    .rx-name   { font-weight: 600; color: var(--text); }
-    .rx-satuan { color: var(--text-muted); font-size: 11px; }
-    .rx-dosis  { color: var(--blue); font-weight: 500; }
-    .rx-qty    { font-weight: 700; color: var(--navy); }
-    .rx-note   { color: var(--text-muted); font-style: italic; font-size: 11.5px; }
-    .rx-price  { color: var(--teal); font-weight: 600; }
-    .rx-total-row td {
-      background: #EEF3FB !important;
-      font-weight: 700;
-      border-top: 2px solid var(--border) !important;
-      color: var(--navy);
-    }
-    .no-rx {
-      padding: 14px 16px;
-      color: var(--text-muted);
-      font-style: italic;
-      font-size: 12px;
-    }
-
-    /* ─── SIGNATURE + INFO ROW ─── */
-    .sig-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .sig-box {
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 12px 14px;
+    .kop-teks {
+      flex: 1;
       text-align: center;
     }
-    .sig-label {
-      font-size: 9.5px;
+    .kop-teks h1 {
+      font-size: 20px; /* Diperbesar dari 18px */
+      font-weight: bold;
+      margin-bottom: 2px;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      margin-bottom: 52px;
+      letter-spacing: 1px;
     }
-    .sig-line {
-      border-top: 1px solid var(--text-mid);
-      margin: 0 16px 6px;
+    .kop-teks h2 {
+      font-size: 14px; /* Diperbesar dari 12px */
+      font-weight: normal;
+      margin-bottom: 2px;
+      text-transform: uppercase;
     }
-    .sig-name  { font-size: 12px; font-weight: 700; color: var(--navy); }
-    .sig-role  { font-size: 11px; color: var(--text-muted); }
+    .kop-teks p {
+      font-size: 12px; /* Diperbesar dari 11px */
+      color: #333;
+    }
+    
+    /* Garis Ganda Kop Surat */
+    .garis-kop {
+      border-top: 2px solid #000;
+      border-bottom: 1px solid #000;
+      height: 2px;
+      margin-bottom: 15px;
+    }
 
-    .info-box {
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 12px 14px;
-      grid-column: span 1;
-    }
-    .info-box-title {
-      font-size: 9.5px;
+    /* Judul Dokumen */
+    .doc-title {
+      text-align: center;
+      font-size: 16px; /* Diperbesar dari 14px */
+      font-weight: bold;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      font-weight: 700;
-      margin-bottom: 8px;
+      text-decoration: underline;
+      margin-bottom: 2px;
     }
-    .info-box-row {
+    .doc-subtitle {
+      text-align: center;
+      font-size: 13px; /* Diperbesar dari 11px */
+      margin-bottom: 20px;
+    }
+
+    /* Tabel Informasi Pasien & Kunjungan (Layout Formal) */
+    .table-info {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 13px; /* Diperbesar dari 11px */
+    }
+    .table-info td {
+      padding: 4px 6px; /* Ditambah sedikit padding */
+      vertical-align: top;
+    }
+    .table-info td:nth-child(2),
+    .table-info td:nth-child(5) {
+      width: 10px; /* Lebar titik dua (:) */
+      text-align: center;
+    }
+    .table-info .lbl {
+      font-weight: bold;
+      width: 18%; /* Disesuaikan agar muat */
+    }
+    .table-info .val {
+      width: 32%;
+    }
+
+    /* Bagian Data Klinis (SOAP) */
+    .section-title {
+      font-weight: bold;
+      font-size: 14px; /* Diperbesar dari 12px */
+      background-color: #eee;
+      padding: 6px 10px;
+      border: 1px solid #000;
+      margin-top: 15px;
+      text-transform: uppercase;
+    }
+    .section-body {
+      border: 1px solid #000;
+      border-top: none;
+      padding: 12px 10px;
+      min-height: 45px;
+      font-size: 13.5px; /* Diperbesar */
+      text-align: left; /* Perataan Kiri untuk SOAP A, B, C */
+      white-space: pre-wrap; /* Mempertahankan baris baru dari textarea */
+    }
+
+    /* Tabel Formal (Resep & Tagihan) */
+    .table-data {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: -1px; /* Gabung dengan border atasnya */
+      font-size: 13px; /* Diperbesar dari 11px */
+    }
+    .table-data th, .table-data td {
+      border: 1px solid #000;
+      padding: 8px 10px; /* Ditambah padding */
+    }
+    .table-data th {
+      background-color: #f9f9f9;
+      text-align: left;
+      font-weight: bold;
+    }
+    .text-center { text-align: center !important; }
+    .text-right { text-align: right !important; }
+    .text-bold { font-weight: bold; }
+
+    /* Area Tanda Tangan */
+    .signature-area {
       display: flex;
       justify-content: space-between;
-      font-size: 11.5px;
-      margin-bottom: 4px;
+      margin-top: 50px;
+      font-size: 13.5px; /* Diperbesar */
     }
-    .info-box-row span:first-child { color: var(--text-muted); }
-    .info-box-row span:last-child  { font-weight: 600; color: var(--text); }
-    .info-total-row span:last-child { color: var(--teal); font-size: 13px; font-weight: 700; }
-
-    /* barcode visual */
-    .barcode-wrap {
+    .sig-box {
+      width: 45%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-    }
-    .barcode-bars {
-      display: flex;
-      gap: 2px;
-      align-items: flex-end;
-      margin-bottom: 4px;
-    }
-    .barcode-bars span {
-      display: block;
-      background: var(--navy);
-    }
-    .barcode-no {
-      font-size: 9px;
-      font-family: monospace;
-      color: var(--text-muted);
-      letter-spacing: 0.14em;
-    }
-    .confidential {
-      display: inline-block;
-      border: 1px solid var(--red);
-      color: var(--red);
-      font-size: 8.5px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 3px;
-      margin-top: 8px;
-    }
-
-    /* ─── DOC FOOTER ─── */
-    .doc-footer {
-      display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 10px 24px;
-      background: var(--bg-section);
-      border-top: 1px solid var(--border);
-      margin-top: 18px;
+      min-height: 140px; /* Tinggi konstan agar area tanda tangan sama */
+      text-align: center;
     }
-    .df-left {
-      font-size: 9.5px;
-      color: var(--text-muted);
+    .sig-header {
+      height: 40px; /* Tinggi header konstan agar teks sejajar */
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
-    .df-right {
-      font-size: 9px;
-      color: var(--text-muted);
-      text-align: right;
+    .sig-footer {
+      /* Bagian bawah untuk nama */
+    }
+    .sig-name {
+      font-weight: bold;
+      text-decoration: underline;
+      margin-bottom: 3px;
     }
 
-    /* ─── PAGE BREAK ─── */
-    .page-break-wrapper {
+    /* Page Break untuk Multiple Pages */
+    .page-break {
       page-break-before: always;
       break-before: page;
     }
-    .page-break-rule {
-      border: none;
-      border-top: 2px dashed var(--border);
-      margin: 32px 0;
+    .page-divider {
+      border-top: 1px dashed #999;
+      margin: 20px 0;
     }
 
-    /* ─── PRINT ─── */
+    /* Konfigurasi Cetak (Print) */
     @media print {
       body { background: #fff; }
       .print-bar { display: none !important; }
       .page-wrapper {
-        width: 100%;
         margin: 0;
+        padding: 0;
+        width: 100%;
         box-shadow: none;
       }
-      .page-break-wrapper {
-        margin: 0;
+      .page-divider { display: none; }
+      @page { 
+        size: A4 portrait;
+        margin: 10mm 15mm; 
       }
-      .page-break-rule { display: none; }
-      @page { size: A4; margin: 10mm 12mm; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── Print Bar (screen only) ── -->
+<!-- Print Control (Hanya di layar) -->
 <div class="print-bar no-print">
-  <span class="print-bar-title">Pratinjau Rekam Medis — RS MiraCare</span>
-  <button class="btn-print" onclick="window.print()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <polyline points="6 9 6 2 18 2 18 9"/>
-      <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
-      <rect x="6" y="14" width="12" height="8"/>
-    </svg>
-    Cetak / Simpan PDF
-  </button>
+  <div>
+    <strong>Rekam Medis (Versi Cetak Formal)</strong>
+  </div>
+  <button class="btn-print" onclick="window.print()">Cetak Dokumen</button>
 </div>
+
+<?php
+if (!function_exists('formatTanggalIndo')) {
+    function formatTanggalIndo($dateStr) {
+        $timestamp = strtotime($dateStr);
+        $hari_arr = [
+            'Sunday' => 'Minggu',
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu'
+        ];
+        $bulan_arr = [
+            'January' => 'Januari',
+            'February' => 'Februari',
+            'March' => 'Maret',
+            'April' => 'April',
+            'May' => 'Mei',
+            'June' => 'Juni',
+            'July' => 'Juli',
+            'August' => 'Agustus',
+            'September' => 'September',
+            'October' => 'Oktober',
+            'November' => 'November',
+            'December' => 'Desember'
+        ];
+        
+        $hari_inggris = date('l', $timestamp);
+        $hari_indo = $hari_arr[$hari_inggris] ?? $hari_inggris;
+        $tgl = date('d', $timestamp);
+        $bulan_inggris = date('F', $timestamp);
+        $bulan_indo = $bulan_arr[$bulan_inggris] ?? $bulan_inggris;
+        $tahun = date('Y', $timestamp);
+        
+        return "$hari_indo, $tgl $bulan_indo $tahun";
+    }
+}
+
+if (!function_exists('formatBulanIndo')) {
+    function formatBulanIndo($dateStr) {
+        $timestamp = strtotime($dateStr);
+        $bulan_arr = [
+            'January' => 'Januari',
+            'February' => 'Februari',
+            'March' => 'Maret',
+            'April' => 'April',
+            'May' => 'Mei',
+            'June' => 'Juni',
+            'July' => 'Juli',
+            'August' => 'Agustus',
+            'September' => 'September',
+            'October' => 'Oktober',
+            'November' => 'November',
+            'December' => 'Desember'
+        ];
+        $tgl = date('d', $timestamp);
+        $bulan_inggris = date('F', $timestamp);
+        $bulan_indo = $bulan_arr[$bulan_inggris] ?? $bulan_inggris;
+        $tahun = date('Y', $timestamp);
+        return "$tgl $bulan_indo $tahun";
+    }
+}
+?>
 
 <?php $first = true; foreach ($rekam_medis as $rm): ?>
 
 <?php if (!$first): ?>
-<div class="page-break-wrapper">
-  <hr class="page-break-rule">
-</div>
+<div class="page-break"></div>
+<hr class="page-divider no-print">
 <?php endif; $first = false; ?>
 
 <?php
-  // Hitung total tagihan dari resep items
+  // Perhitungan Data Pendukung
   $grandTotal = 0;
   if (!empty($rm['resep_items'])) {
       foreach ($rm['resep_items'] as $ri) {
           $grandTotal += (float)$ri['harga'] * (int)$ri['jumlah'];
       }
   }
-  // Hitung umur
+  
   $umur = '';
   if (!empty($rm['tgl_lahir'])) {
-      $umur = (int)date_diff(date_create($rm['tgl_lahir']), date_create('today'))->y . ' tahun';
+      $umur = (int)date_diff(date_create($rm['tgl_lahir']), date_create('today'))->y . ' Tahun';
   }
   $jkLabel = ($rm['jk'] ?? '') === 'P' ? 'Perempuan' : (($rm['jk'] ?? '') === 'L' ? 'Laki-laki' : '-');
 ?>
 
 <div class="page-wrapper">
 
-  <!-- ══ LETTERHEAD ══ -->
-  <div class="letterhead">
-    <div class="lh-logo">
-      <img src="<?= base_url('assets/img/MiraCareLogo.png') ?>" alt="MiraCare Logo">
-    </div>
-    <div class="lh-divider"></div>
-    <div class="lh-info">
-      <div class="lh-rs-name">RS MiraCare</div>
-      <div class="lh-rs-sub">Sistem Informasi Manajemen Rumah Sakit</div>
-      <div class="lh-rs-addr">Jl. Selambo IV No. 4a, Amplas, Medan, Sumatera Utara &nbsp; &nbsp; &nbsp; &nbsp; (+62) 813-9688-4263 &nbsp;·&nbsp; info@miracare.id</div>
-    </div>
-    <div class="lh-doctype">
-      <div class="lh-doc-label">Dokumen Resmi</div>
-      <div class="lh-doc-title">Rekam Medis<br>Rawat Jalan</div>
+  <!-- 1. KOP SURAT -->
+  <div class="kop-surat">
+    <div class="kop-teks">
+      <h2>SISTEM INFORMASI MANAJEMEN RUMAH SAKIT</h2>
+      <h1>RUMAH SAKIT MIRACARE</h1>
+      <p>Jl. Selambo IV No. 4a, Amplas, Medan, Sumatera Utara</p>
+      <p>Telp: (+62) 813-9688-4263 | Email: info@miracare.id</p>
     </div>
   </div>
-  <div class="accent-stripe"></div>
+  <div class="garis-kop"></div>
 
-  <!-- ══ PATIENT IDENTITY BANNER ══ -->
-  <div class="id-banner">
-    <div class="id-cell">
-      <div class="id-label">No. Rekam Medis</div>
-      <div class="vm-value"><?= esc($rm['no_rm']) ?></div>
-    </div>
-    <div class="id-cell">
-      <div class="id-label">Nama Pasien</div>
-      <div class="id-value"><?= esc($rm['nama_pasien']) ?></div>
-    </div>
-    <div class="id-cell">
-      <div class="id-label">Jenis Kelamin &amp; Umur</div>
-      <div class="vm-value"><?= $jkLabel ?><?= $umur ? ' · ' . $umur : '' ?></div>
-    </div>
-    <div class="id-cell">
-      <div class="id-label">NIK</div>
-      <div class="vm-value"><?= $rm['nik'] ? esc($rm['nik']) : '—' ?></div>
-    </div>
+  <!-- 2. JUDUL DOKUMEN -->
+  <div class="doc-title">REKAM MEDIS RAWAT JALAN</div>
+  <div class="doc-subtitle">No. Registrasi: <?= esc($rm['no_rawat']) ?></div>
+
+  <!-- 3. IDENTITAS PASIEN & KUNJUNGAN (Format Tabel Padat) -->
+  <table class="table-info">
+    <tr>
+      <td class="lbl">No. Rekam Medis</td><td>:</td><td class="val"><?= esc($rm['no_rm']) ?></td>
+      <td class="lbl">Tanggal Periksa</td><td>:</td><td class="val"><?= formatTanggalIndo($rm['tgl_periksa']) ?></td>
+    </tr>
+    <tr>
+      <td class="lbl">Nama Pasien</td><td>:</td><td class="val"><strong><?= esc($rm['nama_pasien']) ?></strong></td>
+      <td class="lbl">Dokter Pemeriksa</td><td>:</td><td class="val">dr. <?= esc($rm['nama_dokter']) ?></td>
+    </tr>
+    <tr>
+      <td class="lbl">Jenis Kelamin / Umur</td><td>:</td><td class="val"><?= $jkLabel ?> / <?= $umur ?: '-' ?></td>
+      <td class="lbl">Poliklinik Tujuan</td><td>:</td><td class="val"><?= esc($rm['nama_poli']) ?></td>
+    </tr>
+    <tr>
+      <td class="lbl">NIK / Identitas</td><td>:</td><td class="val"><?= $rm['nik'] ? esc($rm['nik']) : '-' ?></td>
+      <td class="lbl">Tipe Layanan / BPJS</td><td>:</td><td class="val">Rawat Jalan / <?= $rm['no_bpjs'] ? esc($rm['no_bpjs']) : '-' ?></td>
+    </tr>
+  </table>
+
+  <!-- 4. PENCATATAN KLINIS (S.O.A.P) -->
+  <div class="section-title">A. Keluhan Utama (Subjektif)</div>
+  <div class="section-body">
+<?= esc($rm['keluhan_awal'] ?? '-') ?>
   </div>
 
-  <!-- ══ VISIT META ══ -->
-  <div class="visit-meta">
-    <div class="vm-cell">
-      <div class="vm-label">Tanggal Periksa</div>
-      <div class="vm-value"><?= date('d M Y', strtotime($rm['tgl_periksa'])) ?></div>
-    </div>
-    <div class="vm-cell">
-      <div class="vm-label">Jam Periksa</div>
-      <div class="vm-value"><?= date('H:i', strtotime($rm['tgl_periksa'])) ?> WIB</div>
-    </div>
-    <div class="vm-cell">
-      <div class="vm-label">Tgl. Pendaftaran</div>
-      <div class="vm-value"><?= $rm['tgl_daftar'] ? date('d M Y', strtotime($rm['tgl_daftar'])) : '—' ?></div>
-    </div>
-    <div class="vm-cell">
-      <div class="vm-label">Dokter Pemeriksa</div>
-      <div class="id-value">dr. <?= esc($rm['nama_dokter']) ?></div>
-    </div>
-    <div class="vm-cell">
-      <div class="vm-label">Poliklinik</div>
-      <div class="vm-value"><?= esc($rm['nama_poli']) ?></div>
-    </div>
-    <div class="vm-cell">
-      <div class="vm-label">No. BPJS</div>
-      <div class="vm-value"><?= $rm['no_bpjs'] ? esc($rm['no_bpjs']) : '—' ?></div>
-    </div>
+  <div class="section-title">B. Diagnosa (Assessment)</div>
+  <div class="section-body text-bold">
+<?= esc($rm['diagnosa'] ?? '-') ?>
   </div>
 
-  <!-- ══ BODY ══ -->
-  <div class="doc-body">
+  <div class="section-title">C. Tindakan Medis (Planning/Prosedur)</div>
+  <div class="section-body">
+<?= $rm['tindakan'] ? esc($rm['tindakan']) : '-' ?>
+  </div>
 
-    <!-- Keluhan Utama -->
-    <div class="sec">
-      <div class="sec-head amber-bg">
-        <svg class="sec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-        <span class="sec-title">Keluhan Utama Pasien</span>
-      </div>
-      <div class="sec-body keluhan"><?= esc($rm['keluhan_awal'] ?? '—') ?></div>
-    </div>
-
-    <!-- Diagnosa -->
-    <div class="sec">
-      <div class="sec-head red-bg">
-        <svg class="sec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span class="sec-title">Diagnosa</span>
-      </div>
-      <div class="sec-body diagnosa"><?= nl2br(esc($rm['diagnosa'])) ?></div>
-    </div>
-
-    <!-- Tindakan Medis -->
-    <div class="sec">
-      <div class="sec-head teal-bg">
-        <svg class="sec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14.5 4h-5L7 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-3L14.5 4z"/>
-          <circle cx="12" cy="13" r="3"/>
-        </svg>
-        <span class="sec-title">Tindakan Medis</span>
-      </div>
-      <div class="sec-body"><?= $rm['tindakan'] ? nl2br(esc($rm['tindakan'])) : '<em style="color:#94a3b8;">—</em>' ?></div>
-    </div>
-
-    <!-- Resep Obat -->
-    <div class="sec">
-      <div class="sec-head">
-        <svg class="sec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
-          <line x1="9" y1="9" x2="15" y2="9"/>
-          <line x1="9" y1="13" x2="15" y2="13"/>
-          <line x1="9" y1="17" x2="12" y2="17"/>
-        </svg>
-        <span class="sec-title">Resep Obat &amp; Instruksi</span>
-      </div>
-      <?php if (!empty($rm['resep_items'])): ?>
-      <table class="rx-table">
-        <thead>
-          <tr>
-            <th style="width:30px;">No</th>
-            <th>Nama Obat</th>
-            <th>Satuan</th>
-            <th>Dosis / Aturan</th>
-            <th class="center">Jml</th>
-            <th class="right">Harga Satuan</th>
-            <th class="right">Subtotal</th>
-            <th>Keterangan</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php $rn = 1; $runningTotal = 0; foreach ($rm['resep_items'] as $ri):
-            $subtotal = (float)$ri['harga'] * (int)$ri['jumlah'];
+  <!-- 5. RESEP OBAT -->
+  <div class="section-title">D. Resep Obat</div>
+  <?php if (!empty($rm['resep_items'])): ?>
+    <table class="table-data">
+      <thead>
+        <tr>
+          <th width="5%" class="text-center">No</th>
+          <th width="30%" class="text-center">Nama Obat</th>
+          <th width="20%" class="text-center">Dosis / Aturan Pakai</th>
+          <th width="15%" class="text-center">Jumlah</th>
+          <th width="15%" class="text-center">Harga Satuan</th>
+          <th width="15%" class="text-center">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php 
+          $rn = 1; 
+          $runningTotal = 0; 
+          foreach ($rm['resep_items'] as $ri):
+            $isBeliLuar = ($rm['pilihan_obat'] ?? '') !== 'Apotek RS';
+            $subtotal = $isBeliLuar ? 0 : (float)$ri['harga'] * (int)$ri['jumlah'];
             $runningTotal += $subtotal;
-          ?>
-          <tr>
-            <td class="rx-num"><?= $rn++ ?></td>
-            <td class="rx-name"><?= esc($ri['nama_obat']) ?></td>
-            <td class="rx-satuan"><?= esc($ri['satuan'] ?? '—') ?></td>
-            <td class="rx-dosis"><?= esc($ri['dosis'] ?: '—') ?></td>
-            <td class="rx-qty center"><?= (int)$ri['jumlah'] ?></td>
-            <td class="rx-price right">Rp <?= number_format((float)$ri['harga'], 0, ',', '.') ?></td>
-            <td class="rx-price right">Rp <?= number_format($subtotal, 0, ',', '.') ?></td>
-            <td class="rx-note"><?= esc($ri['keterangan'] ?? '—') ?></td>
-          </tr>
-          <?php endforeach; ?>
-          <tr class="rx-total-row">
-            <td colspan="6" style="text-align:right; padding-right:14px; font-size:11px; letter-spacing:.06em; text-transform:uppercase;">Total Biaya Obat</td>
-            <td class="right" style="color:var(--teal); font-size:13.5px;">Rp <?= number_format($runningTotal, 0, ',', '.') ?></td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
-      <?php elseif (!empty(trim($rm['resep_obat'] ?? ''))): ?>
-        <?php
-          // Fallback: render plain-text resep
-          $lines = array_filter(explode("\n", trim($rm['resep_obat'])));
         ?>
-        <table class="rx-table">
-          <thead>
-            <tr>
-              <th style="width:30px;">No</th>
-              <th>Obat / Instruksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php $rn2 = 1; foreach ($lines as $line): $line = trim($line); if(!$line) continue; ?>
-            <tr>
-              <td class="rx-num"><?= $rn2++ ?></td>
-              <td><?= esc($line) ?></td>
-            </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      <?php else: ?>
-        <div class="no-rx"><em>Tidak ada resep obat yang diberikan.</em></div>
+        <tr>
+          <td class="text-center"><?= $rn++ ?></td>
+          <td class="text-bold"><?= esc($ri['nama_obat']) ?></td>
+          <td><?= esc($ri['dosis'] ?: '-') ?></td>
+          <td class="text-center"><?= (int)$ri['jumlah'] ?> <?= esc($ri['satuan'] ?? '') ?></td>
+          <td class="text-right">
+            <?= $isBeliLuar ? '-' : 'Rp ' . number_format((float)$ri['harga'], 0, ',', '.') ?>
+          </td>
+          <td class="text-right">
+            <?= $isBeliLuar ? '-' : 'Rp ' . number_format($subtotal, 0, ',', '.') ?>
+          </td>
+        </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  <?php elseif (!empty(trim($rm['resep_obat'] ?? ''))): ?>
+    <!-- Fallback Text Area Resep -->
+    <div class="section-body">
+<?= esc($rm['resep_obat']) ?>
+    </div>
+  <?php else: ?>
+    <div class="section-body" style="font-style: italic; color: #555;">
+      Tidak ada resep obat.
+    </div>
+  <?php endif; ?>
+
+  <!-- 6. RINCIAN BIAYA & TOTAL TAGIHAN -->
+  <div class="section-title">E. Rincian Biaya & Total Tagihan</div>
+  <table class="table-data">
+    <tbody>
+      <tr>
+        <td>Biaya Konsultasi & Layanan Medis (<?= esc($rm['nama_poli']) ?>)</td>
+        <td class="text-right">
+          Rp <?= number_format((float)($rm['biaya_konsultasi'] ?? 0), 0, ',', '.') ?>
+        </td>
+      </tr>
+      <?php if ((float)($rm['biaya_kamar'] ?? 0) > 0): ?>
+      <tr>
+        <td>Biaya Kamar / Akomodasi (Rawat Inap)</td>
+        <td class="text-right">
+          Rp <?= number_format((float)($rm['biaya_kamar'] ?? 0), 0, ',', '.') ?>
+        </td>
+      </tr>
       <?php endif; ?>
-    </div>
+      <tr>
+        <td>
+          Total Biaya Obat 
+          <?php if (($rm['pilihan_obat'] ?? '') === 'Apotek RS'): ?>
+            <strong>(Apotek RS)</strong>
+          <?php else: ?>
+            <strong style="color: #666;">(Beli di Luar RS)</strong>
+          <?php endif; ?>
+        </td>
+        <td class="text-right">
+          <?php if (($rm['pilihan_obat'] ?? '') === 'Apotek RS'): ?>
+            Rp <?= number_format((float)($rm['biaya_obat'] ?? $runningTotal), 0, ',', '.') ?>
+          <?php else: ?>
+            Rp 0
+          <?php endif; ?>
+        </td>
+      </tr>
+      <tr style="background-color: #f2f2f2;">
+        <td class="text-bold" style="font-size: 14px;">TOTAL TAGIHAN</td>
+        <td class="text-right text-bold" style="font-size: 15px;">
+          Rp <?= number_format((float)($rm['total_biaya'] ?? (($rm['biaya_konsultasi'] ?? 0) + ($rm['biaya_kamar'] ?? 0) + $runningTotal)), 0, ',', '.') ?>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
-    <!-- Signature Row -->
-    <div class="sig-row">
-      <!-- Tanda tangan dokter -->
-      <div class="sig-box">
-        <div class="sig-label">Dokter Pemeriksa</div>
-        <div class="sig-line"></div>
-        <div class="sig-name">dr. <?= esc($rm['nama_dokter']) ?></div>
-        <div class="sig-role"><?= esc($rm['nama_poli']) ?></div>
+  <!-- 7. TANDA TANGAN (Authentikasi) -->
+  <div class="signature-area">
+    <div class="sig-box">
+      <div class="sig-header">
+        <div>Pasien / Keluarga Pasien,</div>
       </div>
-
-      <!-- Tanda tangan pasien -->
-      <div class="sig-box">
-        <div class="sig-label">Tanda Tangan Pasien / Wali</div>
-        <div class="sig-line"></div>
+      <div class="sig-footer">
         <div class="sig-name"><?= esc($rm['nama_pasien']) ?></div>
-        <div class="sig-role">Pasien / Wali</div>
-      </div>
-
-      <!-- Info ringkas + barcode -->
-      <div class="info-box">
-        <div class="info-box-title">Ringkasan Kunjungan</div>
-        <div class="info-box-row">
-          <span>No. Rawat</span>
-          <span style="color:var(--blue); font-family:monospace;"><?= esc($rm['no_rawat']) ?></span>
-        </div>
-        <div class="info-box-row">
-          <span>Kelas Layanan</span>
-          <span>Rawat Jalan</span>
-        </div>
-        <div class="info-box-row info-total-row">
-          <span>Est. Total Biaya</span>
-          <span>Rp <?= number_format($grandTotal, 0, ',', '.') ?></span>
-        </div>
-        <!-- Pseudo-barcode -->
-        <div class="barcode-wrap" style="margin-top:10px;">
-          <div class="barcode-bars">
-            <?php
-              $bw = [2,1,3,1,2,1,1,3,2,1,3,1,2,1,1,3,2,1,3,2,1,2,3,1,2,1,3];
-              $bh = [26,34,26,38,34,26,38,34,26,34,30,38,34,26,34,38,26,34,30,38,26,34,38,26,34,30,26];
-              foreach($bw as $bi => $bwv): ?>
-              <span style="width:<?= $bwv ?>px; height:<?= $bh[$bi] ?>px;"></span>
-            <?php endforeach; ?>
-          </div>
-          <div class="barcode-no"><?= esc($rm['no_rawat']) ?></div>
-          <div class="confidential">Dokumen Rahasia Medis</div>
-        </div>
+        <div style="font-size: 12px; visibility: hidden;">&nbsp;</div>
       </div>
     </div>
-
-  </div><!-- /doc-body -->
-
-  <!-- ══ DOC FOOTER ══ -->
-  <div class="doc-footer">
-    <div class="df-left">
-      RS MiraCare &nbsp;·&nbsp; SIMRS v1.0 &nbsp;·&nbsp; Dokumen ini merupakan arsip resmi rumah sakit yang dilindungi kerahasiaan medis
-    </div>
-    <div class="df-right">
-      Dicetak: <?= date('d/m/Y H:i') ?> WIB &nbsp;·&nbsp; Oleh: Sistem
+    <div class="sig-box">
+      <div class="sig-header">
+        <div>Medan, <?= formatBulanIndo($rm['tgl_periksa']) ?></div>
+        <div>Dokter Pemeriksa,</div>
+      </div>
+      <div class="sig-footer">
+        <div class="sig-name">dr. <?= esc($rm['nama_dokter']) ?></div>
+        <div style="font-size: 12px; color: #333;">SIP. / Poli: <?= esc($rm['nama_poli']) ?></div>
+      </div>
     </div>
   </div>
 

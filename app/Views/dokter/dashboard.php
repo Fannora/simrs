@@ -134,6 +134,8 @@
             background-color: #f1f5f9;
         }
     </style>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="font-body-md text-on-surface">
 
@@ -369,21 +371,21 @@
                                       $waktuJanji = esc($j['slot_waktu'] ?? substr($j['jam_kunjungan'], 0, 5));
                                       $tooltip = "Belum memasuki waktu janji temu ($tglJanji $waktuJanji WIB)";
                                     ?>
-                                    <div class="flex flex-wrap gap-2">
+                                    <div class="flex items-center gap-2 whitespace-nowrap">
                                     <?php if ($j['status_periksa'] === 'Sedang Diperiksa'): ?>
                                         <?php if ($isTime): ?>
                                             <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="bg-secondary text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-85 transition-opacity inline-block shadow-sm">Input Rekam Medis</a>
                                         <?php else: ?>
                                             <button type="button" class="bg-secondary/40 text-white/70 px-4 py-2 rounded-lg text-xs font-bold cursor-not-allowed inline-block shadow-sm" title="<?= $tooltip ?>">Input Rekam Medis</button>
                                         <?php endif; ?>
-                                        <a href="<?= base_url('dokter/tidak-hadir/' . $j['no_rawat']) ?>" class="border border-rose-200 text-rose-600 hover:bg-rose-50 px-3 py-2 rounded-lg text-xs font-bold transition-all inline-block shadow-sm btn-tidak-hadir" data-no-rawat="<?= esc($j['no_rawat']) ?>">Tidak Hadir</a>
+                                        <a href="<?= base_url('dokter/tidak-hadir/' . $j['no_rawat']) ?>" class="border-2 border-rose-500 text-rose-700 hover:bg-rose-100/70 px-4 py-2 rounded-lg text-xs font-bold transition-all inline-block shadow-sm btn-tidak-hadir" data-no-rawat="<?= esc($j['no_rawat']) ?>">Tidak Hadir</a>
                                     <?php elseif ($j['status_periksa'] === 'Belum Diperiksa'): ?>
                                         <?php if ($isTime): ?>
                                             <a href="<?= base_url('dokter/panggil/' . $j['no_rawat']) ?>" class="border border-secondary text-secondary px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors inline-block shadow-sm">Panggil</a>
                                         <?php else: ?>
                                             <button type="button" class="border border-secondary/30 text-secondary/35 px-4 py-2 rounded-lg text-xs font-bold cursor-not-allowed inline-block shadow-sm" title="<?= $tooltip ?>">Panggil</button>
                                         <?php endif; ?>
-                                        <a href="<?= base_url('dokter/tidak-hadir/' . $j['no_rawat']) ?>" class="border border-rose-200 text-rose-600 hover:bg-rose-50 px-3 py-2 rounded-lg text-xs font-bold transition-all inline-block shadow-sm btn-tidak-hadir" data-no-rawat="<?= esc($j['no_rawat']) ?>">Tidak Hadir</a>
+                                        <a href="<?= base_url('dokter/tidak-hadir/' . $j['no_rawat']) ?>" class="border-2 border-rose-500 text-rose-700 hover:bg-rose-100/70 px-4 py-2 rounded-lg text-xs font-bold transition-all inline-block shadow-sm btn-tidak-hadir" data-no-rawat="<?= esc($j['no_rawat']) ?>">Tidak Hadir</a>
                                     <?php else: ?>
                                         <span class="text-xs text-on-surface-variant font-medium">—</span>
                                     <?php endif; ?>
@@ -423,9 +425,34 @@
             e.preventDefault();
             const url = btn.getAttribute('href');
             const noRawat = btn.getAttribute('data-no-rawat');
-            if (confirm('Apakah Anda yakin ingin menandai pasien dengan nomor rawat ' + noRawat + ' sebagai "Tidak Hadir"?\n\nTindakan ini akan mengeluarkan pasien dari daftar antrean aktif.')) {
-                window.location.href = url;
-            }
+            
+            Swal.fire({
+                title: 'Konfirmasi Tidak Hadir',
+                html: `<div class="text-center font-body-md">
+                    <p class="text-sm text-slate-600 mb-3">Apakah Anda yakin ingin menandai pasien dengan nomor rawat <strong class="text-slate-900 font-semibold">${noRawat}</strong> sebagai <strong class="text-rose-600 font-semibold">"Tidak Hadir"</strong>?</p>
+                    <p class="text-xs text-slate-500 bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-start gap-2 leading-relaxed">
+                        <span class="material-symbols-outlined text-amber-500 text-lg flex-shrink-0" style="font-variation-settings: 'FILL' 1;">warning</span>
+                        <span>Tindakan ini akan mengeluarkan pasien dari daftar antrean aktif.</span>
+                    </p>
+                </div>`,
+                icon: 'warning',
+                iconColor: '#f43f5e',
+                showCancelButton: true,
+                confirmButtonColor: '#f43f5e',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Tidak Hadir',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-2xl border border-outline-variant/40 shadow-xl font-body-md text-slate-800 p-6',
+                    confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 mr-2',
+                    cancelButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-slate-500'
+                },
+                buttonsStyling: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
         });
     });
 </script>

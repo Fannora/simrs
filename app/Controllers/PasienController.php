@@ -440,6 +440,7 @@ class PasienController extends BaseController
             'no_rawat'       => $noRawat,
             'no_rm'          => $no_rm,
             'id_dokter'      => $id_dokter,
+            'id_poli'        => $id_poli, // Mengunci poliklinik historis
             'tgl_daftar'     => $tgl_daftar,
             'jam_kunjungan'  => $slot_waktu . ':00',
             'keluhan_awal'   => $keluhan_awal,
@@ -478,9 +479,10 @@ class PasienController extends BaseController
         $no_rm = session()->get('no_rm');
 
         $kunjungan = $this->db->table('tbl_pendaftaran p')
-            ->select('p.*, d.nama_dokter, po.nama_poli, po.gedung')
+            ->select('p.*, d.nama_dokter, po.nama_poli, po.gedung, t.pilihan_obat, t.status_bayar')
             ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
-            ->join('tbl_poli po', 'd.id_poli = po.id_poli')
+            ->join('tbl_poli po', 'p.id_poli = po.id_poli')
+            ->join('tbl_tagihan t', 't.no_rawat = p.no_rawat', 'left')
             ->where('p.no_rm', $no_rm)
             ->orderBy('p.tgl_daftar', 'DESC')
             ->orderBy('p.slot_waktu', 'DESC')
@@ -488,10 +490,11 @@ class PasienController extends BaseController
             ->getResultArray();
 
         $rekamMedis = $this->db->table('tbl_rekam_medis rm')
-            ->select('rm.*, p.tgl_daftar, d.nama_dokter, po.nama_poli')
+            ->select('rm.*, p.tgl_daftar, d.nama_dokter, po.nama_poli, t.pilihan_obat, t.status_bayar')
             ->join('tbl_pendaftaran p', 'rm.no_rawat = p.no_rawat')
             ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
-            ->join('tbl_poli po', 'd.id_poli = po.id_poli')
+            ->join('tbl_poli po', 'p.id_poli = po.id_poli')
+            ->join('tbl_tagihan t', 't.no_rawat = p.no_rawat', 'left')
             ->where('p.no_rm', $no_rm)
             ->orderBy('rm.tgl_periksa', 'DESC')
             ->get()

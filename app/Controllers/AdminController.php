@@ -33,8 +33,8 @@ class AdminController extends BaseController
         $totalPasien = $this->db->table('tbl_pasien')->countAllResults();
         $totalPoli   = $this->db->table('tbl_poli')->countAllResults();
 
-        $pendaftaranHariIni = $this->db->table('tbl_pendaftaran')
-            ->where('tgl_daftar', date('Y-m-d'))
+        $kamarTersedia = $this->db->table('tbl_kamar')
+            ->where('status', 'Tersedia')
             ->countAllResults();
 
         $pendaftaranBulanIni = $this->db->table('tbl_pendaftaran')
@@ -56,7 +56,7 @@ class AdminController extends BaseController
             ->select('p.*, ps.nama_pasien, d.nama_dokter, po.nama_poli')
             ->join('tbl_pasien ps', 'p.no_rm = ps.no_rm')
             ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
-            ->join('tbl_poli po', 'd.id_poli = po.id_poli')
+            ->join('tbl_poli po', 'p.id_poli = po.id_poli')
             ->where('p.tgl_daftar', date('Y-m-d'))
             ->orderBy('p.slot_waktu', 'ASC')
             ->limit(10)
@@ -65,7 +65,7 @@ class AdminController extends BaseController
 
         return view('admin/dashboard', compact(
             'totalDokter', 'totalPasien', 'totalPoli',
-            'pendaftaranHariIni', 'pendaftaranBulanIni',
+            'kamarTersedia', 'pendaftaranBulanIni',
             'rekamMedisTerbaru', 'jadwalHariIni'
         ));
     }
@@ -77,16 +77,27 @@ class AdminController extends BaseController
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
-        $dokter = $this->db->table('tbl_dokter d')
+        $cari = $this->request->getGet('cari');
+
+        $builder = $this->db->table('tbl_dokter d')
             ->select('d.*, p.nama_poli, u.username')
             ->join('tbl_poli p', 'd.id_poli = p.id_poli')
-            ->join('tbl_user u', 'd.id_user = u.id_user', 'left')
-            ->orderBy('d.nama_dokter', 'ASC')
+            ->join('tbl_user u', 'd.id_user = u.id_user', 'left');
+
+        if (!empty($cari)) {
+            $builder->like('d.nama_dokter', $cari);
+        }
+
+        $dokter = $builder->orderBy('d.nama_dokter', 'ASC')
             ->get()->getResultArray();
 
         $poli = $this->db->table('tbl_poli')->orderBy('nama_poli')->get()->getResultArray();
 
-        return view('admin/kelola_dokter', ['dokter' => $dokter, 'poli' => $poli]);
+        return view('admin/kelola_dokter', [
+            'dokter' => $dokter,
+            'poli' => $poli,
+            'cari' => $cari
+        ]);
     }
 
     public function simpanDokter()
@@ -215,11 +226,23 @@ class AdminController extends BaseController
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
-        $poli = $this->db->query(
-            "SELECT p.*, (SELECT COUNT(*) FROM tbl_dokter d WHERE d.id_poli = p.id_poli) as jumlah_dokter FROM tbl_poli p ORDER BY p.nama_poli"
-        )->getResultArray();
+        $cari = $this->request->getGet('cari');
 
-        return view('admin/kelola_poli', ['poli' => $poli]);
+        if (!empty($cari)) {
+            $poli = $this->db->query(
+                "SELECT p.*, (SELECT COUNT(*) FROM tbl_dokter d WHERE d.id_poli = p.id_poli) as jumlah_dokter FROM tbl_poli p WHERE p.nama_poli LIKE ? ORDER BY p.nama_poli",
+                ['%' . $cari . '%']
+            )->getResultArray();
+        } else {
+            $poli = $this->db->query(
+                "SELECT p.*, (SELECT COUNT(*) FROM tbl_dokter d WHERE d.id_poli = p.id_poli) as jumlah_dokter FROM tbl_poli p ORDER BY p.nama_poli"
+            )->getResultArray();
+        }
+
+        return view('admin/kelola_poli', [
+            'poli' => $poli,
+            'cari' => $cari
+        ]);
     }
 
     public function simpanPoli()
@@ -266,18 +289,36 @@ class AdminController extends BaseController
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
-        $pasien = $this->db->table('tbl_pasien ps')
+        $cari = $this->request->getGet('cari');
+
+        $builder = $this->db->table('tbl_pasien ps')
             ->select('ps.*, u.username')
-            ->join('tbl_user u', 'ps.id_user = u.id_user', 'left')
-            ->orderBy('ps.nama_pasien', 'ASC')
+            ->join('tbl_user u', 'ps.id_user = u.id_user', 'left');
+
+        if (!empty($cari)) {
+            $builder->like('ps.nama_pasien', $cari);
+        }
+
+        $pasien = $builder->orderBy('ps.nama_pasien', 'ASC')
             ->get()->getResultArray();
 
-        return view('admin/kelola_pasien', ['pasien' => $pasien]);
+        return view('admin/kelola_pasien', [
+            'pasien' => $pasien,
+            'cari' => $cari
+        ]);
     }
 
     public function simpanPasien()
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
+
+        $no_bpjs = $this->request->getPost('no_bpjs');
+        if (!empty($no_bpjs)) {
+            if (strlen($no_bpjs) > 13 || !ctype_digit($no_bpjs)) {
+                session()->setFlashdata('error', 'Nomor BPJS harus berupa angka dan maksimal 13 digit.');
+                return redirect()->to(base_url('admin/pasien'));
+            }
+        }
 
         // Generate No. RM
         $lastRm = $this->db->query("SELECT no_rm FROM tbl_pasien ORDER BY no_rm DESC LIMIT 1")->getRowArray();
@@ -291,7 +332,7 @@ class AdminController extends BaseController
             'tgl_lahir'   => $this->request->getPost('tgl_lahir'),
             'jk'          => $this->request->getPost('jk'),
             'alamat'      => $this->request->getPost('alamat'),
-            'no_bpjs'     => $this->request->getPost('no_bpjs') ?: null,
+            'no_bpjs'     => $no_bpjs ?: null,
         ]);
 
         session()->setFlashdata('success', 'Pasien berhasil ditambahkan. No. RM: ' . $no_rm);
@@ -302,6 +343,14 @@ class AdminController extends BaseController
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
+        $no_bpjs = $this->request->getPost('no_bpjs');
+        if (!empty($no_bpjs)) {
+            if (strlen($no_bpjs) > 13 || !ctype_digit($no_bpjs)) {
+                session()->setFlashdata('error', 'Nomor BPJS harus berupa angka dan maksimal 13 digit.');
+                return redirect()->to(base_url('admin/pasien'));
+            }
+        }
+
         $this->db->table('tbl_pasien')
             ->where('no_rm', $this->request->getPost('no_rm'))
             ->update([
@@ -310,7 +359,7 @@ class AdminController extends BaseController
                 'tgl_lahir'   => $this->request->getPost('tgl_lahir'),
                 'jk'          => $this->request->getPost('jk'),
                 'alamat'      => $this->request->getPost('alamat'),
-                'no_bpjs'     => $this->request->getPost('no_bpjs') ?: null,
+                'no_bpjs'     => $no_bpjs ?: null,
             ]);
 
         session()->setFlashdata('success', 'Data pasien berhasil diubah.');
@@ -449,8 +498,20 @@ class AdminController extends BaseController
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
-        $obat = $this->db->table('tbl_obat')->orderBy('nama_obat', 'ASC')->get()->getResultArray();
-        return view('admin/kelola_obat', ['obat' => $obat]);
+        $cari = $this->request->getGet('cari');
+
+        $builder = $this->db->table('tbl_obat');
+
+        if (!empty($cari)) {
+            $builder->like('nama_obat', $cari);
+        }
+
+        $obat = $builder->orderBy('nama_obat', 'ASC')->get()->getResultArray();
+
+        return view('admin/kelola_obat', [
+            'obat' => $obat,
+            'cari' => $cari
+        ]);
     }
 
     public function simpanObat()
@@ -501,14 +562,21 @@ class AdminController extends BaseController
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
+        $cari = $this->request->getGet('cari');
+
         // Ambil semua tagihan
-        $tagihan = $this->db->table('tbl_tagihan t')
+        $builder = $this->db->table('tbl_tagihan t')
             ->select('t.*, p.no_rm, p.tgl_daftar, ps.nama_pasien, d.nama_dokter, po.nama_poli')
             ->join('tbl_pendaftaran p', 't.no_rawat = p.no_rawat')
             ->join('tbl_pasien ps', 'p.no_rm = ps.no_rm')
             ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
-            ->join('tbl_poli po', 'd.id_poli = po.id_poli')
-            ->orderBy('t.id_tagihan', 'DESC')
+            ->join('tbl_poli po', 'p.id_poli = po.id_poli');
+
+        if (!empty($cari)) {
+            $builder->like('ps.nama_pasien', $cari);
+        }
+
+        $tagihan = $builder->orderBy('t.id_tagihan', 'DESC')
             ->get()->getResultArray();
 
         // Ambil kunjungan yang belum ada tagihannya untuk modal tambah
@@ -522,7 +590,8 @@ class AdminController extends BaseController
 
         return view('admin/kelola_tagihan', [
             'tagihan' => $tagihan,
-            'pendaftaranTanpaTagihan' => $pendaftaranTanpaTagihan
+            'pendaftaranTanpaTagihan' => $pendaftaranTanpaTagihan,
+            'cari' => $cari
         ]);
     }
 
@@ -551,9 +620,15 @@ class AdminController extends BaseController
 
         $id = $this->request->getPost('id_tagihan');
         $status = $this->request->getPost('status_bayar');
+        $pilihan_obat = $this->request->getPost('pilihan_obat'); // 'Apotek RS', 'Beli di Luar', or ''
         
         // Fetch current tagihan to see if status changed
         $current = $this->db->table('tbl_tagihan')->where('id_tagihan', $id)->get()->getRowArray();
+        if (!$current) {
+            session()->setFlashdata('error', 'Data tagihan tidak ditemukan.');
+            return redirect()->to(base_url('admin/tagihan'));
+        }
+
         $tgl_bayar = $current['tgl_bayar'] ?? null;
         if ($status === 'Lunas' && ($current['status_bayar'] ?? '') !== 'Lunas') {
             $tgl_bayar = date('Y-m-d H:i:s');
@@ -561,13 +636,63 @@ class AdminController extends BaseController
             $tgl_bayar = null;
         }
 
+        $biayaObat = 0;
+        $db_pilihan_obat = null;
+        $tgl_pilih_obat = $current['tgl_pilih_obat'] ?? null;
+
+        if ($pilihan_obat === 'Apotek RS') {
+            $db_pilihan_obat = 'Apotek RS';
+            if ($current['pilihan_obat'] !== 'Apotek RS') {
+                $tgl_pilih_obat = date('Y-m-d H:i:s');
+            }
+            // Hitung biaya obat dari tbl_resep
+            $rekamMedis = $this->db->table('tbl_rekam_medis')
+                ->where('no_rawat', $current['no_rawat'])
+                ->orderBy('tgl_periksa', 'DESC')
+                ->limit(1)
+                ->get()->getRowArray();
+
+            if ($rekamMedis) {
+                $reseps = $this->db->table('tbl_resep r')
+                    ->select('r.jumlah, o.harga')
+                    ->join('tbl_obat o', 'r.id_obat = o.id_obat')
+                    ->where('r.id_rm', $rekamMedis['id_rm'])
+                    ->get()->getResultArray();
+
+                foreach ($reseps as $r) {
+                    $biayaObat += (float)$r['harga'] * (int)$r['jumlah'];
+                }
+            }
+        } elseif ($pilihan_obat === 'Beli di Luar') {
+            $db_pilihan_obat = 'Beli di Luar';
+            if ($current['pilihan_obat'] !== 'Beli di Luar') {
+                $tgl_pilih_obat = date('Y-m-d H:i:s');
+            }
+            $biayaObat = 0;
+        } else {
+            $db_pilihan_obat = null;
+            $tgl_pilih_obat = null;
+            $biayaObat = 0;
+        }
+
+        // Ambil input total_biaya dari post. Jika tidak ada/kosong, hitung otomatis.
+        $inputTotal = $this->request->getPost('total_biaya');
+        if ($inputTotal === null || $inputTotal === '') {
+            $totalBiaya = (float)$current['biaya_konsultasi'] + $biayaObat + (float)$current['biaya_kamar'];
+        } else {
+            $totalBiaya = (float)$inputTotal;
+        }
+
         $this->db->table('tbl_tagihan')
             ->where('id_tagihan', $id)
             ->update([
-                'total_biaya'  => $this->request->getPost('total_biaya') ?: 0,
-                'jenis_bayar'  => $this->request->getPost('jenis_bayar') ?: 'Umum',
-                'status_bayar' => $status ?: 'Belum Lunas',
-                'tgl_bayar'    => $tgl_bayar
+                'pilihan_obat'   => $db_pilihan_obat,
+                'tgl_pilih_obat' => $tgl_pilih_obat,
+                'biaya_obat'     => $biayaObat,
+                'total_biaya'    => $totalBiaya,
+                'jenis_bayar'    => $this->request->getPost('jenis_bayar') ?: 'Umum',
+                'status_bayar'   => $status ?: 'Belum Lunas',
+                'tgl_bayar'      => $tgl_bayar
             ]);
 
         session()->setFlashdata('success', 'Data tagihan berhasil diubah.');

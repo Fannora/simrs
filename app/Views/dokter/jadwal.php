@@ -343,7 +343,7 @@
                                     <span class="px-3 py-1 rounded-full text-xs font-bold border whitespace-nowrap inline-block text-center <?= $badgeStyle ?>"><?= esc($j['status_periksa']) ?></span>
                                 </td>
                                 <td class="px-6 py-5">
-                                    <?php if ($j['status_periksa'] === 'Selesai'): ?>
+                                    <?php if (in_array($j['status_periksa'], ['Selesai', 'Rawat Inap'])): ?>
                                         <button 
                                             type="button" 
                                             class="btn-view-rm bg-cyan-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-85 transition-opacity inline-flex items-center gap-1.5 shadow-sm"
@@ -424,7 +424,7 @@
     <div class="relative bg-white rounded-[24px] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-outline-variant/30 transform scale-95 transition-transform duration-300 z-10">
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-secondary to-secondary-container text-white px-6 py-5 flex justify-between items-center">
+        <div class="bg-secondary text-white px-6 py-5 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <span class="material-symbols-outlined text-2xl text-white" style="font-variation-settings: 'FILL' 1;">clinical_notes</span>
                 <div>
@@ -496,12 +496,7 @@
             </div>
         </div>
         
-        <!-- Footer Actions -->
         <div class="p-6 bg-slate-50 border-t border-outline-variant/30 flex gap-2 justify-end">
-            <a href="#" id="modal-print-btn" target="_blank" class="px-5 py-2.5 bg-white border border-outline-variant hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
-                <span class="material-symbols-outlined text-sm">print</span>
-                Cetak Rekam Medis
-            </a>
             <button type="button" class="px-6 py-2.5 bg-secondary text-white hover:opacity-90 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-opacity modal-close-trigger">
                 Tutup Detail
             </button>
@@ -531,7 +526,7 @@
     const modalTindakan = document.getElementById('modal-tindakan');
     const modalResep = document.getElementById('modal-resep');
     const modalTgl = document.getElementById('modal-tgl-periksa');
-    const modalPrintBtn = document.getElementById('modal-print-btn');
+
 
     // Open Modal
     document.querySelectorAll('.btn-view-rm').forEach(btn => {
@@ -548,7 +543,7 @@
             modalResep.textContent = ds.resep;
             modalTgl.textContent = "Diperiksa pada: " + ds.tgl;
             
-            modalPrintBtn.href = "<?= base_url('rekammedis/cetak') ?>?no_rawat=" + encodeURIComponent(ds.raw);
+
             
             rmModal.classList.remove('opacity-0', 'pointer-events-none');
             rmModal.querySelector('.relative').classList.remove('scale-95');

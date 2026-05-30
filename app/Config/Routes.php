@@ -43,7 +43,7 @@ $routes->get('dokter/panggil/(:segment)', 'DokterDashboardController::panggilPas
 $routes->get('dokter/tidak-hadir/(:segment)', 'DokterDashboardController::tidakHadirPasien/$1');
 $routes->get('dokter/rekam-medis/(:segment)', 'DokterDashboardController::inputRekamMedis/$1');
 $routes->post('dokter/rekam-medis/simpan', 'DokterDashboardController::simpanRekamMedis');
-$routes->post('dokter/rekam-medis/rawat-inap/(:segment)', 'DokterDashboardController::rekomendasiRawatInap/$1');
+$routes->get('dokter/rekam-medis/rawat-inap/(:segment)', 'DokterDashboardController::rekomendasiRawatInap/$1');
 $routes->get('dokter/settings', 'DokterDashboardController::settings');
 $routes->post('dokter/settings/update', 'DokterDashboardController::updateSettings');
 
@@ -100,4 +100,5 @@ $routes->post('admin/kamar/update/(:num)', 'KamarController::update/$1');
 // Rawat Inap
 $routes->get('admin/rawat-inap', 'RawatInapController::index');
 $routes->post('admin/rawat-inap/masuk', 'RawatInapController::masuk');
+$routes->get('admin/rawat-inap/batal/(:segment)', 'RawatInapController::batal/$1');
 $routes->post('admin/rawat-inap/pulang/(:num)', 'RawatInapController::pulang/$1');

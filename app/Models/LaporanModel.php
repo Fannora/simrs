@@ -26,7 +26,7 @@ class LaporanModel extends Model
             ->join('tbl_pendaftaran p', 't.no_rawat = p.no_rawat')
             ->join('tbl_pasien ps', 'p.no_rm = ps.no_rm')
             ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
-            ->join('tbl_poli po', 'd.id_poli = po.id_poli');
+            ->join('tbl_poli po', 'p.id_poli = po.id_poli');
 
         // Filter tanggal bayar
         if (!empty($filter['tgl_dari'])) {

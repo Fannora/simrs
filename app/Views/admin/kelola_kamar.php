@@ -2,13 +2,31 @@
 <?= $this->extend('admin/layout') ?>
 <?= $this->section('content') ?>
 
-<!-- Header -->
-<div class="flex justify-between items-center mb-6 animate-in fade-in duration-300">
-    <p class="text-sm text-slate-500">Manajemen kamar rawat inap rumah sakit</p>
-    <button type="button" onclick="openModal('modalTambahKamar')" class="bg-secondary text-white hover:opacity-90 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all">
-        <span class="material-symbols-outlined">add</span>
-        Tambah Kamar
-    </button>
+<!-- Header Area -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 animate-in fade-in duration-300">
+    <div class="flex items-center gap-4">
+        <button type="button" onclick="openModal('modalTambahKamar')" class="bg-secondary text-white hover:opacity-90 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all whitespace-nowrap">
+            <span class="material-symbols-outlined">add</span>
+            Tambah Kamar
+        </button>
+        <p class="text-xs text-slate-500 hidden md:block">Manajemen kamar rawat inap rumah sakit</p>
+    </div>
+    
+    <!-- Search Filter Form -->
+    <form method="GET" action="<?= base_url('admin/kamar') ?>" class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="relative w-full sm:w-64">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+            <input type="text" name="cari" value="<?= esc($cari ?? '') ?>" placeholder="Cari nama kamar..." class="w-full pl-9 pr-4 py-2 border border-outline-variant/65 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all bg-white text-slate-700">
+        </div>
+        <button type="submit" class="bg-secondary text-white hover:opacity-90 px-5 py-2 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-1.5 h-[38px]">
+            Cari
+        </button>
+        <?php if (!empty($cari)): ?>
+            <a href="<?= base_url('admin/kamar') ?>" class="border border-outline-variant/60 hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-1 h-[38px] whitespace-nowrap">
+                Reset
+            </a>
+        <?php endif; ?>
+    </form>
 </div>
 
 <!-- Stat Cards -->
@@ -64,8 +82,8 @@ $terisi   = count(array_filter($kamar, fn($k) => $k['status'] === 'Terisi'));
                 <?php if (empty($kamar)): ?>
                 <tr>
                     <td colspan="6" class="text-center text-slate-400 py-12">
-                        <span class="material-symbols-outlined text-[48px] text-slate-300 block mb-2">meeting_room</span>
-                        Belum ada data kamar. Tambahkan kamar untuk rawat inap.
+                        <span class="material-symbols-outlined text-[48px] text-slate-300 block mb-2"><?= !empty($cari) ? 'search_off' : 'meeting_room' ?></span>
+                        <?= !empty($cari) ? 'Tidak ditemukan kamar dengan nama "' . esc($cari) . '".' : 'Belum ada data kamar. Tambahkan kamar untuk rawat inap.' ?>
                     </td>
                 </tr>
                 <?php else: ?>
@@ -116,7 +134,7 @@ $terisi   = count(array_filter($kamar, fn($k) => $k['status'] === 'Terisi'));
 <!-- Modal Tambah -->
 <div id="modalTambahKamar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform scale-95 transition-all duration-300">
-        <div class="bg-gradient-to-r from-secondary to-secondary-container text-white px-6 py-5 flex justify-between items-center">
+        <div class="bg-secondary text-white px-6 py-5 flex justify-between items-center">
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">add_circle</span>
                 <h3 class="font-bold text-lg text-white">Tambah Kamar</h3>
@@ -157,7 +175,7 @@ $terisi   = count(array_filter($kamar, fn($k) => $k['status'] === 'Terisi'));
 <!-- Modal Edit -->
 <div id="modalEditKamar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform scale-95 transition-all duration-300">
-        <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-5 flex justify-between items-center">
+        <div class="bg-amber-500 text-white px-6 py-5 flex justify-between items-center">
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">edit_square</span>
                 <h3 class="font-bold text-lg text-white">Edit Kamar</h3>

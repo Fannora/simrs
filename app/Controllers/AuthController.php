@@ -126,6 +126,14 @@ class AuthController extends BaseController
             return redirect()->to(base_url('register'));
         }
 
+        // Cek panjang & format BPJS
+        if (!empty($data['no_bpjs'])) {
+            if (strlen($data['no_bpjs']) > 13 || !ctype_digit($data['no_bpjs'])) {
+                session()->setFlashdata('error', 'Nomor BPJS harus berupa angka dan maksimal 13 digit.');
+                return redirect()->to(base_url('register'));
+            }
+        }
+
         $db->transStart();
 
         // 1. Simpan ke tbl_user

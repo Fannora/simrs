@@ -299,9 +299,12 @@ class DokterDashboardController extends BaseController
         }
 
         // 4. UPDATE status pendaftaran
+        $is_rawat_inap = $this->request->getPost('is_rawat_inap');
+        $new_status = ((int)$is_rawat_inap === 1) ? 'Rawat Inap' : 'Selesai';
+
         $this->db->table('tbl_pendaftaran')
             ->where('no_rawat', $no_rawat)
-            ->update(['status_periksa' => 'Selesai']);
+            ->update(['status_periksa' => $new_status]);
 
         // 5. Hitung total biaya & INSERT otomatis ke tbl_tagihan
         $totalBiaya = 0;
@@ -368,8 +371,13 @@ class DokterDashboardController extends BaseController
             return redirect()->to(base_url('dokter/rekam-medis/' . $no_rawat));
         }
 
-        session()->setFlashdata('success', 'Rekam medis dan resep berhasil disimpan untuk No. Rawat: ' . $no_rawat);
-        return redirect()->to(base_url('dokter/dashboard'));
+        if ($new_status === 'Rawat Inap') {
+            session()->setFlashdata('success', 'Pasien No. Rawat: ' . $no_rawat . ' berhasil direkomendasikan rawat inap dan rekam medis telah disimpan.');
+            return redirect()->to(base_url('dokter/antrian'));
+        } else {
+            session()->setFlashdata('success', 'Rekam medis dan resep berhasil disimpan untuk No. Rawat: ' . $no_rawat);
+            return redirect()->to(base_url('dokter/dashboard'));
+        }
     }
 
     /**
