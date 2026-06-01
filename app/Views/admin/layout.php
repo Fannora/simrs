@@ -28,6 +28,10 @@
         <span class="material-symbols-outlined">groups</span>
         <span class="font-label-md text-label-md">Kelola Pasien</span>
     </a>
+    <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'admin/pendaftaran' || strpos(uri_string(), 'admin/pendaftaran') !== false) ? 'bg-secondary text-white font-bold' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('admin/pendaftaran') ?>">
+        <span class="material-symbols-outlined">calendar_month</span>
+        <span class="font-label-md text-label-md">Pendaftaran &amp; Janji Temu</span>
+    </a>
     <a class="flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 <?= (uri_string() == 'admin/obat') ? 'bg-secondary text-white font-bold' : 'text-on-surface-variant hover:text-secondary hover:bg-slate-50' ?>" href="<?= base_url('admin/obat') ?>">
         <span class="material-symbols-outlined">medication</span>
         <span class="font-label-md text-label-md">Kelola Obat</span>

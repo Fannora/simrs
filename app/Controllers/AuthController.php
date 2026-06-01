@@ -120,10 +120,19 @@ class AuthController extends BaseController
         }
 
         // Cek NIK unik
-        $existingNik = $db->table('tbl_pasien')->where('nik', $data['nik'])->countAllResults();
-        if ($existingNik > 0) {
-            session()->setFlashdata('error', 'NIK sudah terdaftar di sistem kami.');
-            return redirect()->to(base_url('register'));
+        $existingPasien = $db->table('tbl_pasien')
+            ->where('nik', $data['nik'])
+            ->get()
+            ->getRowArray();
+            
+        if ($existingPasien) {
+            // NIK terdaftar, cek apakah sudah memiliki akun user online
+            if (!empty($existingPasien['id_user'])) {
+                session()->setFlashdata('error', 'NIK sudah terdaftar di sistem kami dengan akun aktif. Silakan login atau gunakan fitur Lupa Sandi.');
+                return redirect()->to(base_url('register'));
+            }
+            // Jika id_user masih kosong, pasien ini terdaftar offline oleh admin.
+            // Kita izinkan registrasi untuk menghubungkan akun baru dengan rekam medis yang ada!
         }
 
         // Cek panjang & format BPJS
@@ -146,27 +155,41 @@ class AuthController extends BaseController
         
         $id_user = $db->insertID();
 
-        // 2. Generate Nomor Rekam Medis (no_rm) menggunakan MAX()
-        // Format: RM-00001
-        $latestPasien = $db->table('tbl_pasien')->selectMax('no_rm')->get()->getRowArray();
-        $nextNum = 1;
-        if ($latestPasien && !empty($latestPasien['no_rm'])) {
-            $num = (int) str_replace('RM-', '', $latestPasien['no_rm']);
-            $nextNum = $num + 1;
-        }
-        $no_rm = 'RM-' . str_pad($nextNum, 5, '0', STR_PAD_LEFT);
+        if ($existingPasien) {
+            // Pasien terdaftar offline, kita hubungkan rekam medis yang sudah ada dengan akun user baru ini!
+            $db->table('tbl_pasien')
+                ->where('no_rm', $existingPasien['no_rm'])
+                ->update([
+                    'id_user' => $id_user,
+                    'nama_pasien' => $data['nama_lengkap'],
+                    'no_bpjs' => empty($data['no_bpjs']) ? $existingPasien['no_bpjs'] : $data['no_bpjs']
+                ]);
+            $no_rm = $existingPasien['no_rm'];
+            $is_activated = true;
+        } else {
+            // Pasien baru sepenuhnya, kita generate nomor Rekam Medis baru
+            // 2. Generate Nomor Rekam Medis (no_rm) menggunakan MAX()
+            $latestPasien = $db->table('tbl_pasien')->selectMax('no_rm')->get()->getRowArray();
+            $nextNum = 1;
+            if ($latestPasien && !empty($latestPasien['no_rm'])) {
+                $num = (int) str_replace('RM-', '', $latestPasien['no_rm']);
+                $nextNum = $num + 1;
+            }
+            $no_rm = 'RM-' . str_pad($nextNum, 5, '0', STR_PAD_LEFT);
 
-        // 3. Simpan ke tbl_pasien
-        $db->table('tbl_pasien')->insert([
-            'id_user'     => $id_user,
-            'no_rm'       => $no_rm,
-            'nik'         => $data['nik'],
-            'nama_pasien' => $data['nama_lengkap'],
-            'tgl_lahir'   => $data['tgl_lahir'],
-            'jk'          => $data['jk'],
-            'alamat'      => $data['alamat'],
-            'no_bpjs'     => empty($data['no_bpjs']) ? null : $data['no_bpjs']
-        ]);
+            // 3. Simpan ke tbl_pasien baru
+            $db->table('tbl_pasien')->insert([
+                'id_user'     => $id_user,
+                'no_rm'       => $no_rm,
+                'nik'         => $data['nik'],
+                'nama_pasien' => $data['nama_lengkap'],
+                'tgl_lahir'   => $data['tgl_lahir'],
+                'jk'          => $data['jk'],
+                'alamat'      => $data['alamat'],
+                'no_bpjs'     => empty($data['no_bpjs']) ? null : $data['no_bpjs']
+            ]);
+            $is_activated = false;
+        }
 
         $db->transComplete();
 
@@ -175,7 +198,11 @@ class AuthController extends BaseController
             return redirect()->to(base_url('register'));
         }
 
-        session()->setFlashdata('success', 'Registrasi berhasil! Silakan login dengan akun Anda.');
+        if ($is_activated) {
+            session()->setFlashdata('success', 'Aktivasi Akun Berhasil! Akun Anda terhubung dengan Rekam Medis: ' . $no_rm . '. Silakan login.');
+        } else {
+            session()->setFlashdata('success', 'Registrasi berhasil! No. RM Anda: ' . $no_rm . '. Silakan login dengan akun Anda.');
+        }
         return redirect()->to(base_url('login'));
     }
 

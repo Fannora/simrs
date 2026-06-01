@@ -341,7 +341,7 @@ if (!function_exists('formatBulanIndo')) {
   <div class="garis-kop"></div>
 
   <!-- 2. JUDUL DOKUMEN -->
-  <div class="doc-title">REKAM MEDIS RAWAT JALAN</div>
+  <div class="doc-title"><?= ($rm['status_periksa'] ?? '') === 'Rawat Inap' ? 'REKAM MEDIS RAWAT INAP' : 'REKAM MEDIS RAWAT JALAN' ?></div>
   <div class="doc-subtitle">No. Registrasi: <?= esc($rm['no_rawat']) ?></div>
 
   <!-- 3. IDENTITAS PASIEN & KUNJUNGAN (Format Tabel Padat) -->
@@ -360,7 +360,7 @@ if (!function_exists('formatBulanIndo')) {
     </tr>
     <tr>
       <td class="lbl">NIK / Identitas</td><td>:</td><td class="val"><?= $rm['nik'] ? esc($rm['nik']) : '-' ?></td>
-      <td class="lbl">Tipe Layanan / BPJS</td><td>:</td><td class="val">Rawat Jalan / <?= $rm['no_bpjs'] ? esc($rm['no_bpjs']) : '-' ?></td>
+      <td class="lbl">Tipe Layanan / BPJS</td><td>:</td><td class="val"><?= ($rm['status_periksa'] ?? '') === 'Rawat Inap' ? 'Rawat Inap' : 'Rawat Jalan' ?> / <?= $rm['no_bpjs'] ? esc($rm['no_bpjs']) : '-' ?></td>
     </tr>
   </table>
 

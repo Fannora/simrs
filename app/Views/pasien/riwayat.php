@@ -392,7 +392,11 @@ if ($hour < 11) {
                                 <?php endif; ?>
                                 
                                 <?php if (in_array($k['status_periksa'], ['Selesai', 'Rawat Inap'])): ?>
-                                    <?php if (($k['status_bayar'] ?? '') === 'Lunas'): ?>
+                                    <?php if ($k['status_periksa'] === 'Rawat Inap' && ($k['status_bayar'] ?? '') !== 'Lunas'): ?>
+                                        <button type="button" class="bg-slate-100 text-slate-400 border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 opacity-60 cursor-not-allowed select-none" title="Harap melunasi tagihan Rawat Inap terlebih dahulu untuk mengunduh rekam medis.">
+                                            <span class="material-symbols-outlined text-sm">download</span> Unduh Rekam Medis (Belum Lunas)
+                                        </button>
+                                    <?php elseif (($k['status_bayar'] ?? '') === 'Lunas'): ?>
                                         <a href="<?= base_url('rekammedis/cetak?no_rawat=' . $k['no_rawat']) ?>" target="_blank" class="bg-secondary text-white hover:bg-opacity-95 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
                                             <span class="material-symbols-outlined text-sm">download</span> Unduh Rekam Medis
                                         </a>
@@ -463,7 +467,11 @@ if ($hour < 11) {
                                         <p class="text-xs text-on-surface-variant mt-1 font-semibold">dr. <?= esc($rm['nama_dokter']) ?></p>
                                         <p class="text-[11px] text-slate-400 mt-1"><?= date('d M Y', strtotime($rm['tgl_periksa'])) ?></p>
                                     </div>
-                                    <?php if (($rm['status_bayar'] ?? '') === 'Lunas'): ?>
+                                    <?php if (($rm['status_periksa'] ?? '') === 'Rawat Inap' && ($rm['status_bayar'] ?? '') !== 'Lunas'): ?>
+                                        <span class="p-1 text-slate-300 flex items-center justify-center cursor-not-allowed select-none" title="Harap melunasi tagihan Rawat Inap terlebih dahulu untuk mengunduh.">
+                                            <span class="material-symbols-outlined text-lg">download</span>
+                                        </span>
+                                    <?php elseif (($rm['status_bayar'] ?? '') === 'Lunas'): ?>
                                         <a class="p-1 text-secondary hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center" href="<?= base_url('rekammedis/cetak?no_rawat=' . $rm['no_rawat']) ?>" target="_blank" title="Unduh Rekam Medis">
                                             <span class="material-symbols-outlined text-lg">download</span>
                                         </a>
@@ -495,7 +503,12 @@ if ($hour < 11) {
                                 <li class="p-4 rounded-xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all">
                                     <div class="flex justify-between items-start mb-2.5">
                                         <div class="min-w-0">
-                                            <p class="font-bold text-sm text-slate-800 truncate"><?= esc($t['no_rawat']) ?></p>
+                                            <p class="font-bold text-sm text-slate-800 truncate flex items-center gap-1.5">
+                                                <?= esc($t['no_rawat']) ?>
+                                                <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-wider <?= ($t['jenis_kunjungan'] ?? 'Rawat Jalan') === 'Rawat Inap' ? 'bg-purple-50 text-purple-700 border border-purple-100' : 'bg-slate-100 text-slate-600 border border-slate-200' ?>">
+                                                    <?= esc($t['jenis_kunjungan'] ?? 'Rawat Jalan') ?>
+                                                </span>
+                                            </p>
                                             <p class="text-xs text-slate-400 font-semibold mt-1"><?= date('d M Y', strtotime($t['tgl_daftar'])) ?> • dr. <?= esc($t['nama_dokter']) ?></p>
                                         </div>
                                         <span class="text-xs font-bold px-2.5 py-0.5 rounded-full <?= $t['status_bayar'] === 'Lunas' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100' ?>">
@@ -788,7 +801,13 @@ function showRmModal(noRawat) {
     }
     
     const btnCetak = document.getElementById('rm_btn_cetak');
-    if (rm.status_bayar === 'Lunas') {
+    if (rm.status_periksa === 'Rawat Inap' && rm.status_bayar !== 'Lunas') {
+        btnCetak.href = '#';
+        btnCetak.className = "px-6 py-2.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 opacity-60 cursor-not-allowed select-none pointer-events-none";
+        btnCetak.setAttribute('onclick', 'return false;');
+        btnCetak.innerHTML = '<span class="material-symbols-outlined text-sm">print</span> Unduh Tidak Tersedia (Belum Lunas)';
+        btnCetak.title = "Harap melunasi tagihan Rawat Inap terlebih dahulu untuk mengunduh rekam medis.";
+    } else if (rm.status_bayar === 'Lunas') {
         btnCetak.href = `<?= base_url('rekammedis/cetak?no_rawat=') ?>${rm.no_rawat}`;
         btnCetak.className = "px-6 py-2.5 bg-secondary text-white hover:opacity-90 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-1.5";
         btnCetak.removeAttribute('onclick');

@@ -611,10 +611,12 @@ $(document).ready(function() {
     // STEP 2: DATE & SLOT
     // ============================
 
-    // Set min date = tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const minDate = tomorrow.toISOString().split('T')[0];
+    // Set min date = today
+    const todayLocal = new Date();
+    const yyyy = todayLocal.getFullYear();
+    const mm = String(todayLocal.getMonth() + 1).padStart(2, '0');
+    const dd = String(todayLocal.getDate()).padStart(2, '0');
+    const minDate = `${yyyy}-${mm}-${dd}`;
     $('#tglDaftar').attr('min', minDate);
 
     // Date validation (no Sunday)
@@ -641,10 +643,10 @@ $(document).ready(function() {
             checkStep2Valid();
             return;
         }
-        if (date <= today) {
+        if (date < today) {
             Swal.fire({
                 title: 'Tanggal Tidak Valid',
-                text: 'Tanggal janji temu harus minimal besok.',
+                text: 'Tanggal janji temu tidak boleh di masa lalu.',
                 icon: 'error',
                 confirmButtonColor: '#0047AB',
                 confirmButtonText: 'Mengerti',
@@ -676,6 +678,25 @@ $(document).ready(function() {
 
         $.get('<?= base_url('pasien/booking/slot') ?>?id_dokter=' + id_dokter + '&tanggal=' + tanggal, function(data) {
             $('#slotLoading').addClass('hidden');
+
+            if (data.error) {
+                Swal.fire({
+                    title: 'Jadwal Tidak Tersedia',
+                    text: data.error,
+                    icon: 'error',
+                    confirmButtonColor: '#ba1a1a',
+                    confirmButtonText: 'Mengerti',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-xl border border-slate-100',
+                        confirmButton: 'rounded-xl font-semibold px-6 py-2.5 text-sm transition-all hover:bg-opacity-95'
+                    }
+                });
+                $('#tglDaftar').val('');
+                $('#slotSection').addClass('hidden');
+                $('#selectedSlot').val('');
+                checkStep2Valid();
+                return;
+            }
 
             if (data.error_limit) {
                 Swal.fire({

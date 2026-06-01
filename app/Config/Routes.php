@@ -68,6 +68,15 @@ $routes->get('admin/pasien', 'AdminController::kelolaPasien');
 $routes->post('admin/pasien/simpan', 'AdminController::simpanPasien');
 $routes->post('admin/pasien/edit', 'AdminController::editPasien');
 $routes->get('admin/pasien/hapus/(:any)', 'AdminController::hapusPasien/$1');
+$routes->get('admin/pasien/cek-nik', 'AdminController::cekNik'); // AJAX NIK check
+
+// Kelola Pendaftaran & Janji Temu
+$routes->get('admin/pendaftaran', 'AdminController::pendaftaran');
+$routes->post('admin/pendaftaran/simpan', 'AdminController::simpanPendaftaran');
+$routes->get('admin/pendaftaran/batal/(:segment)', 'AdminController::batalPendaftaran/$1');
+$routes->post('admin/pendaftaran/reschedule/(:segment)', 'AdminController::reschedulePendaftaran/$1');
+$routes->get('admin/pendaftaran/dokter', 'PasienController::getDokterByPoli');   // AJAX (admin)
+$routes->get('admin/pendaftaran/slot', 'PasienController::getSlotWaktu');         // AJAX (admin)
 
 // Laporan Keuangan
 $routes->get('admin/laporan', 'AdminController::laporan');

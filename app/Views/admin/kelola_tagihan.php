@@ -57,6 +57,7 @@ function formatTanggalWaktuIndo($dateStr) {
                     <th class="py-4 px-6 w-16 text-center">No</th>
                     <th class="py-4 px-6">Informasi Pasien & Rawat</th>
                     <th class="py-4 px-6">Dokter & Poli</th>
+                    <th class="py-4 px-6 text-center">Jenis</th>
                     <th class="py-4 px-6 text-center">Metode Bayar</th>
                     <th class="py-4 px-6 text-right">Total Biaya</th>
                     <th class="py-4 px-6 text-center">Status</th>
@@ -67,7 +68,7 @@ function formatTanggalWaktuIndo($dateStr) {
             <tbody class="divide-y divide-outline-variant/25 text-sm text-slate-700">
                 <?php if (empty($tagihan)): ?>
                 <tr>
-                    <td colspan="8" class="text-center text-slate-400 py-12">
+                    <td colspan="9" class="text-center text-slate-400 py-12">
                         <span class="material-symbols-outlined text-[48px] text-slate-300 block mb-2"><?= !empty($cari) ? 'search_off' : 'receipt' ?></span>
                         <?= !empty($cari) ? 'Tidak ditemukan tagihan untuk pasien dengan nama "' . esc($cari) . '".' : 'Belum ada data tagihan terdaftar di database.' ?>
                     </td>
@@ -105,7 +106,12 @@ function formatTanggalWaktuIndo($dateStr) {
                         <div class="text-xs text-slate-400 mt-1"><?= esc($t['nama_poli']) ?></div>
                     </td>
                     <td class="py-5 px-6 text-center">
-                        <span class="text-xs font-bold px-3 py-1 rounded-full <?= $t['jenis_bayar'] === 'BPJS' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : ($t['jenis_bayar'] === 'Asuransi' ? 'bg-cyan-50 text-cyan-700 border border-cyan-100' : 'bg-slate-100 text-slate-700 border border-slate-200') ?>">
+                        <span class="text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap inline-block text-center <?= ($t['jenis_kunjungan'] ?? 'Rawat Jalan') === 'Rawat Inap' ? 'bg-purple-50 text-purple-700 border border-purple-100' : 'bg-slate-100 text-slate-700 border border-slate-200' ?>">
+                            <?= esc($t['jenis_kunjungan'] ?? 'Rawat Jalan') ?>
+                        </span>
+                    </td>
+                    <td class="py-5 px-6 text-center">
+                        <span class="text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap inline-block text-center <?= $t['jenis_bayar'] === 'BPJS' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : ($t['jenis_bayar'] === 'Asuransi' ? 'bg-cyan-50 text-cyan-700 border border-cyan-100' : 'bg-slate-100 text-slate-700 border border-slate-200') ?>">
                             <?= esc($t['jenis_bayar']) ?>
                         </span>
                     </td>
@@ -114,9 +120,9 @@ function formatTanggalWaktuIndo($dateStr) {
                     </td>
                     <td class="py-5 px-6 text-center">
                         <form method="POST" action="<?= base_url('admin/tagihan/update-status') ?>" class="inline-block">
-                            <?= csrf_field() ?>
+                             <?= csrf_field() ?>
                             <input type="hidden" name="id_tagihan" value="<?= $t['id_tagihan'] ?>">
-                            <button type="submit" onclick="return confirm('Ubah status pembayaran tagihan <?= esc($t['no_rawat'], 'js') ?>?')" class="text-xs font-bold px-3 py-1.5 rounded-xl cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-sm <?= $t['status_bayar'] === 'Lunas' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-rose-500 text-white hover:bg-rose-600' ?>">
+                            <button type="submit" onclick="return confirm('Ubah status pembayaran tagihan <?= esc($t['no_rawat'], 'js') ?>?')" class="text-xs font-bold px-3 py-1.5 rounded-xl cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-sm whitespace-nowrap inline-block text-center <?= $t['status_bayar'] === 'Lunas' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-rose-500 text-white hover:bg-rose-600' ?>">
                                 <?= esc($t['status_bayar']) ?>
                             </button>
                         </form>

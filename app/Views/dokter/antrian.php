@@ -293,13 +293,28 @@
                                 </td>
                                 <td class="px-6 py-5">
                                     <?php
-                                      $timeStr = $j['slot_waktu'] ?: (!empty($j['jam_kunjungan']) ? substr($j['jam_kunjungan'], 0, 5) : '00:00');
-                                      $appointmentTime = new DateTime($j['tgl_daftar'] . ' ' . $timeStr);
-                                      $isTime = $now >= $appointmentTime;
+                                      $bookingDate = new \DateTime($j['tgl_daftar'] . ' 00:00:00');
+                                      $todayDate = new \DateTime(date('Y-m-d') . ' 00:00:00');
                                       
                                       $tglJanji = date('d M Y', strtotime($j['tgl_daftar']));
-                                      $waktuJanji = esc($j['slot_waktu'] ?? substr($j['jam_kunjungan'], 0, 5));
-                                      $tooltip = "Belum memasuki waktu janji temu ($tglJanji $waktuJanji WIB)";
+                                      $waktuMulai = !empty($dokter['jam_mulai']) ? substr($dokter['jam_mulai'], 0, 5) : '08:00';
+                                      
+                                      if ($bookingDate > $todayDate) {
+                                          $isTime = false;
+                                          $tooltip = "Belum memasuki tanggal janji temu (Mulai tanggal $tglJanji)";
+                                      } else {
+                                          // Jika hari ini atau masa lalu, aktifkan jika waktu sekarang >= jam mulai praktik dokter
+                                          $currentHourMin = date('H:i:s');
+                                          $practiceStart = !empty($dokter['jam_mulai']) ? $dokter['jam_mulai'] : '00:00:00';
+                                          
+                                          if ($currentHourMin >= $practiceStart) {
+                                              $isTime = true;
+                                              $tooltip = "";
+                                          } else {
+                                              $isTime = false;
+                                              $tooltip = "Belum memasuki jam praktik dokter hari ini (Jam praktik mulai pukul $waktuMulai WIB)";
+                                          }
+                                      }
                                     ?>
                                     <div class="flex items-center gap-2 whitespace-nowrap">
                                     <?php if ($j['status_periksa'] === 'Sedang Diperiksa'): ?>

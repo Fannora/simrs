@@ -82,31 +82,41 @@ class RekamMedisController extends BaseController
         if ($no_rawat) {
             $rows = $db->table('tbl_rekam_medis rm')
                 ->select('rm.id_rm, rm.no_rawat, rm.tgl_periksa, rm.diagnosa, rm.tindakan, rm.resep_obat,
-                          p.no_rm, p.tgl_daftar, p.keluhan_awal, p.slot_waktu,
+                          p.no_rm, p.tgl_daftar, p.keluhan_awal, p.slot_waktu, p.status_periksa,
                           ps.nama_pasien, ps.nik, ps.tgl_lahir, ps.jk, ps.alamat, ps.no_bpjs,
                           d.nama_dokter, d.no_telp as telp_dokter,
                           po.nama_poli,
-                          t.biaya_konsultasi, t.biaya_obat, t.biaya_kamar, t.total_biaya, t.pilihan_obat')
+                          SUM(t.biaya_konsultasi) as biaya_konsultasi, 
+                          SUM(t.biaya_obat) as biaya_obat, 
+                          SUM(t.biaya_kamar) as biaya_kamar, 
+                          SUM(t.total_biaya) as total_biaya, 
+                          MAX(t.pilihan_obat) as pilihan_obat')
                 ->join('tbl_pendaftaran p',  'p.no_rawat = rm.no_rawat')
                 ->join('tbl_pasien ps',      'ps.no_rm = p.no_rm')
                 ->join('tbl_dokter d',       'd.id_dokter = p.id_dokter')
                 ->join('tbl_poli po',        'po.id_poli = d.id_poli')
                 ->join('tbl_tagihan t',      't.no_rawat = rm.no_rawat', 'left')
                 ->where('rm.no_rawat', $no_rawat)
+                ->groupBy('rm.id_rm')
                 ->get()->getResultArray();
         } else {
             $rows = $db->table('tbl_rekam_medis rm')
                 ->select('rm.id_rm, rm.no_rawat, rm.tgl_periksa, rm.diagnosa, rm.tindakan, rm.resep_obat,
-                          p.no_rm, p.tgl_daftar, p.keluhan_awal, p.slot_waktu,
+                          p.no_rm, p.tgl_daftar, p.keluhan_awal, p.slot_waktu, p.status_periksa,
                           ps.nama_pasien, ps.nik, ps.tgl_lahir, ps.jk, ps.alamat, ps.no_bpjs,
                           d.nama_dokter, d.no_telp as telp_dokter,
                           po.nama_poli,
-                          t.biaya_konsultasi, t.biaya_obat, t.biaya_kamar, t.total_biaya, t.pilihan_obat')
+                          SUM(t.biaya_konsultasi) as biaya_konsultasi, 
+                          SUM(t.biaya_obat) as biaya_obat, 
+                          SUM(t.biaya_kamar) as biaya_kamar, 
+                          SUM(t.total_biaya) as total_biaya, 
+                          MAX(t.pilihan_obat) as pilihan_obat')
                 ->join('tbl_pendaftaran p',  'p.no_rawat = rm.no_rawat')
                 ->join('tbl_pasien ps',      'ps.no_rm = p.no_rm')
                 ->join('tbl_dokter d',       'd.id_dokter = p.id_dokter')
                 ->join('tbl_poli po',        'po.id_poli = d.id_poli')
                 ->join('tbl_tagihan t',      't.no_rawat = rm.no_rawat', 'left')
+                ->groupBy('rm.id_rm')
                 ->orderBy('rm.tgl_periksa', 'DESC')
                 ->get()->getResultArray();
         }

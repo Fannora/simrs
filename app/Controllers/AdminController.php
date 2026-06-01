@@ -312,12 +312,23 @@ class AdminController extends BaseController
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
+        $nik = $this->request->getPost('nik');
         $no_bpjs = $this->request->getPost('no_bpjs');
         if (!empty($no_bpjs)) {
             if (strlen($no_bpjs) > 13 || !ctype_digit($no_bpjs)) {
                 session()->setFlashdata('error', 'Nomor BPJS harus berupa angka dan maksimal 13 digit.');
                 return redirect()->to(base_url('admin/pasien'));
             }
+        }
+
+        // Cek NIK unik
+        $existingNik = $this->db->table('tbl_pasien')
+            ->where('nik', $nik)
+            ->get()
+            ->getRowArray();
+        if ($existingNik) {
+            session()->setFlashdata('error', 'Gagal mendaftarkan pasien! NIK sudah terdaftar atas nama ' . esc($existingNik['nama_pasien']) . ' dengan No. RM: ' . esc($existingNik['no_rm']));
+            return redirect()->to(base_url('admin/pasien'));
         }
 
         // Generate No. RM
@@ -327,7 +338,7 @@ class AdminController extends BaseController
 
         $this->db->table('tbl_pasien')->insert([
             'no_rm'       => $no_rm,
-            'nik'         => $this->request->getPost('nik'),
+            'nik'         => $nik,
             'nama_pasien' => $this->request->getPost('nama_pasien'),
             'tgl_lahir'   => $this->request->getPost('tgl_lahir'),
             'jk'          => $this->request->getPost('jk'),
@@ -343,6 +354,8 @@ class AdminController extends BaseController
     {
         if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
 
+        $no_rm = $this->request->getPost('no_rm');
+        $nik = $this->request->getPost('nik');
         $no_bpjs = $this->request->getPost('no_bpjs');
         if (!empty($no_bpjs)) {
             if (strlen($no_bpjs) > 13 || !ctype_digit($no_bpjs)) {
@@ -351,10 +364,21 @@ class AdminController extends BaseController
             }
         }
 
+        // Cek NIK unik (kecuali pasien yang sedang diedit)
+        $existingNik = $this->db->table('tbl_pasien')
+            ->where('nik', $nik)
+            ->where('no_rm !=', $no_rm)
+            ->get()
+            ->getRowArray();
+        if ($existingNik) {
+            session()->setFlashdata('error', 'Gagal mengubah data! NIK sudah digunakan oleh pasien lain (' . esc($existingNik['nama_pasien']) . ' - ' . esc($existingNik['no_rm']) . ')');
+            return redirect()->to(base_url('admin/pasien'));
+        }
+
         $this->db->table('tbl_pasien')
-            ->where('no_rm', $this->request->getPost('no_rm'))
+            ->where('no_rm', $no_rm)
             ->update([
-                'nik'         => $this->request->getPost('nik'),
+                'nik'         => $nik,
                 'nama_pasien' => $this->request->getPost('nama_pasien'),
                 'tgl_lahir'   => $this->request->getPost('tgl_lahir'),
                 'jk'          => $this->request->getPost('jk'),
@@ -364,6 +388,33 @@ class AdminController extends BaseController
 
         session()->setFlashdata('success', 'Data pasien berhasil diubah.');
         return redirect()->to(base_url('admin/pasien'));
+    }
+
+    public function cekNik()
+    {
+        if (!$this->checkAdminSession()) {
+            return $this->response->setJSON(['error' => 'Akses ditolak.'])->setStatusCode(403);
+        }
+
+        $nik = $this->request->getGet('nik');
+        $exclude_rm = $this->request->getGet('exclude_rm');
+
+        $query = $this->db->table('tbl_pasien')->where('nik', $nik);
+        if (!empty($exclude_rm)) {
+            $query->where('no_rm !=', $exclude_rm);
+        }
+
+        $existing = $query->get()->getRowArray();
+
+        if ($existing) {
+            return $this->response->setJSON([
+                'registered'  => true,
+                'nama_pasien' => $existing['nama_pasien'],
+                'no_rm'       => $existing['no_rm']
+            ]);
+        }
+
+        return $this->response->setJSON(['registered' => false]);
     }
 
     public function hapusPasien($no_rm = null)
@@ -732,5 +783,221 @@ class AdminController extends BaseController
         $this->db->table('tbl_tagihan')->where('id_tagihan', $id)->delete();
         session()->setFlashdata('success', 'Data tagihan berhasil dihapus.');
         return redirect()->to(base_url('admin/tagihan'));
+    }
+
+    // ============================
+    // KELOLA PENDAFTARAN & JANJI TEMU
+    // ============================
+    public function pendaftaran()
+    {
+        if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
+
+        $tanggal = $this->request->getGet('tanggal') ?: date('Y-m-d');
+        $id_dokter = $this->request->getGet('id_dokter');
+
+        $builder = $this->db->table('tbl_pendaftaran p')
+            ->select('p.*, ps.nama_pasien, ps.no_rm, d.nama_dokter, po.nama_poli')
+            ->join('tbl_pasien ps', 'p.no_rm = ps.no_rm')
+            ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
+            ->join('tbl_poli po', 'p.id_poli = po.id_poli');
+
+        if (!empty($tanggal)) {
+            $builder->where('p.tgl_daftar', $tanggal);
+        }
+        if (!empty($id_dokter)) {
+            $builder->where('p.id_dokter', $id_dokter);
+        }
+
+        $pendaftaran = $builder->orderBy('p.slot_waktu', 'ASC')
+            ->orderBy('p.no_rawat', 'ASC')
+            ->get()->getResultArray();
+
+        $poli = $this->db->table('tbl_poli')->orderBy('nama_poli', 'ASC')->get()->getResultArray();
+        $dokter = $this->db->table('tbl_dokter')->orderBy('nama_dokter', 'ASC')->get()->getResultArray();
+        $pasien = $this->db->table('tbl_pasien')->orderBy('nama_pasien', 'ASC')->get()->getResultArray();
+
+        return view('admin/kelola_pendaftaran', compact('pendaftaran', 'poli', 'dokter', 'pasien', 'tanggal', 'id_dokter'));
+    }
+
+    public function simpanPendaftaran()
+    {
+        if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
+
+        $no_rm = $this->request->getPost('no_rm');
+        $id_dokter = $this->request->getPost('id_dokter');
+        $id_poli = $this->request->getPost('id_poli');
+        $tgl_daftar = $this->request->getPost('tgl_daftar');
+        $slot_waktu = $this->request->getPost('slot_waktu');
+        $keluhan_awal = $this->request->getPost('keluhan_awal') ?: 'Registrasi Walk-In';
+
+        if (empty($no_rm) || empty($id_dokter) || empty($id_poli) || empty($tgl_daftar) || empty($slot_waktu)) {
+            session()->setFlashdata('error', 'Semua field pendaftaran wajib diisi.');
+            return redirect()->to(base_url('admin/pendaftaran'));
+        }
+
+        $dokter = $this->db->table('tbl_dokter')->where('id_dokter', $id_dokter)->get()->getRowArray();
+        if (!$dokter) {
+            session()->setFlashdata('error', 'Dokter tidak ditemukan.');
+            return redirect()->to(base_url('admin/pendaftaran'));
+        }
+
+        $this->db->transStart();
+
+        // Generate no_rawat: RWT-YYYYMMDD-XXX
+        $tglFormatted = str_replace('-', '', $tgl_daftar);
+        $prefix = 'RWT-' . $tglFormatted . '-';
+        
+        $latestBooking = $this->db->table('tbl_pendaftaran')
+            ->selectMax('no_rawat')
+            ->like('no_rawat', $prefix, 'after')
+            ->get()
+            ->getRowArray();
+
+        $nextNum = 1;
+        if ($latestBooking && !empty($latestBooking['no_rawat'])) {
+            $num = (int) str_replace($prefix, '', $latestBooking['no_rawat']);
+            $nextNum = $num + 1;
+        }
+        $noUrut  = str_pad($nextNum, 3, '0', STR_PAD_LEFT);
+        $noRawat = $prefix . $noUrut;
+
+        // Insert pendaftaran
+        $this->db->table('tbl_pendaftaran')->insert([
+            'no_rawat'       => $noRawat,
+            'no_rm'          => $no_rm,
+            'id_dokter'      => $id_dokter,
+            'id_poli'        => $id_poli,
+            'tgl_daftar'     => $tgl_daftar,
+            'jam_kunjungan'  => $slot_waktu . ':00',
+            'keluhan_awal'   => $keluhan_awal,
+            'slot_waktu'     => $slot_waktu,
+            'status_periksa' => 'Belum Diperiksa',
+        ]);
+
+        // Insert / Update slot booking count
+        $this->db->query(
+            "INSERT INTO tbl_slot_booking (id_dokter, tgl_booking, slot_waktu, jumlah_terisi)
+             VALUES (?, ?, ?, 1)
+             ON DUPLICATE KEY UPDATE jumlah_terisi = jumlah_terisi + 1",
+            [$id_dokter, $tgl_daftar, $slot_waktu]
+        );
+
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false) {
+            session()->setFlashdata('error', 'Gagal menyimpan pendaftaran walk-in.');
+        } else {
+            session()->setFlashdata('success', 'Pendaftaran walk-in berhasil disimpan! No. Rawat: ' . $noRawat);
+        }
+
+        return redirect()->to(base_url('admin/pendaftaran?tanggal=' . $tgl_daftar));
+    }
+
+    public function batalPendaftaran($noRawat = null)
+    {
+        if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
+
+        $pendaftaran = $this->db->table('tbl_pendaftaran')
+            ->where('no_rawat', $noRawat)
+            ->get()->getRowArray();
+
+        if (!$pendaftaran) {
+            session()->setFlashdata('error', 'Pendaftaran tidak ditemukan.');
+            return redirect()->to(base_url('admin/pendaftaran'));
+        }
+
+        $this->db->transStart();
+
+        // Update status_periksa to 'Batal'
+        $this->db->table('tbl_pendaftaran')
+            ->where('no_rawat', $noRawat)
+            ->update(['status_periksa' => 'Batal']);
+
+        // Decrement slot booking
+        $this->db->query(
+            "UPDATE tbl_slot_booking 
+             SET jumlah_terisi = GREATEST(0, jumlah_terisi - 1) 
+             WHERE id_dokter = ? AND tgl_booking = ? AND slot_waktu = ?",
+            [$pendaftaran['id_dokter'], $pendaftaran['tgl_daftar'], $pendaftaran['slot_waktu']]
+        );
+
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false) {
+            session()->setFlashdata('error', 'Gagal membatalkan pendaftaran.');
+        } else {
+            session()->setFlashdata('success', 'Pendaftaran ' . $noRawat . ' berhasil dibatalkan.');
+        }
+
+        return redirect()->to(base_url('admin/pendaftaran?tanggal=' . $pendaftaran['tgl_daftar']));
+    }
+
+    public function reschedulePendaftaran($noRawat = null)
+    {
+        if (!$this->checkAdminSession()) return redirect()->to(base_url('login'));
+
+        $pendaftaran = $this->db->table('tbl_pendaftaran')
+            ->where('no_rawat', $noRawat)
+            ->get()->getRowArray();
+
+        if (!$pendaftaran) {
+            session()->setFlashdata('error', 'Pendaftaran tidak ditemukan.');
+            return redirect()->to(base_url('admin/pendaftaran'));
+        }
+
+        $id_dokter = $this->request->getPost('id_dokter');
+        $tgl_daftar = $this->request->getPost('tgl_daftar');
+        $slot_waktu = $this->request->getPost('slot_waktu');
+
+        if (empty($id_dokter) || empty($tgl_daftar) || empty($slot_waktu)) {
+            session()->setFlashdata('error', 'Jadwal reschedule baru harus diisi lengkap.');
+            return redirect()->to(base_url('admin/pendaftaran?tanggal=' . $pendaftaran['tgl_daftar']));
+        }
+
+        $dokter = $this->db->table('tbl_dokter')->where('id_dokter', $id_dokter)->get()->getRowArray();
+        if (!$dokter) {
+            session()->setFlashdata('error', 'Dokter tujuan tidak ditemukan.');
+            return redirect()->to(base_url('admin/pendaftaran?tanggal=' . $pendaftaran['tgl_daftar']));
+        }
+
+        $this->db->transStart();
+
+        // 1. Decrement old slot booking count
+        $this->db->query(
+            "UPDATE tbl_slot_booking 
+             SET jumlah_terisi = GREATEST(0, jumlah_terisi - 1) 
+             WHERE id_dokter = ? AND tgl_booking = ? AND slot_waktu = ?",
+            [$pendaftaran['id_dokter'], $pendaftaran['tgl_daftar'], $pendaftaran['slot_waktu']]
+        );
+
+        // 2. Increment new slot booking count
+        $this->db->query(
+            "INSERT INTO tbl_slot_booking (id_dokter, tgl_booking, slot_waktu, jumlah_terisi)
+             VALUES (?, ?, ?, 1)
+             ON DUPLICATE KEY UPDATE jumlah_terisi = jumlah_terisi + 1",
+            [$id_dokter, $tgl_daftar, $slot_waktu]
+        );
+
+        // 3. Update pendaftaran record
+        $this->db->table('tbl_pendaftaran')
+            ->where('no_rawat', $noRawat)
+            ->update([
+                'id_dokter' => $id_dokter,
+                'id_poli' => $dokter['id_poli'],
+                'tgl_daftar' => $tgl_daftar,
+                'slot_waktu' => $slot_waktu,
+                'jam_kunjungan' => $slot_waktu . ':00',
+                'status_periksa' => 'Belum Diperiksa'
+            ]);
+
+        $this->db->transComplete();
+
+        if ($this->db->transStatus() === false) {
+            session()->setFlashdata('error', 'Gagal memproses reschedule.');
+        } else {
+            session()->setFlashdata('success', 'Pendaftaran ' . $noRawat . ' berhasil di-reschedule.');
+        }
+
+        return redirect()->to(base_url('admin/pendaftaran?tanggal=' . $tgl_daftar));
     }
 }

@@ -39,6 +39,10 @@
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
         }
+        .doctor-fade-bottom {
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+        }
     </style>
     
     <script id="tailwind-config">
@@ -161,14 +165,14 @@
                 <!-- Ministry of Health Logo -->
                 <img src="<?= base_url('assets/img/KemenkesRILogo.png') ?>" alt="Kemenkes RI" class="h-12 w-auto object-contain"/>
                 <!-- SATUSEHAT Logo -->
-                <img src="<?= base_url('assets/img/SatuSehatLogo.png') ?>" alt="SATUSEHAT" class="h-12 w-auto object-contain"/>
+                <img src="<?= base_url('assets/img/SatuSehatLogoh.png') ?>" alt="SATUSEHAT" class="h-12 w-auto object-contain"/>
                 <!-- BPJS Kesehatan Logo -->
                 <img src="<?= base_url('assets/img/BPJSKesehatanLogo.png') ?>" alt="BPJS Kesehatan" class="h-12 w-auto object-contain"/>
             </div>
         </div>
         
         <!-- Dashboard Mockup Block -->
-        <img alt="MiraCare Dashboard Mockup" class="w-full aspect-[1/1] object-cover" src="<?= base_url('assets/img/Doctor.png') ?>"/>
+        <img alt="MiraCare Dashboard Mockup" class="w-full aspect-[1/1] object-cover doctor-fade-bottom" src="<?= base_url('assets/img/Doctor.png') ?>"/>
     </div>
 </section>
 

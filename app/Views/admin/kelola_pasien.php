@@ -101,40 +101,41 @@
 
 <!-- Modal Tambah Pasien -->
 <div id="modalTambahPasien" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-all duration-300">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform scale-95 transition-all duration-300">
         <!-- Header -->
-        <div class="bg-secondary text-white px-6 py-5 flex justify-between items-center">
-            <div class="flex items-center gap-2.5">
+        <div class="bg-secondary text-white px-5 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">person_add</span>
-                <h3 class="font-headline-sm text-lg font-bold text-white">Tambah Pasien Baru</h3>
+                <h3 class="font-headline-sm text-base font-bold text-white">Tambah Pasien Baru</h3>
             </div>
             <button type="button" onclick="closeModal('modalTambahPasien')" class="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all">
-                <span class="material-symbols-outlined">close</span>
+                <span class="material-symbols-outlined text-lg">close</span>
             </button>
         </div>
         
         <!-- Form -->
-        <form method="POST" action="<?= base_url('admin/pasien/simpan') ?>" class="p-6 space-y-4">
+        <form method="POST" action="<?= base_url('admin/pasien/simpan') ?>" class="p-5 space-y-3">
             <?= csrf_field() ?>
             
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor NIK <span class="text-rose-500">*</span></label>
-                <input type="text" name="nik" required maxlength="16" minlength="16" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm" placeholder="Masukkan 16 digit NIK">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nomor NIK <span class="text-rose-500">*</span></label>
+                <input type="text" name="nik" required maxlength="16" minlength="16" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm py-2" placeholder="Masukkan 16 digit NIK">
+                <div id="nik-feedback-tambah" class="text-[11px] font-semibold mt-1 hidden"></div>
             </div>
             
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nama Lengkap Pasien <span class="text-rose-500">*</span></label>
-                <input type="text" name="nama_pasien" required class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm" placeholder="Contoh: Budi Santoso">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nama Lengkap Pasien <span class="text-rose-500">*</span></label>
+                <input type="text" name="nama_pasien" required class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm py-2" placeholder="Contoh: Budi Santoso">
             </div>
             
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Tanggal Lahir <span class="text-rose-500">*</span></label>
-                    <input type="date" name="tgl_lahir" required class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tanggal Lahir <span class="text-rose-500">*</span></label>
+                    <input type="date" name="tgl_lahir" required class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm py-2">
                 </div>
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Jenis Kelamin <span class="text-rose-500">*</span></label>
-                    <select name="jk" required class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm bg-white py-2.5">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                    <select name="jk" required class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm bg-white py-2">
                         <option value="L">Laki-laki</option>
                         <option value="P">Perempuan</option>
                     </select>
@@ -142,26 +143,26 @@
             </div>
             
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Alamat Tempat Tinggal</label>
-                <textarea name="alamat" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm min-h-[70px] resize-y" placeholder="Masukkan alamat lengkap pasien..."></textarea>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Alamat Tempat Tinggal</label>
+                <textarea name="alamat" rows="2" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm min-h-[45px] py-1.5 px-3 resize-y" placeholder="Masukkan alamat lengkap pasien..."></textarea>
             </div>
             
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor BPJS (Opsional)</label>
-                <input type="text" name="no_bpjs" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm" placeholder="Contoh: 0001XXXXXXXXX">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nomor BPJS (Opsional)</label>
+                <input type="text" name="no_bpjs" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full rounded-xl border-slate-200 focus:ring-secondary focus:border-secondary text-sm py-2" placeholder="Contoh: 0001XXXXXXXXX">
             </div>
             
-            <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl flex items-start gap-2 text-xs text-slate-600">
-                <span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5" style="font-variation-settings: 'FILL' 1;">info</span>
+            <div class="bg-slate-50 border border-slate-100 p-2.5 rounded-xl flex items-start gap-2 text-[10px] text-slate-500">
+                <span class="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5" style="font-variation-settings: 'FILL' 1;">info</span>
                 <p>Nomor Rekam Medis (RM) akan dibuat dan di-generate secara otomatis oleh sistem rumah sakit setelah formulir disimpan.</p>
             </div>
             
             <!-- Actions -->
-            <div class="pt-4 border-t border-slate-100 flex gap-2 justify-end">
-                <button type="button" onclick="closeModal('modalTambahPasien')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-xl text-sm font-bold transition-all">
+            <div class="pt-3 border-t border-slate-100 flex gap-2 justify-end">
+                <button type="button" onclick="closeModal('modalTambahPasien')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-xl text-xs font-bold transition-all">
                     Batal
                 </button>
-                <button type="submit" class="px-6 py-2.5 bg-secondary text-white hover:opacity-90 rounded-xl text-sm font-bold shadow-sm transition-all">
+                <button type="submit" class="px-5 py-2 bg-secondary text-white hover:opacity-90 rounded-xl text-xs font-bold shadow-sm transition-all">
                     Simpan Pasien
                 </button>
             </div>
@@ -171,41 +172,42 @@
 
 <!-- Modal Edit Pasien -->
 <div id="modalEditPasien" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-all duration-300">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform scale-95 transition-all duration-300">
         <!-- Header -->
-        <div class="bg-amber-500 text-white px-6 py-5 flex justify-between items-center">
-            <div class="flex items-center gap-2.5">
+        <div class="bg-amber-500 text-white px-5 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">edit_square</span>
-                <h3 class="font-headline-sm text-lg font-bold text-white">Edit Data Pasien</h3>
+                <h3 class="font-headline-sm text-base font-bold text-white">Edit Data Pasien</h3>
             </div>
             <button type="button" onclick="closeModal('modalEditPasien')" class="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all">
-                <span class="material-symbols-outlined">close</span>
+                <span class="material-symbols-outlined text-lg">close</span>
             </button>
         </div>
         
         <!-- Form -->
-        <form method="POST" action="<?= base_url('admin/pasien/edit') ?>" class="p-6 space-y-4">
+        <form method="POST" action="<?= base_url('admin/pasien/edit') ?>" class="p-5 space-y-3">
             <?= csrf_field() ?>
             <input type="hidden" name="no_rm" id="edit_no_rm">
             
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor NIK <span class="text-rose-500">*</span></label>
-                <input type="text" name="nik" id="edit_nik" required maxlength="16" minlength="16" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nomor NIK <span class="text-rose-500">*</span></label>
+                <input type="text" name="nik" id="edit_nik" required maxlength="16" minlength="16" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm py-2">
+                <div id="nik-feedback-edit" class="text-[11px] font-semibold mt-1 hidden"></div>
             </div>
             
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nama Lengkap Pasien <span class="text-rose-500">*</span></label>
-                <input type="text" name="nama_pasien" id="edit_nama_pasien" required class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nama Lengkap Pasien <span class="text-rose-500">*</span></label>
+                <input type="text" name="nama_pasien" id="edit_nama_pasien" required class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm py-2">
             </div>
             
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Tanggal Lahir <span class="text-rose-500">*</span></label>
-                    <input type="date" name="tgl_lahir" id="edit_tgl_lahir" required class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tanggal Lahir <span class="text-rose-500">*</span></label>
+                    <input type="date" name="tgl_lahir" id="edit_tgl_lahir" required class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm py-2">
                 </div>
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Jenis Kelamin <span class="text-rose-500">*</span></label>
-                    <select name="jk" id="edit_jk" required class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm bg-white py-2.5">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                    <select name="jk" id="edit_jk" required class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm bg-white py-2">
                         <option value="L">Laki-laki</option>
                         <option value="P">Perempuan</option>
                     </select>
@@ -213,21 +215,21 @@
             </div>
             
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Alamat Tempat Tinggal</label>
-                <textarea name="alamat" id="edit_alamat" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm min-h-[70px] resize-y"></textarea>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Alamat Tempat Tinggal</label>
+                <textarea name="alamat" id="edit_alamat" rows="2" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm min-h-[45px] py-1.5 px-3 resize-y"></textarea>
             </div>
             
             <div class="space-y-1">
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor BPJS</label>
-                <input type="text" name="no_bpjs" id="edit_no_bpjs" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nomor BPJS</label>
+                <input type="text" name="no_bpjs" id="edit_no_bpjs" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full rounded-xl border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-sm py-2">
             </div>
             
             <!-- Actions -->
-            <div class="pt-4 border-t border-slate-100 flex gap-2 justify-end">
-                <button type="button" onclick="closeModal('modalEditPasien')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-xl text-sm font-bold transition-all">
+            <div class="pt-3 border-t border-slate-100 flex gap-2 justify-end">
+                <button type="button" onclick="closeModal('modalEditPasien')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-600 rounded-xl text-xs font-bold transition-all">
                     Batal
                 </button>
-                <button type="submit" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold shadow-sm transition-all">
+                <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
                     Simpan Perubahan
                 </button>
             </div>
@@ -262,6 +264,110 @@ function populateEditPasien(noRm, nik, nama, tglLahir, jk, alamat, noBpjs) {
     document.getElementById('edit_alamat').value = alamat;
     document.getElementById('edit_no_bpjs').value = noBpjs;
     openModal('modalEditPasien');
+    
+    // Reset feedback on populate
+    $('#nik-feedback-edit').addClass('hidden').empty();
+    $('button[type="submit"]', '#modalEditPasien').prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
 }
+
+$(document).ready(function() {
+    // 1. Tambah Pasien - NIK dynamic check
+    const nikInputTambah = $('input[name="nik"]', '#modalTambahPasien');
+    const feedbackTambah = $('#nik-feedback-tambah');
+    const submitTambah = $('button[type="submit"]', '#modalTambahPasien');
+
+    nikInputTambah.on('input propertychange', function() {
+        const nik = $(this).val().trim();
+        $(this).val(nik.replace(/[^0-9]/g, ''));
+        const cleanNik = $(this).val();
+
+        if (cleanNik.length === 16) {
+            feedbackTambah.removeClass('hidden text-rose-500 text-emerald-500').addClass('text-slate-400').text('Memeriksa NIK...');
+            submitTambah.prop('disabled', true);
+
+            $.ajax({
+                url: '<?= site_url("admin/pasien/cek-nik") ?>',
+                type: 'GET',
+                data: { nik: cleanNik },
+                success: function(res) {
+                    if (res.registered) {
+                        feedbackTambah.removeClass('text-slate-400 text-emerald-500').addClass('text-rose-500')
+                            .html(`<span class="flex items-center gap-1 mt-0.5"><span class="material-symbols-outlined text-[13px]">cancel</span> NIK terdaftar atas nama ${res.nama_pasien} (${res.no_rm})</span>`);
+                        submitTambah.prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
+                    } else {
+                        feedbackTambah.removeClass('text-slate-400 text-rose-500').addClass('text-emerald-500')
+                            .html('<span class="flex items-center gap-1 mt-0.5"><span class="material-symbols-outlined text-[13px]">check_circle</span> NIK tersedia dan dapat digunakan</span>');
+                        submitTambah.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+                    }
+                },
+                error: function() {
+                    feedbackTambah.removeClass('hidden text-rose-500 text-emerald-500').addClass('text-rose-500').text('Gagal memverifikasi NIK.');
+                }
+            });
+        } else {
+            feedbackTambah.addClass('hidden').empty();
+            submitTambah.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+        }
+    });
+
+    // 2. Edit Pasien - NIK dynamic check
+    const nikInputEdit = $('#edit_nik');
+    const feedbackEdit = $('#nik-feedback-edit');
+    const submitEdit = $('button[type="submit"]', '#modalEditPasien');
+
+    nikInputEdit.on('input propertychange', function() {
+        const nik = $(this).val().trim();
+        $(this).val(nik.replace(/[^0-9]/g, ''));
+        const cleanNik = $(this).val();
+        const currentRm = $('#edit_no_rm').val();
+
+        if (cleanNik.length === 16) {
+            feedbackEdit.removeClass('hidden text-rose-500 text-emerald-500').addClass('text-slate-400').text('Memeriksa NIK...');
+            submitEdit.prop('disabled', true);
+
+            $.ajax({
+                url: '<?= site_url("admin/pasien/cek-nik") ?>',
+                type: 'GET',
+                data: { nik: cleanNik, exclude_rm: currentRm },
+                success: function(res) {
+                    if (res.registered) {
+                        feedbackEdit.removeClass('text-slate-400 text-emerald-500').addClass('text-rose-500')
+                            .html(`<span class="flex items-center gap-1 mt-0.5"><span class="material-symbols-outlined text-[13px]">cancel</span> NIK terdaftar atas nama ${res.nama_pasien} (${res.no_rm})</span>`);
+                        submitEdit.prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
+                    } else {
+                        feedbackEdit.removeClass('text-slate-400 text-rose-500').addClass('text-emerald-500')
+                            .html('<span class="flex items-center gap-1 mt-0.5"><span class="material-symbols-outlined text-[13px]">check_circle</span> NIK tersedia dan dapat digunakan</span>');
+                        submitEdit.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+                    }
+                },
+                error: function() {
+                    feedbackEdit.removeClass('hidden text-rose-500 text-emerald-500').addClass('text-rose-500').text('Gagal memverifikasi NIK.');
+                }
+            });
+        } else {
+            feedbackEdit.addClass('hidden').empty();
+            submitEdit.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+        }
+    });
+
+    // Reset feedback on modal close
+    window.closeModalOriginal = window.closeModal;
+    window.closeModal = function(modalId) {
+        closeModalOriginal(modalId);
+        if (modalId === 'modalTambahPasien') {
+            feedbackTambah.addClass('hidden').empty();
+            submitTambah.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+            // Clear input values
+            $('input[name="nik"]', '#modalTambahPasien').val('');
+            $('input[name="nama_pasien"]', '#modalTambahPasien').val('');
+            $('input[name="tgl_lahir"]', '#modalTambahPasien').val('');
+            $('textarea[name="alamat"]', '#modalTambahPasien').val('');
+            $('input[name="no_bpjs"]', '#modalTambahPasien').val('');
+        } else if (modalId === 'modalEditPasien') {
+            feedbackEdit.addClass('hidden').empty();
+            submitEdit.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+        }
+    };
+});
 </script>
 <?= $this->endSection() ?>

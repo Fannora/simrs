@@ -34,6 +34,9 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'adminAuth'     => \App\Filters\AdminAuthFilter::class,
+        'dokterAuth'    => \App\Filters\DokterAuthFilter::class,
+        'pasienAuth'    => \App\Filters\PasienAuthFilter::class,
     ];
 
     /**
@@ -108,5 +111,9 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        'adminAuth'  => ['before' => ['admin/*']],
+        'dokterAuth' => ['before' => ['dokter/*']],
+        'pasienAuth' => ['before' => ['pasien/*']],
+    ];
 }

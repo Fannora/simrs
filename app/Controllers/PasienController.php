@@ -135,7 +135,7 @@ class PasienController extends BaseController
                 ->where('status_periksa', 'Tidak Hadir')
                 ->countAllResults();
             if ($noShowBookings >= 3) {
-                return $this->response->setJSON(['error_penalty' => 'Akun Anda ditangguhkan sementara karena memiliki riwayat 3 kali Tidak Hadir (No-Show). Silakan hubungi CS Rumah Sakit untuk mengaktifkan kembali akun Anda.']);
+                return $this->response->setJSON(['error_penalty' => 'Akun Anda ditangguhkan sementara karena memiliki riwayat 3 kali Tidak Hadir. Silakan hubungi CS Rumah Sakit untuk mengaktifkan kembali akun Anda.']);
             }
 
             // SANKSI 2: Batasi Booking Aktif Maksimal 3 Booking
@@ -180,8 +180,8 @@ class PasienController extends BaseController
         $dateObj = new \DateTime($tanggal);
         $today   = new \DateTime('today');
 
-        if ($dateObj <= $today) {
-            return $this->response->setJSON(['error' => 'Tanggal harus minimal besok.']);
+        if ($dateObj < $today) {
+            return $this->response->setJSON(['error' => 'Tanggal booking tidak boleh di masa lalu.']);
         }
         if ((int) $dateObj->format('w') === 0) {
             return $this->response->setJSON(['error' => 'Booking tidak tersedia pada hari Minggu.']);
@@ -319,8 +319,8 @@ class PasienController extends BaseController
         $dateObj = new \DateTime($tgl_daftar);
         $today   = new \DateTime('today');
 
-        if ($dateObj <= $today) {
-            session()->setFlashdata('error', 'Tanggal booking harus minimal besok.');
+        if ($dateObj < $today) {
+            session()->setFlashdata('error', 'Tanggal booking tidak boleh di masa lalu.');
             return redirect()->to(base_url('pasien/booking'));
         }
         if ((int) $dateObj->format('w') === 0) {
@@ -479,10 +479,9 @@ class PasienController extends BaseController
         $no_rm = session()->get('no_rm');
 
         $kunjungan = $this->db->table('tbl_pendaftaran p')
-            ->select('p.*, d.nama_dokter, po.nama_poli, po.gedung, t.pilihan_obat, t.status_bayar')
+            ->select('p.*, d.nama_dokter, po.nama_poli, po.gedung')
             ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
             ->join('tbl_poli po', 'p.id_poli = po.id_poli')
-            ->join('tbl_tagihan t', 't.no_rawat = p.no_rawat', 'left')
             ->where('p.no_rm', $no_rm)
             ->orderBy('p.tgl_daftar', 'DESC')
             ->orderBy('p.slot_waktu', 'DESC')
@@ -490,11 +489,10 @@ class PasienController extends BaseController
             ->getResultArray();
 
         $rekamMedis = $this->db->table('tbl_rekam_medis rm')
-            ->select('rm.*, p.tgl_daftar, d.nama_dokter, po.nama_poli, t.pilihan_obat, t.status_bayar')
+            ->select('rm.*, p.tgl_daftar, p.status_periksa, d.nama_dokter, po.nama_poli')
             ->join('tbl_pendaftaran p', 'rm.no_rawat = p.no_rawat')
             ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
             ->join('tbl_poli po', 'p.id_poli = po.id_poli')
-            ->join('tbl_tagihan t', 't.no_rawat = p.no_rawat', 'left')
             ->where('p.no_rm', $no_rm)
             ->orderBy('rm.tgl_periksa', 'DESC')
             ->get()
@@ -512,7 +510,9 @@ class PasienController extends BaseController
 
         foreach ($reseps as $res) {
             $resepsGrouped[$res['id_rm']][] = $res;
-        }        $tagihan = $this->db->table('tbl_tagihan t')
+        }
+
+        $tagihan = $this->db->table('tbl_tagihan t')
             ->select('t.*, p.tgl_daftar, d.nama_dokter, po.nama_poli')
             ->join('tbl_pendaftaran p', 't.no_rawat = p.no_rawat')
             ->join('tbl_dokter d', 'p.id_dokter = d.id_dokter')
@@ -521,6 +521,54 @@ class PasienController extends BaseController
             ->orderBy('t.id_tagihan', 'DESC')
             ->get()
             ->getResultArray();
+
+        // Map bills to visits
+        $tagihanMap = [];
+        foreach ($tagihan as $t) {
+            $tagihanMap[$t['no_rawat']][$t['jenis_kunjungan']] = $t;
+        }
+
+        // Map status back to kunjungan
+        foreach ($kunjungan as &$k) {
+            $noRawat = $k['no_rawat'];
+            $k['status_bayar'] = 'Lunas'; // Default if no bill exists
+            $k['pilihan_obat'] = null;
+            
+            if (isset($tagihanMap[$noRawat]['Rawat Jalan'])) {
+                $k['status_bayar'] = $tagihanMap[$noRawat]['Rawat Jalan']['status_bayar'];
+                $k['pilihan_obat'] = $tagihanMap[$noRawat]['Rawat Jalan']['pilihan_obat'];
+            }
+            
+            if (isset($tagihanMap[$noRawat]['Rawat Inap'])) {
+                // Untuk pasien rawat inap, status lunas hanya mengacu pada tagihan rawat inap
+                $k['status_bayar'] = $tagihanMap[$noRawat]['Rawat Inap']['status_bayar'];
+                if (empty($k['pilihan_obat'])) {
+                    $k['pilihan_obat'] = $tagihanMap[$noRawat]['Rawat Inap']['pilihan_obat'];
+                }
+            }
+        }
+        unset($k);
+
+        // Map status back to rekam medis
+        foreach ($rekamMedis as &$rm) {
+            $noRawat = $rm['no_rawat'];
+            $rm['status_bayar'] = 'Lunas';
+            $rm['pilihan_obat'] = null;
+            
+            if (isset($tagihanMap[$noRawat]['Rawat Jalan'])) {
+                $rm['status_bayar'] = $tagihanMap[$noRawat]['Rawat Jalan']['status_bayar'];
+                $rm['pilihan_obat'] = $tagihanMap[$noRawat]['Rawat Jalan']['pilihan_obat'];
+            }
+            
+            if (isset($tagihanMap[$noRawat]['Rawat Inap'])) {
+                // Untuk pasien rawat inap, status lunas hanya mengacu pada tagihan rawat inap
+                $rm['status_bayar'] = $tagihanMap[$noRawat]['Rawat Inap']['status_bayar'];
+                if (empty($rm['pilihan_obat'])) {
+                    $rm['pilihan_obat'] = $tagihanMap[$noRawat]['Rawat Inap']['pilihan_obat'];
+                }
+            }
+        }
+        unset($rm);
 
         return view('pasien/riwayat', [
             'kunjungan' => $kunjungan,

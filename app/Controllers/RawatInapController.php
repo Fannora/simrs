@@ -161,25 +161,42 @@ class RawatInapController extends BaseController
         // Update status kamar jadi Tersedia
         $this->db->table('tbl_kamar')->where('id_kamar', $rawat['id_kamar'])->update(['status' => 'Tersedia']);
 
-        // Update tbl_tagihan: biaya_kamar, jenis_kunjungan, total_biaya, dan reset status_bayar jika ada biaya tambahan
-        $tagihan = $this->db->table('tbl_tagihan')->where('no_rawat', $rawat['no_rawat'])->get()->getRowArray();
-        if ($tagihan) {
-            $newTotal = (float)$tagihan['biaya_konsultasi'] + (float)$tagihan['biaya_obat'] + $biaya_kamar;
+        // Create or update separate tbl_tagihan for Inpatient (Rawat Inap)
+        $outpatientTagihan = $this->db->table('tbl_tagihan')
+            ->where('no_rawat', $rawat['no_rawat'])
+            ->where('jenis_kunjungan', 'Rawat Jalan')
+            ->get()->getRowArray();
             
-            $updateData = [
-                'biaya_kamar'     => $biaya_kamar,
-                'jenis_kunjungan' => 'Rawat Inap',
-                'total_biaya'     => $newTotal,
-            ];
-            
-            // Jika sebelumnya sudah lunas tapi ada biaya kamar baru, kembalikan status menjadi Belum Lunas
-            // agar petugas kasir dapat menagih sisa kekurangan pembayaran biaya kamar tersebut.
-            if ($biaya_kamar > 0 && $tagihan['status_bayar'] === 'Lunas') {
-                $updateData['status_bayar'] = 'Belum Lunas';
-                $updateData['tgl_bayar']    = null;
-            }
-            
-            $this->db->table('tbl_tagihan')->where('no_rawat', $rawat['no_rawat'])->update($updateData);
+        $jenisBayar = $outpatientTagihan ? $outpatientTagihan['jenis_bayar'] : 'Umum';
+
+        $inpatientTagihan = $this->db->table('tbl_tagihan')
+            ->where('no_rawat', $rawat['no_rawat'])
+            ->where('jenis_kunjungan', 'Rawat Inap')
+            ->get()->getRowArray();
+
+        if ($inpatientTagihan) {
+            // Update existing inpatient bill if discharged again
+            $this->db->table('tbl_tagihan')
+                ->where('id_tagihan', $inpatientTagihan['id_tagihan'])
+                ->update([
+                    'biaya_kamar' => $biaya_kamar,
+                    'total_biaya' => $biaya_kamar,
+                ]);
+        } else {
+            // Insert new separate inpatient bill in tbl_tagihan
+            $this->db->table('tbl_tagihan')->insert([
+                'no_rawat'         => $rawat['no_rawat'],
+                'biaya_konsultasi' => 0.00,
+                'biaya_obat'       => 0.00,
+                'biaya_kamar'      => $biaya_kamar,
+                'jenis_kunjungan'  => 'Rawat Inap',
+                'total_biaya'      => $biaya_kamar,
+                'jenis_bayar'      => $jenisBayar,
+                'pilihan_obat'     => null,
+                'tgl_pilih_obat'   => null,
+                'status_bayar'     => 'Belum Lunas',
+                'tgl_bayar'        => null
+            ]);
         }
 
         $this->db->transComplete();
