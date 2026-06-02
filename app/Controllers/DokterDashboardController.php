@@ -32,13 +32,27 @@ class DokterDashboardController extends BaseController
             ->getRowArray();
     }
 
-    private function isAppointmentTime($pendaftaran)
+    private function isAppointmentTime($pendaftaran, $dokter = null)
     {
         date_default_timezone_set('Asia/Jakarta');
-        $now = new \DateTime();
-        $timeStr = $pendaftaran['slot_waktu'] ?: (!empty($pendaftaran['jam_kunjungan']) ? substr($pendaftaran['jam_kunjungan'], 0, 5) : '00:00');
-        $appointmentTime = new \DateTime($pendaftaran['tgl_daftar'] . ' ' . $timeStr);
-        return $now >= $appointmentTime;
+        if (!$dokter) {
+            $dokter = $this->getDokterData();
+        }
+        if (!$dokter) {
+            return false;
+        }
+
+        $bookingDate = new \DateTime($pendaftaran['tgl_daftar'] . ' 00:00:00');
+        $todayDate = new \DateTime(date('Y-m-d') . ' 00:00:00');
+
+        if ($bookingDate > $todayDate) {
+            return false;
+        }
+
+        $currentHourMin = date('H:i:s');
+        $practiceStart = !empty($dokter['jam_mulai']) ? $dokter['jam_mulai'] : '00:00:00';
+
+        return $currentHourMin >= $practiceStart;
     }
 
     /**
@@ -159,11 +173,19 @@ class DokterDashboardController extends BaseController
             return redirect()->to(base_url('dokter/dashboard'));
         }
 
-        // Cek apakah sudah waktunya periksa (tanggal dan jam janji temu)
-        if (!$this->isAppointmentTime($pendaftaran)) {
+        // Cek apakah sudah waktunya periksa (tanggal hari ini/masa lalu dan jam praktik dokter)
+        if (!$this->isAppointmentTime($pendaftaran, $dokter)) {
             $tglJanji = date('d M Y', strtotime($pendaftaran['tgl_daftar']));
-            $waktuJanji = $pendaftaran['slot_waktu'] ?: substr($pendaftaran['jam_kunjungan'], 0, 5);
-            session()->setFlashdata('error', 'Belum memasuki waktu janji temu pasien (' . $tglJanji . ' ' . $waktuJanji . ' WIB).');
+            $waktuMulai = !empty($dokter['jam_mulai']) ? substr($dokter['jam_mulai'], 0, 5) : '08:00';
+            
+            $bookingDate = new \DateTime($pendaftaran['tgl_daftar'] . ' 00:00:00');
+            $todayDate = new \DateTime(date('Y-m-d') . ' 00:00:00');
+            
+            if ($bookingDate > $todayDate) {
+                session()->setFlashdata('error', 'Belum memasuki tanggal janji temu (Mulai tanggal ' . $tglJanji . ').');
+            } else {
+                session()->setFlashdata('error', 'Belum memasuki jam praktik dokter hari ini (Jam praktik mulai pukul ' . $waktuMulai . ' WIB).');
+            }
             return redirect()->to(base_url('dokter/dashboard'));
         }
 
@@ -472,11 +494,19 @@ class DokterDashboardController extends BaseController
             return redirect()->back();
         }
 
-        // Cek apakah sudah waktunya periksa (tanggal dan jam janji temu)
-        if (!$this->isAppointmentTime($pendaftaran)) {
+        // Cek apakah sudah waktunya periksa (tanggal hari ini/masa lalu dan jam praktik dokter)
+        if (!$this->isAppointmentTime($pendaftaran, $dokter)) {
             $tglJanji = date('d M Y', strtotime($pendaftaran['tgl_daftar']));
-            $waktuJanji = $pendaftaran['slot_waktu'] ?: substr($pendaftaran['jam_kunjungan'], 0, 5);
-            session()->setFlashdata('error', 'Belum memasuki waktu janji temu pasien (' . $tglJanji . ' ' . $waktuJanji . ' WIB).');
+            $waktuMulai = !empty($dokter['jam_mulai']) ? substr($dokter['jam_mulai'], 0, 5) : '08:00';
+            
+            $bookingDate = new \DateTime($pendaftaran['tgl_daftar'] . ' 00:00:00');
+            $todayDate = new \DateTime(date('Y-m-d') . ' 00:00:00');
+            
+            if ($bookingDate > $todayDate) {
+                session()->setFlashdata('error', 'Belum memasuki tanggal janji temu (Mulai tanggal ' . $tglJanji . ').');
+            } else {
+                session()->setFlashdata('error', 'Belum memasuki jam praktik dokter hari ini (Jam praktik mulai pukul ' . $waktuMulai . ' WIB).');
+            }
             return redirect()->back();
         }
 

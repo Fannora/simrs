@@ -501,17 +501,17 @@ if ($hour < 11) {
                         <ul class="space-y-4 max-h-[380px] overflow-y-auto pr-1">
                             <?php foreach ($tagihan as $t): ?>
                                 <li class="p-4 rounded-xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all">
-                                    <div class="flex justify-between items-start mb-2.5">
-                                        <div class="min-w-0">
-                                            <p class="font-bold text-sm text-slate-800 truncate flex items-center gap-1.5">
-                                                <?= esc($t['no_rawat']) ?>
+                                    <div class="flex justify-between items-start gap-2 mb-2.5">
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex flex-wrap items-center gap-1.5">
+                                                <span class="font-bold text-sm text-slate-800"><?= esc($t['no_rawat']) ?></span>
                                                 <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-wider <?= ($t['jenis_kunjungan'] ?? 'Rawat Jalan') === 'Rawat Inap' ? 'bg-purple-50 text-purple-700 border border-purple-100' : 'bg-slate-100 text-slate-600 border border-slate-200' ?>">
                                                     <?= esc($t['jenis_kunjungan'] ?? 'Rawat Jalan') ?>
                                                 </span>
-                                            </p>
+                                            </div>
                                             <p class="text-xs text-slate-400 font-semibold mt-1"><?= date('d M Y', strtotime($t['tgl_daftar'])) ?> • dr. <?= esc($t['nama_dokter']) ?></p>
                                         </div>
-                                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full <?= $t['status_bayar'] === 'Lunas' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100' ?>">
+                                        <span class="flex-shrink-0 text-xs font-bold px-2.5 py-0.5 rounded-full <?= $t['status_bayar'] === 'Lunas' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100' ?>">
                                             <?= esc($t['status_bayar']) ?>
                                         </span>
                                     </div>

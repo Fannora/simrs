@@ -353,17 +353,17 @@ function loadSlots(idDokter, tanggal, containerId, activeSlot = null) {
                 const isPenuh = s.status === 'penuh';
                 const isSelected = activeSlot === s.slot;
                 const buttonClass = isSelected 
-                    ? 'bg-amber-500 text-white font-bold border-amber-600' 
-                    : (isPenuh ? 'bg-rose-50 border-rose-100 text-rose-300 cursor-not-allowed opacity-60' : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 cursor-pointer');
+                    ? 'bg-amber-500 text-white font-bold border-amber-600 scale-102 shadow-sm' 
+                    : (isPenuh ? 'bg-rose-50 border-rose-100 text-rose-300 cursor-not-allowed opacity-60' : 'bg-white hover:bg-amber-500 hover:text-white border-slate-200 text-slate-700 hover:border-amber-600 cursor-pointer hover:scale-102 hover:shadow-sm');
 
                 const disabledAttr = isPenuh ? 'disabled' : '';
                 const checkedAttr = isSelected ? 'checked' : '';
 
                 container.insertAdjacentHTML('beforeend', `
-                    <label class="border rounded-xl py-1.5 px-2 flex flex-col items-center transition-all ${buttonClass} relative select-none">
+                    <label class="group border rounded-xl py-1.5 px-2 flex flex-col items-center transition-all ${buttonClass} relative select-none">
                         <input type="radio" name="slot_waktu" value="${s.slot}" required ${disabledAttr} ${checkedAttr} class="absolute opacity-0">
                         <span class="text-xs font-bold">${s.slot}</span>
-                        <span class="text-[9px] uppercase font-semibold mt-0.5 tracking-wider ${isSelected ? 'text-white/80' : (isPenuh ? 'text-rose-400' : 'text-slate-400')}">
+                        <span class="text-[9px] uppercase font-semibold mt-0.5 tracking-wider transition-colors ${isSelected ? 'text-white/80' : (isPenuh ? 'text-rose-400' : 'text-slate-400 group-hover:text-white/80')}">
                             ${isPenuh ? 'Penuh' : `Sisa ${s.sisa}`}
                         </span>
                     </label>
@@ -373,10 +373,19 @@ function loadSlots(idDokter, tanggal, containerId, activeSlot = null) {
             // Handle selection style change visually
             $(`#${containerId} label`).on('click', function() {
                 if ($(this).find('input').is(':disabled')) return;
-                $(`#${containerId} label`).removeClass('bg-amber-500 text-white border-amber-600');
-                $(`#${containerId} label`).find('span:last-child').removeClass('text-white/80').addClass('text-slate-400');
                 
-                $(this).addClass('bg-amber-500 text-white border-amber-600');
+                // Reset all non-disabled labels to default unselected classes
+                $(`#${containerId} label`).each(function() {
+                    if (!$(this).find('input').is(':disabled')) {
+                        $(this).removeClass('bg-amber-500 text-white border-amber-600 scale-102 shadow-sm font-bold')
+                               .addClass('bg-white border-slate-200 text-slate-700 hover:border-amber-600 hover:bg-amber-500 hover:text-white hover:shadow-sm hover:scale-102');
+                        $(this).find('span:last-child').removeClass('text-white/80').addClass('text-slate-400');
+                    }
+                });
+                
+                // Set the clicked label to selected classes
+                $(this).removeClass('bg-white border-slate-200 text-slate-700 hover:border-amber-600 hover:bg-amber-500 hover:text-white hover:shadow-sm hover:scale-102')
+                       .addClass('bg-amber-500 text-white border-amber-600 scale-102 shadow-sm font-bold');
                 $(this).find('span:last-child').removeClass('text-slate-400').addClass('text-white/80');
                 $(this).find('input').prop('checked', true);
             });

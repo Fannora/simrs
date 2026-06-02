@@ -361,13 +361,28 @@
                                         </button>
                                     <?php elseif ($j['status_periksa'] === 'Sedang Diperiksa'): ?>
                                         <?php
-                                          $timeStr = $j['slot_waktu'] ?: (!empty($j['jam_kunjungan']) ? substr($j['jam_kunjungan'], 0, 5) : '00:00');
-                                          $appointmentTime = new DateTime($j['tgl_daftar'] . ' ' . $timeStr);
-                                          $isTime = $now >= $appointmentTime;
+                                          $bookingDate = new \DateTime($j['tgl_daftar'] . ' 00:00:00');
+                                          $todayDate = new \DateTime(date('Y-m-d') . ' 00:00:00');
                                           
                                           $tglJanji = date('d M Y', strtotime($j['tgl_daftar']));
-                                          $waktuJanji = esc($j['slot_waktu'] ?? substr($j['jam_kunjungan'], 0, 5));
-                                          $tooltip = "Belum memasuki waktu janji temu ($tglJanji $waktuJanji WIB)";
+                                          $waktuMulai = !empty($dokter['jam_mulai']) ? substr($dokter['jam_mulai'], 0, 5) : '08:00';
+                                          
+                                          if ($bookingDate > $todayDate) {
+                                              $isTime = false;
+                                              $tooltip = "Belum memasuki tanggal janji temu (Mulai tanggal $tglJanji)";
+                                          } else {
+                                              // Jika hari ini atau masa lalu, aktifkan jika waktu sekarang >= jam mulai praktik dokter
+                                              $currentHourMin = date('H:i:s');
+                                              $practiceStart = !empty($dokter['jam_mulai']) ? $dokter['jam_mulai'] : '00:00:00';
+                                              
+                                              if ($currentHourMin >= $practiceStart) {
+                                                  $isTime = true;
+                                                  $tooltip = "";
+                                              } else {
+                                                  $isTime = false;
+                                                  $tooltip = "Belum memasuki jam praktik dokter hari ini (Jam praktik mulai pukul $waktuMulai WIB)";
+                                              }
+                                          }
                                         ?>
                                         <?php if ($isTime): ?>
                                             <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-85 transition-opacity inline-flex items-center gap-1.5 shadow-sm">
@@ -382,13 +397,28 @@
                                         <?php endif; ?>
                                     <?php elseif ($j['status_periksa'] === 'Belum Diperiksa'): ?>
                                         <?php
-                                          $timeStr = $j['slot_waktu'] ?: (!empty($j['jam_kunjungan']) ? substr($j['jam_kunjungan'], 0, 5) : '00:00');
-                                          $appointmentTime = new DateTime($j['tgl_daftar'] . ' ' . $timeStr);
-                                          $isTime = $now >= $appointmentTime;
+                                          $bookingDate = new \DateTime($j['tgl_daftar'] . ' 00:00:00');
+                                          $todayDate = new \DateTime(date('Y-m-d') . ' 00:00:00');
                                           
                                           $tglJanji = date('d M Y', strtotime($j['tgl_daftar']));
-                                          $waktuJanji = esc($j['slot_waktu'] ?? substr($j['jam_kunjungan'], 0, 5));
-                                          $tooltip = "Belum memasuki waktu janji temu ($tglJanji $waktuJanji WIB)";
+                                          $waktuMulai = !empty($dokter['jam_mulai']) ? substr($dokter['jam_mulai'], 0, 5) : '08:00';
+                                          
+                                          if ($bookingDate > $todayDate) {
+                                              $isTime = false;
+                                              $tooltip = "Belum memasuki tanggal janji temu (Mulai tanggal $tglJanji)";
+                                          } else {
+                                              // Jika hari ini atau masa lalu, aktifkan jika waktu sekarang >= jam mulai praktik dokter
+                                              $currentHourMin = date('H:i:s');
+                                              $practiceStart = !empty($dokter['jam_mulai']) ? $dokter['jam_mulai'] : '00:00:00';
+                                              
+                                              if ($currentHourMin >= $practiceStart) {
+                                                  $isTime = true;
+                                                  $tooltip = "";
+                                              } else {
+                                                  $isTime = false;
+                                                  $tooltip = "Belum memasuki jam praktik dokter hari ini (Jam praktik mulai pukul $waktuMulai WIB)";
+                                              }
+                                          }
                                         ?>
                                         <?php if ($isTime): ?>
                                             <a href="<?= base_url('dokter/rekam-medis/' . $j['no_rawat']) ?>" class="border border-secondary text-secondary px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all inline-flex items-center gap-1.5 shadow-sm">
