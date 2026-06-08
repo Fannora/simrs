@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simrs
+    restart: unless-stopped
+    # ports:
+    #   - "8081:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - CI_ENVIRONMENT=development
+    networks:
+      - default
+      - nginx_network
+    # depends_on:
+    #   - db
+
+  # db:
+  #   image: mysql:8.0
+  #   container_name: ci4_db
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     MYSQL_DATABASE: project_warteg
+  #     MYSQL_USER: admin_posts
+  #     MYSQL_PASSWORD: rahasia123
+  #     MYSQL_ROOT_PASSWORD: rahasia123
+  #   volumes:
+  #     - db_data:/var/lib/mysql
+
+networks:
+  nginx_network:
+    external: true
+
+volumes:
+  db_data:
